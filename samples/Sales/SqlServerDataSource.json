@@ -1,0 +1,5 @@
+{
+  "DatabaseType": "SqlServer",
+  "ConnectionString": "Data Source=.;Initial Catalog=benchmark;Integrated Security=True;",
+  "Query": "SELECT * FROM Sales"
+}

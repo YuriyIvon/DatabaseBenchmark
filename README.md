@@ -16,7 +16,12 @@ This tool addresses the issues from above by introducing a data import and query
 
 ### Usage
 
+#### Table creation
+
+
 Create a table definition - see [SaleTable.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesTable.json) as an example.
+
+**Though different databases may use different terminology for data objects, the tool uses terms table and column for consistency.**
 
 Supported values for `Type` attribute are:
 * `Boolean`
@@ -28,7 +33,7 @@ Supported values for `Type` attribute are:
 * `String`
 * `Text`
 
-`Queryable` gives a hint if the field is going to participate in query conditions. Based on this information some table builders may generate more optimal definitions.
+`Queryable` gives a hint if the column is going to participate in query conditions. Based on this information some table builders may generate more optimal definitions.
 
 Once the definition is ready, you can create the table in all database management systems you are comparing:
 
@@ -53,6 +58,8 @@ Supported values for `DatabaseType` attribute are:
 * `PostgresJsonb` - stores all queryable "logical" columns in a single JSONB column indexed with GIN index of  jsonb_path_ops type. Supports only `Equals` and `In` primitive operators. 
 * `SqlServer`
 
+#### Data import
+
 Once tables are created, it is the time to import the dataset you are going to use in your benchmarks:
 ```
 DatabaseBenchmark import --DatabaseType=SqlServer --ConnectionString="Data Source=.;Initial Catalog=benchmark;Integrated Security=True;" --TableFilePath=SalesTable.json --DataSourceType=Csv --DataSourceFilePath="1000000 Sales Records.csv"
@@ -63,6 +70,16 @@ DatabaseBenchmark import --DatabaseType=MongoDb --ConnectionString="mongodb://lo
 ```
 
 These snippets use a sample CSV file from [here](https://eforexcel.com/wp/wp-content/uploads/2017/07/1000000%20Sales%20Records.zip). _You will need to remove spaces from CSV headers to make them consistent with the table definition._
+
+Alternatively, data can be imported from any database supported by the tool:
+
+```
+import --DatabaseType=Postgres --ConnectionString="Host=localhost;Port=5432;Database=benchmark;Username=postgres;Password=postgres" --TableFilePath=SalesTable.json --DataSourceType=Database --DataSourceFilePath=SqlServerDataSource.json
+```
+
+Here file [SqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SqlServerDataSource.json) describes where and how to get source data. With relational databases, a raw query specified in `Query` parameter must return all columns declared in the target table definition. Extra columns are ignored. For those databases where container name doesn't appear in a query, there is an optional data source parameter `TableName`.
+
+#### Query benchmark
 
 To start running benchmarks you will need to create a set of query definitions. In our example scenario we will use only two queries - one returning a page of results for some search criteria ([SalesPageQuery.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesPageQuery.json)) and one calculating aggregates for a subset of data ([SalesAggregateQuery.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesAggregateQuery.json)).
 
@@ -95,6 +112,8 @@ When everything is ready, a full benchmark can be run.
 DatabaseBenchmark query --DatabaseType=SqlServer --ConnectionString="Data Source=.;Initial Catalog=benchmark;Integrated Security=True;" --TableFilePath=SalesTable.json --QueryFilePath=SalesPageQuery.json --QueryCount=100 --QueryParallelism=10 --BenchmarkName="SQL Server - Page Query - 10 threads"
 ```
 
+#### Query benchmark scenarios
+
 The same can obviously be done for other database engines and query definitions, but what if you want a single results table for all the benchmarks at once? The tool supports so-called scenarios that allow you to define multiple benchmarks in a single file and run them sequentially by calling a single command.
 
 A sample scenario benchmarking the same query on different databases can be found in [SalesPageQueryScenario.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesPageQueryScenario.json).
@@ -124,6 +143,10 @@ If you need to run only specific steps from a scenario file, use `QueryScenarioS
 ```
 DatabaseBenchmark query-scenario --QueryScenarioFilePath=SalesPageQueryParallelScenario.json --QueryScenarioParametersFilePath=SqlServerScenarioParameters.json --QueryScenarioStepIndexes=1,2
 ```
+
+#### Raw query benchmark
+
+TODO
 
 ### Limitations
 
