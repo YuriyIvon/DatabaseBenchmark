@@ -37,7 +37,7 @@ namespace DatabaseBenchmark.Commands
                 throw new InputArgumentException("Scenario items are not specified");
             }
 
-            var scenarioItems = CommandUtils.FilterByIndexes(queryScenario.Items, options.QueryScenarioItemIndexes);
+            var scenarioSteps = CommandUtils.FilterByIndexes(queryScenario.Items, options.QueryScenarioStepIndexes);
 
             string parametersJson = !string.IsNullOrEmpty(options.QueryScenarioParametersFilePath)
                 ? File.ReadAllText(options.QueryScenarioParametersFilePath)
@@ -45,24 +45,24 @@ namespace DatabaseBenchmark.Commands
 
             try
             {
-                foreach (var rawScenarioItem in scenarioItems)
+                foreach (var rawScenarioStep in scenarioSteps)
                 {
-                    var jsonOptionsProvider = new JsonOptionsProvider(rawScenarioItem.ToString(), parametersJson);
-                    var scenarioItem = jsonOptionsProvider.GetOptions<QueryBenchmarkOptions>();
+                    var jsonOptionsProvider = new JsonOptionsProvider(rawScenarioStep.ToString(), parametersJson);
+                    var scenarioStep = jsonOptionsProvider.GetOptions<QueryBenchmarkOptions>();
 
                     var databaseFactory = new DatabaseFactory(_environment, jsonOptionsProvider);
-                    var database = databaseFactory.Create(scenarioItem.DatabaseType, scenarioItem.ConnectionString);
-                    var table = JsonUtils.DeserializeFile<Table>(scenarioItem.TableFilePath);
-                    var query = JsonUtils.DeserializeFile<Query>(scenarioItem.QueryFilePath);
+                    var database = databaseFactory.Create(scenarioStep.DatabaseType, scenarioStep.ConnectionString);
+                    var table = JsonUtils.DeserializeFile<Table>(scenarioStep.TableFilePath);
+                    var query = JsonUtils.DeserializeFile<Query>(scenarioStep.QueryFilePath);
 
-                    if (!string.IsNullOrEmpty(scenarioItem.TableName))
+                    if (!string.IsNullOrEmpty(scenarioStep.TableName))
                     {
-                        table.Name = scenarioItem.TableName;
+                        table.Name = scenarioStep.TableName;
                     }
 
                     var executorFactory = database.CreateQueryExecutorFactory(table, query);
 
-                    benchmark.Benchmark(executorFactory, scenarioItem);
+                    benchmark.Benchmark(executorFactory, scenarioStep);
                 }
 
                 Report(metricsCollector, options);
