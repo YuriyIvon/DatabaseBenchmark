@@ -1,10 +1,9 @@
 # Database Benchmark
-A universal multi-database query benchmark tool
-
-### Project Status
 ![Application Status](https://github.com/YuriyIvon/DatabaseBenchmark/actions/workflows/application.yml/badge.svg)
 
-### Motivation
+A universal multi-database query benchmark tool
+
+## Motivation<a name="motivation"></a>
 When deciding what database engine to choose for your project, you need to compare how quickly different engines can handle typical queries specific to the project. Usually, such comparison requires writing a test application that executes a few hard-coded queries against the database engines in question. However, this approach is far from ideal:
 * Manually written queries are prone to accidental mistakes and omissions that skew benchmark results.
 * Manually written equivalent queries for different database engines may get inconsistent in their logic.
@@ -14,9 +13,21 @@ When deciding what database engine to choose for your project, you need to compa
 
 This tool addresses the issues from above by introducing a data import and query abstraction mechanism with parameter randomization capabilities. At the same time, it allows falling back to raw queries if the abstraction doesn't provide required query features. Parameter randomization is supported in both cases.
 
-### Usage
+## Table of contents
 
-#### Table creation
+* [Usage](#usage)
+  * [Table creation](#table_creation)
+  * [Data import](#data_import)
+  * [Query benchmark](#query_benchmark)
+  * [Query benchmark scenarios](#query_benchmark_scenarios)
+  * [Raw query benchmark](#raw_query_benchmark)
+  * [Query definition](#query_definition)
+  * [Value randomization rules](#value_randomization_rules)
+* [Limitations](#limitations)
+
+## Usage<a name="usage"></a>
+
+### Table creation<a name="table_creation"></a>
 
 Create a table definition - see [SaleTable.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesTable.json) as an example.
 
@@ -49,7 +60,7 @@ Supported values for `DatabaseType` attribute are:
 * `PostgresJsonb` - stores all queryable "logical" columns in a single JSONB column indexed with GIN index of  jsonb_path_ops type. Supports only `Equals` and `In` primitive operators. 
 * `SqlServer`
 
-#### Data import
+### Data import<a name="data_import"></a>
 
 Once tables are created, it is the time to import the dataset you are going to use in your benchmarks:
 ```
@@ -70,9 +81,9 @@ DatabaseBenchmark import --DatabaseType=Postgres --ConnectionString="Host=localh
 
 Here file [SqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SqlServerDataSource.json) defines where and how to get source data. With relational databases, a raw query specified in `Query` parameter must return all columns declared in the target table definition. Extra columns are ignored. For those databases where container name doesn't appear in a query, there is an optional data source parameter `TableName`.
 
-#### Query benchmark
+### Query benchmark<a name="query_benchmark"></a>
 
-To start running benchmarks you will need to create a set of query definitions. In our example scenario we will use only two queries - one returning a page of results for some search criteria ([SalesPageQuery.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesPageQuery.json)) and one calculating aggregates for a subset of data ([SalesAggregateQuery.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesAggregateQuery.json)).
+To start running benchmarks, you will need to create a set of [query definitions](#query_definition). In our example scenario we will use only two queries - one returning a page of results for some search criteria ([SalesPageQuery.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesPageQuery.json)) and one calculating aggregates for a subset of data ([SalesAggregateQuery.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesAggregateQuery.json)).
 
 To make sure that the query is properly generated in all cases and you get correct results do a single run:
 
@@ -93,7 +104,7 @@ There are some parameters specific to the query command:
 * `WarmupQueryCount` - number of warm-up query executions on each thread.
 * `ReportFormatterType` - benchmark result report output format, currently can be either `Text` or `Csv`.
 * `ReportFilePath` - path to the result report output file. If not specified, the report is written to the console. 
-* `TraceResults` - a Boolean parameter specifying if query results should be printed to the console.
+* `TraceResults` - Boolean parameter specifying if query results should be printed to the console.
 
 **Please note that the tool, in general, is not responsible for index creation and other database configuration tweaks. Any settings that can be modified after the table has been created must be controlled by the person responsible for the benchmark. Thus, ensure that all indexes and other required settings are in place before running a real benchmark.**
 
@@ -103,7 +114,7 @@ When everything is ready, a full benchmark can be run.
 DatabaseBenchmark query --DatabaseType=SqlServer --ConnectionString="Data Source=.;Initial Catalog=benchmark;Integrated Security=True;" --TableFilePath=SalesTable.json --QueryFilePath=SalesPageQuery.json --QueryCount=100 --QueryParallelism=10 --BenchmarkName="SQL Server - Page Query - 10 threads"
 ```
 
-#### Query benchmark scenarios
+### Query benchmark scenarios<a name="query_benchmark_scenarios"></a>
 
 The same can obviously be done for other database engines and query definitions, but what if you want a single results table for all the benchmarks at once? The tool supports so-called scenarios that allow you to define multiple benchmarks in a single file and run them sequentially by calling a single command.
 
@@ -113,7 +124,7 @@ A sample scenario benchmarking the same query on different databases can be foun
 DatabaseBenchmark query-scenario --QueryScenarioFilePath=SalesPageQueryScenario.json 
 ```
 
-Each step definition in this scenario file consists of a set of query command parameters used earlier when running a single benchmark from the command line. There are a few command line parameters that are common for all steps in a scenario: `ReportFormatterType`, `ReportFilePath`, `TraceQueries`, `TraceResults`.
+Each step definition in this scenario file consists of a set of query command parameters used earlier when running a single benchmark from the command line. There are a few command-line parameters that are common for all steps in a scenario: `ReportFormatterType`, `ReportFilePath`, `TraceQueries`, `TraceResults`.
 
 Sometimes there is a need to run a set of benchmarks for each of the database engines you are investigating. For example, you need to understand how query throughput depends on the number of concurrent sessions, so you want to run the same benchmark multiple times with different `QueryParallelism` parameter values. There is a feature that reduces the amount of copy-paste in such situations - parameterized scenarios.
 
@@ -135,11 +146,11 @@ If you need to run only specific steps from a scenario file, use `QueryScenarioS
 DatabaseBenchmark query-scenario --QueryScenarioFilePath=SalesPageQueryParallelScenario.json --QueryScenarioParametersFilePath=SqlServerScenarioParameters.json --QueryScenarioStepIndexes=1,2
 ```
 
-#### Raw query benchmark
+### Raw query benchmark<a name="raw_query_benchmark"></a>
 
 TODO
 
-#### Query definition
+### Query definition<a name="query_definition"></a>
 
 A query definition has the following top-level properties:
 
@@ -163,22 +174,40 @@ A primitive condition has the following properties:
 * `Operator` - conditional operator, can be one of `Equals`, `NotEquals`, `In`, `Greater`, `GreaterEquals`, `Lower`, `LowerEquals`, `Contains`, and `StartsWith`.
 * `Value` - specifies the value of the second operand. It is ignored if `RandomizeValue` is `true`. 
 * `RandomizeValue` - specifies if the second operand should be randomized.
-* `ValueRandomizationRule` - specifies value randomization rules.
+* `ValueRandomizationRule` - specifies [value randomization rules](#value_randomization_rules).
 
 `Aggregate` has the following top-level properties:
 * `GroupColumnNames` - an array of columns the query result should be grouped by.
-* `ResultColumns` - an array of aggregate function columns to be returned by the query.
+* `ResultColumns` - an array of aggregate columns to be returned by the query.
 
 Each element of `ResultColumns` array has the following properties:
 * `SourceColumnName` - a table column the aggregate function will be applied to. Can be omitted for `Count` aggregate. 
 * `Function` - an aggregate function, can be one of `Average`, `Count`, `DistinctCount`, `Max`, `Min`, `Sum`.
 * `ResultColumnName` - a name assigned to the aggregate expression in the result set.
 
-### Limitations
+### Value randomization rules<a name="value_randomization_rules"></a>
+
+When `RandomizeValue` is `true` on a query condition or on a raw query parameter, this structure defines how the value should be generated. The value type depends on the column used in the condition or on the corresponding raw query parameter definition. A random collection is generated only for `In` operator condition or for a raw query parameter with `Collection` property set to `true`.
+
+* `UseExistingValues` - specifies if the value should be randomly picked from already existing values in this column. Is `true` by default.
+* `ExistingValuesOverride` - provides a specific array of values to pick a random value from. Can be particularly useful in case "distinct" queries are too slow on the database being tested. 
+* `ExistingValuesSourceTableName` - provides an alternative table to select existing values from.
+* `ExistingValuesSourceColumnName` - provides an alternative column name to select existing values from. 
+* `MinCollectionLength` - minimum random collection length. Is equal to `1` by default.
+* `MaxCollectionLength` - maximum random collection length. Is equal to `10` by default.
+* `MinNumericValue` - minimum numeric value. Is equal to `0` by default.
+* `MaxNumericValue` - maximum numeric value. Is equal to `100` by default.
+* `MinDateTimeValue` - minimum date time value. Is equal to the current date and time minus 10 years by default. 
+* `MaxDateTimeValue` - maximum date time value. Is equal to the current date and time by default.
+* `MinStringValueLength` - minimum random string length. Is equal to `1` by default.
+* `MaxStringValueLength` - maximum random string length. Is equal to `10` by default.
+* `AllowedCharacters` - characters to be used when generating a random string. By default contains uppercase Latin letters and digits.
+
+## Limitations<a name="limitations"></a>
 
 There are some limitations that are going to be addressed in the future:
 
-* Query definitions don't support joins. A workaround is using raw queries approach.
+* Query definitions don't support joins. A workaround is using the raw queries approach.
 * Random inclusion of condition parts into generated queries - there is a reserved property `RandomizeInclusion` on each part of a query condition, but it is not handled yet.
 * Configurable partitioning in Cosmos DB and other databases is not supported yet.
 * Importing from Elasticsearch database doesn't support unlimited number of rows.
