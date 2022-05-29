@@ -1,4 +1,4 @@
-name: Application
+name: build
 
 on: [push]
 
