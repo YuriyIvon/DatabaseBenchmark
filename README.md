@@ -16,7 +16,7 @@ This tool addresses the issues from above by introducing a data import and query
 
 ### Usage
 
-Create a table definition - see [SaleTable.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/93ee6c36da1a4b2a435a1b84f0f7f41f0b99b4c9/samples/Sales/SalesTable.json) as an example.
+Create a table definition - see [SaleTable.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesTable.json) as an example.
 
 Supported values for `Type` attribute are:
 * `Boolean`
@@ -62,7 +62,7 @@ DatabaseBenchmark import --DatabaseType=MongoDb --ConnectionString="mongodb://lo
 
 These snippets use a sample CSV file from [here](https://eforexcel.com/wp/wp-content/uploads/2017/07/1000000%20Sales%20Records.zip). _You will need to remove spaces from CSV headers to make them consistent with the table definition._
 
-To start running benchmarks you will need to create a set of query definitions. In our example scenario we will use only two queries - one returning a page of results for some search criteria ([SalesPageQuery.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/7df40d3a106419c93fa788a5d5a021b4fd4d03b1/samples/Sales/SalesPageQuery.json)) and one calculating aggregates for a subset of data ([SalesAggregateQuery](https://github.com/YuriyIvon/DatabaseBenchmark/blob/7df40d3a106419c93fa788a5d5a021b4fd4d03b1/samples/Sales/SalesAggregateQuery.json)).
+To start running benchmarks you will need to create a set of query definitions. In our example scenario we will use only two queries - one returning a page of results for some search criteria ([SalesPageQuery.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesPageQuery.json)) and one calculating aggregates for a subset of data ([SalesAggregateQuery.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesAggregateQuery.json)).
 
 To make sure that the query is properly generated in all cases and you get correct results do a single run:
 
