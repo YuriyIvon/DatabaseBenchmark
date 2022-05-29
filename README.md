@@ -16,9 +16,7 @@ This tool addresses the issues from above by introducing a data import and query
 
 ### Usage
 
-Create a table definition as a JSON file.
-
-https://github.com/YuriyIvon/DatabaseBenchmark/blob/93ee6c36da1a4b2a435a1b84f0f7f41f0b99b4c9/samples/Sales/SalesTable.json
+Create a table definition - see [SaleTable.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/93ee6c36da1a4b2a435a1b84f0f7f41f0b99b4c9/samples/Sales/SalesTable.json) as an example.
 
 Supported values for `Type` attribute are:
 * `Boolean`
@@ -32,7 +30,7 @@ Supported values for `Type` attribute are:
 
 `Queryable` gives a hint if the field is going to participate in query conditions. Based on this information some table builders may generate more optimal definitions.
 
-Once the file is ready, you can create the table in all database management systems you are comparing:
+Once the definition is ready, you can create the table in all database management systems you are comparing:
 
 ```
 DatabaseBenchmark create --DatabaseType=SqlServer --ConnectionString="Data Source=.;Initial Catalog=benchmark;Integrated Security=True;" --TableFilePath=SalesTable.json --TraceQueries=true
@@ -53,7 +51,7 @@ Supported values for `DatabaseType` attribute are:
 * `PostgresJsonb` - stores all queryable "logical" columns in a single JSONB column indexed with GIN index of  jsonb_path_ops type. Supports only `Equals` and `In` primitive operators. 
 * `SqlServer`
 
-Once tables are created, it is the time to import benchmark dataset:
+Once tables are created, it is the time to import the dataset you are going to use in your benchmarks:
 ```
 DatabaseBenchmark import --DatabaseType=SqlServer --ConnectionString="Data Source=.;Initial Catalog=benchmark;Integrated Security=True;" --TableFilePath=SalesTable.json --DataSourceType=Csv --DataSourceFilePath="1000000 Sales Records.csv"
 
@@ -64,7 +62,7 @@ DatabaseBenchmark import --DatabaseType=MongoDb --ConnectionString="mongodb://lo
 
 These snippets use a sample CSV file from [here](https://eforexcel.com/wp/wp-content/uploads/2017/07/1000000%20Sales%20Records.zip). _You will need to remove spaces from CSV headers to make them consistent with the table definition._
 
-To start running benchmarks you will need to create a set of query definitions. In our example scenario we will use only two queries - one returning a page of results for some search criteria and one for an aggregate query.
+To start running benchmarks you will need to create a set of query definitions. In our example scenario we will use only two queries - one returning a page of results for some search criteria ([SalesPageQuery.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/7df40d3a106419c93fa788a5d5a021b4fd4d03b1/samples/Sales/SalesPageQuery.json)) and one calculating aggregates for a subset of data ([SalesAggregateQuery](https://github.com/YuriyIvon/DatabaseBenchmark/blob/7df40d3a106419c93fa788a5d5a021b4fd4d03b1/samples/Sales/SalesAggregateQuery.json)).
 
 To make sure that the query is properly generated in all cases and you get correct results do a single run:
 
@@ -75,6 +73,8 @@ DatabaseBenchmark query --DatabaseType=Postgres --ConnectionString="Host=localho
 
 DatabaseBenchmark query --DatabaseType=MongoDb --ConnectionString="mongodb://localhost/benchmark" --TableFilePath=SalesTable.json --QueryFilePath=SalesPageQuery.json --QueryCount=1 --WarmupQueryCount=0 --TraceQueries=true --TraceResults=true
 ```
+
+The same commands can be executed with `--QueryFilePath=SalesAggregateQuery.json` to make sure it works fine with all databases we are going to benchmark.
 
 There are some parameters specific to the query command:
 * `QueryParallelism` - number of parallel threads to be run.

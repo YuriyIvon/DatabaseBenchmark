@@ -6,9 +6,9 @@
     "Operator": "And",
     "Conditions": [
       {
-        "ColumnName": "SalesChannel",
+        "ColumnName": "ItemType",
         "Operator": "Equals",
-        "Value": "Offline"
+        "RandomizeValue": true
       },
       {
         "ColumnName": "OrderDate",
