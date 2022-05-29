@@ -1,0 +1,32 @@
+{
+  "Name": "Sales scenario",
+  "Items": [
+    {
+      "BenchmarkName": "SQL Server 1 thread - Page Query",
+      "DatabaseType": "SqlServer",
+      "ConnectionString": "Data Source=.;Initial Catalog=benchmark;Integrated Security=True;",
+      "TableFilePath": "SalesTable.json",
+      "QueryFilePath": "SalesPageQuery.json",
+      "QueryParallelism": 1,
+      "QueryCount": 100
+    },
+    {
+      "BenchmarkName": "PostgreSQL 1 thread - Page Query",
+      "DatabaseType": "Postgres",
+      "ConnectionString": "Host=localhost;Port=5432;Database=benchmark;Username=postgres;Password=postgres",
+      "TableFilePath": "SalesTable.json",
+      "QueryFilePath": "SalesPageQuery.json",
+      "QueryParallelism": 1,
+      "QueryCount": 100
+    },
+    {
+      "BenchmarkName": "MongoDB 1 thread - Page Query",
+      "DatabaseType": "MongoDb",
+      "ConnectionString": "mongodb://localhost/benchmark",
+      "TableFilePath": "SalesTable.json",
+      "QueryFilePath": "SalesPageQuery.json",
+      "QueryParallelism": 1,
+      "QueryCount": 100
+    }
+  ]
+}
