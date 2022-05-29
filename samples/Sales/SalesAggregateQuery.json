@@ -1,0 +1,45 @@
+{
+  "Columns": [
+    "Country"
+  ],
+  "Condition": {
+    "Operator": "And",
+    "Conditions": [
+      {
+        "ColumnName": "SalesChannel",
+        "Operator": "Equals",
+        "Value": "Offline"
+      },
+      {
+        "ColumnName": "OrderDate",
+        "Operator": "GreaterEquals",
+        "Value": "2016-01-01"
+      },
+      {
+        "ColumnName": "OrderDate",
+        "Operator": "Lower",
+        "Value": "2017-01-01"
+      }
+    ]
+  },
+  "Aggregate": {
+    "GroupColumnNames": ["Country"],
+    "ResultColumns": [
+      {
+        "Function": "Count",
+        "ResultColumnName": "OrderCount"
+      },
+      {
+        "SourceColumnName": "UnitsSold",
+        "Function": "Sum",
+        "ResultColumnName": "TotalUnitsSold"
+      }
+    ]
+  },
+  "Sort": [
+    {
+      "ColumnName": "Country",
+      "Direction": "Ascending"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "Name": "Sales",
+  "Columns": [
+    {
+      "Name": "Country",
+      "Type": "String",
+      "Queryable": true
+    },
+    {
+      "Name": "ItemType",
+      "Type": "String",
+      "Queryable": true
+    },
+    {
+      "Name": "SalesChannel",
+      "Type": "String",
+      "Queryable": true
+    },
+    {
+      "Name": "OrderPriority",
+      "Type": "String",
+      "Queryable": true
+    },
+    {
+      "Name": "OrderDate",
+      "Type": "DateTime",
+      "Queryable": true
+    },
+    {
+      "Name": "OrderID",
+      "Type": "Integer",
+      "Queryable": true
+    },
+    {
+      "Name": "ShipDate",
+      "Type": "DateTime",
+      "Queryable": true
+    },
+    {
+      "Name": "UnitsSold",
+      "Type": "Integer",
+      "Queryable": false
+    },
+    {
+      "Name": "UnitPrice",
+      "Type": "Double",
+      "Queryable": false
+    },
+    {
+      "Name": "UnitCost",
+      "Type": "Double",
+      "Queryable": false
+    }
+  ]
+}

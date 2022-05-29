@@ -1,0 +1,42 @@
+{
+  "Columns": [
+    "Country",
+    "ItemType",
+    "SalesChannel",
+    "OrderPriority",
+    "OrderDate",
+    "OrderID",
+    "ShipDate",
+    "UnitsSold",
+    "UnitPrice",
+    "UnitCost"
+  ],
+  "Condition": {
+    "Operator": "And",
+    "Conditions": [
+      {
+        "ColumnName": "Country",
+        "Operator": "Equals",
+        "RandomizeValue": true
+      },
+      {
+        "ColumnName": "SalesChannel",
+        "Operator": "Equals",
+        "Value": "Offline"
+      },
+      {
+        "ColumnName": "UnitsSold",
+        "Operator": "Greater",
+        "Value": 1000
+      }
+    ]
+  },
+  "Sort": [
+    {
+      "ColumnName": "OrderDate",
+      "Direction": "Descending"
+    }
+  ],
+  "Skip": 0,
+  "Take": 100
+}
