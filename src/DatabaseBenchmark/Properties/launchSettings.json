@@ -1,8 +1,7 @@
 {
   "profiles": {
     "DatabaseBenchmark": {
-      "commandName": "Project",
-      "commandLineArgs": "query --DatabaseType=SqlServer --ConnectionString=\"Data Source=.;Initial Catalog=benchmark;Integrated Security=True;\" --TableFilePath=SalesTable.json --QueryFilePath=SalesAggregateQuery.json --QueryCount=100"
+      "commandName": "Project"
     }
   }
 }

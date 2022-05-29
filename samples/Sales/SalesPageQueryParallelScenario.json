@@ -1,0 +1,26 @@
+{
+  "Name": "Sales scenario",
+  "Items": [
+    {
+      "BenchmarkName": "${DatabaseType} 1 thread - Page Query",
+      "TableFilePath": "SalesTable.json",
+      "QueryFilePath": "SalesPageQuery.json",
+      "QueryParallelism": 1,
+      "QueryCount": 100
+    },
+    {
+      "BenchmarkName": "${DatabaseType} 10 threads - Page Query",
+      "TableFilePath": "SalesTable.json",
+      "QueryFilePath": "SalesPageQuery.json",
+      "QueryParallelism": 10,
+      "QueryCount": 100
+    },
+    {
+      "BenchmarkName": "${DatabaseType} 20 threads - Page Query",
+      "TableFilePath": "SalesTable.json",
+      "QueryFilePath": "SalesPageQuery.json",
+      "QueryParallelism": 20,
+      "QueryCount": 100
+    }
+  ]
+}

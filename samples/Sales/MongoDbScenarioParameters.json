@@ -1,0 +1,4 @@
+{
+  "DatabaseType": "MongoDb",
+  "ConnectionString": "mongodb://localhost/benchmark"
+}

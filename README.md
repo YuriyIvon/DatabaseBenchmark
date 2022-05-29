@@ -1,5 +1,5 @@
-# DatabaseBenchmark
-A universal database query benchmark tool
+# Database Benchmark
+A universal multi-database query benchmark tool
 
 ### Project Status
 ![Application Status](https://github.com/YuriyIvon/DatabaseBenchmark/actions/workflows/application.yml/badge.svg)
@@ -40,6 +40,8 @@ DatabaseBenchmark create --DatabaseType=Postgres --ConnectionString="Host=localh
 DatabaseBenchmark create --DatabaseType=MongoDb --ConnectionString="mongodb://localhost/benchmark" --TableFilePath=SalesTable.json --TraceQueries=true
 ```
 
+**Please note that in a real-life scenario, the benchmark tool and a database engine usually must run on separate machines to take network throughput into account and avoid resource contention.**
+
 Supported values for `DatabaseType` attribute are:
 * `ClickHouse`
 * `CosmosDb` - SQL API only, connection string must contain a non-standard property specifying a database name to be used - `Database=database_name`.
@@ -77,6 +79,7 @@ DatabaseBenchmark query --DatabaseType=MongoDb --ConnectionString="mongodb://loc
 The same commands can be executed with `--QueryFilePath=SalesAggregateQuery.json` to make sure it works fine with all databases we are going to benchmark.
 
 There are some parameters specific to the query command:
+* `BenchmarkName` - benchmark name to be printed in the results table.
 * `QueryParallelism` - number of parallel threads to be run.
 * `QueryCount` - number of query executions on each thread.
 * `WarmupQueryCount` - number of warm-up query executions on each thread.
@@ -84,10 +87,27 @@ There are some parameters specific to the query command:
 * `ReportFilePath` - path to the result report output file. If not specified, report is written to the console. 
 * `TraceResults` - a Boolean parameter specifying if query results should be printed to the console.
 
+**Please note that the tool in general is not responsible for index creation and other database configuration tweaks. Any settings that can be modified after the table has been created must be controlled by the person responsible for the benchmark. Thus, before running a real benchmark, ensure that all required indexes and other required settings are in place.**
+
+When everything is ready, a full benchmark can be run.
+
+```
+DatabaseBenchmark query --DatabaseType=SqlServer --ConnectionString="Data Source=.;Initial Catalog=benchmark;Integrated Security=True;" --TableFilePath=SalesTable.json --QueryFilePath=SalesPageQuery.json --QueryCount=100 --QueryParallelism=10 --BenchmarkName="SQL Server - Page Query - 10 threads"
+```
+
+The same can obviously be done for other database engines and query definitions, but what if you want to have a single table for all the benchmarks on output? The tool supports so called scenarios that allow you to define multiple benchmarks in a single file and run them sequentially by calling a single command.
+
+A sample scenario benchmarking the same query on different databases can be found in [SalesPageQueryScenario.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesPageQueryScenario.json).
+
+```
+DatabaseBenchmark query-scenario --QueryScenarioFilePath=SalesPageQueryScenario.json 
+```
+
 ### Limitations
 
 There are some limitations that are going to be addressed in the future:
 
 * Query definitions don't support joins. A workaround is using raw queries approach.
 * Random inclusion of condition parts into generated queries - there is a reserved property `RandomizeInclusion` on each part of a query condition, but it is not handled yet.
-* Configurable partitioning in Cosmos DB and other databases.
+* Configurable partitioning in Cosmos DB and other databases is not supported yet.
+* Importing from Elasticsearch database doesn't support unlimited number of rows.
