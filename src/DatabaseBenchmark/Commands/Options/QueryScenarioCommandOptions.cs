@@ -10,7 +10,7 @@ namespace DatabaseBenchmark.Commands.Options
         public string QueryScenarioFilePath { get; set; }
 
         [Option("Comma-separated list of scenario item indexes to run")]
-        public string QueryScenarioItemIndexes { get; set; }
+        public string QueryScenarioStepIndexes { get; set; }
 
         [Option("Path to JSON file specifying scenario parameters")]
         public string QueryScenarioParametersFilePath { get; set; }

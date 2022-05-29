@@ -37,7 +37,7 @@ namespace DatabaseBenchmark.Commands
                 throw new InputArgumentException("Scenario items are not specified");
             }
 
-            var scenarioItems = CommandUtils.FilterByIndexes(queryScenario.Items, options.QueryScenarioItemIndexes);
+            var scenarioSteps = CommandUtils.FilterByIndexes(queryScenario.Items, options.QueryScenarioStepIndexes);
 
             string parametersJson = !string.IsNullOrEmpty(options.QueryScenarioParametersFilePath)
                 ? File.ReadAllText(options.QueryScenarioParametersFilePath)
@@ -45,18 +45,18 @@ namespace DatabaseBenchmark.Commands
 
             try
             {
-                foreach (var rawScenarioItem in scenarioItems)
+                foreach (var rawScenarioStep in scenarioSteps)
                 {
-                    var jsonOptionsProvider = new JsonOptionsProvider(rawScenarioItem.ToString(), parametersJson);
-                    var scenarioItem = jsonOptionsProvider.GetOptions<RawQueryBenchmarkOptions>();
+                    var jsonOptionsProvider = new JsonOptionsProvider(rawScenarioStep.ToString(), parametersJson);
+                    var scenarioStep = jsonOptionsProvider.GetOptions<RawQueryBenchmarkOptions>();
 
                     var databaseFactory = new DatabaseFactory(_environment, jsonOptionsProvider);
-                    var database = databaseFactory.Create(scenarioItem.DatabaseType, scenarioItem.ConnectionString);
-                    var query = JsonUtils.DeserializeFile<RawQuery>(scenarioItem.QueryFilePath);
+                    var database = databaseFactory.Create(scenarioStep.DatabaseType, scenarioStep.ConnectionString);
+                    var query = JsonUtils.DeserializeFile<RawQuery>(scenarioStep.QueryFilePath);
 
                     var executorFactory = database.CreateRawQueryExecutorFactory(query);
 
-                    benchmark.Benchmark(executorFactory, scenarioItem);
+                    benchmark.Benchmark(executorFactory, scenarioStep);
                 }
 
                 Report(metricsCollector, options);
