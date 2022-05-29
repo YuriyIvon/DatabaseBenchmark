@@ -18,20 +18,11 @@ This tool addresses the issues from above by introducing a data import and query
 
 #### Table creation
 
-
 Create a table definition - see [SaleTable.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesTable.json) as an example.
 
-**Though different databases may use different terminology for data objects, the tool uses terms table and column for consistency.**
+**Though different databases may use different terminology for data objects, the tool uses relational terms such as table, column, and row for consistency.**
 
-Supported values for `Type` attribute are:
-* `Boolean`
-* `DateTime`
-* `Double`
-* `Guid`
-* `Integer`
-* `Long`
-* `String`
-* `Text`
+Supported values for `Type` attribute are `Boolean`, `DateTime`, `Double`, `Guid`, `Integer`, `Long`,  `String`, and `Text`.
 
 `Queryable` gives a hint if the column is going to participate in query conditions. Based on this information some table builders may generate more optimal definitions.
 
@@ -74,10 +65,10 @@ These snippets use a sample CSV file from [here](https://eforexcel.com/wp/wp-con
 Alternatively, data can be imported from any database supported by the tool:
 
 ```
-import --DatabaseType=Postgres --ConnectionString="Host=localhost;Port=5432;Database=benchmark;Username=postgres;Password=postgres" --TableFilePath=SalesTable.json --DataSourceType=Database --DataSourceFilePath=SqlServerDataSource.json
+DatabaseBenchmark import --DatabaseType=Postgres --ConnectionString="Host=localhost;Port=5432;Database=benchmark;Username=postgres;Password=postgres" --TableFilePath=SalesTable.json --DataSourceType=Database --DataSourceFilePath=SqlServerDataSource.json
 ```
 
-Here file [SqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SqlServerDataSource.json) describes where and how to get source data. With relational databases, a raw query specified in `Query` parameter must return all columns declared in the target table definition. Extra columns are ignored. For those databases where container name doesn't appear in a query, there is an optional data source parameter `TableName`.
+Here file [SqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SqlServerDataSource.json) defines where and how to get source data. With relational databases, a raw query specified in `Query` parameter must return all columns declared in the target table definition. Extra columns are ignored. For those databases where container name doesn't appear in a query, there is an optional data source parameter `TableName`.
 
 #### Query benchmark
 
@@ -101,7 +92,7 @@ There are some parameters specific to the query command:
 * `QueryCount` - number of query executions on each thread.
 * `WarmupQueryCount` - number of warm-up query executions on each thread.
 * `ReportFormatterType` - benchmark result report output format, currently can be either `Text` or `Csv`.
-* `ReportFilePath` - path to the result report output file. If not specified, report is written to the console. 
+* `ReportFilePath` - path to the result report output file. If not specified, the report is written to the console. 
 * `TraceResults` - a Boolean parameter specifying if query results should be printed to the console.
 
 **Please note that the tool, in general, is not responsible for index creation and other database configuration tweaks. Any settings that can be modified after the table has been created must be controlled by the person responsible for the benchmark. Thus, ensure that all indexes and other required settings are in place before running a real benchmark.**
@@ -147,6 +138,41 @@ DatabaseBenchmark query-scenario --QueryScenarioFilePath=SalesPageQueryParallelS
 #### Raw query benchmark
 
 TODO
+
+#### Query definition
+
+A query definition has the following top-level properties:
+
+* `Columns` - an array of columns to be returned by the query. If `Aggregate` is specified, it may contain only columns present in its `GroupColumnNames` array.  
+* `Condition` - an object representing the query condition.
+* `Aggregate` - an object representing the aggregation to be done.
+* `Sort` - an array of objects defining the sort order. Each object in the array has `ColumnName` and `Direction` properties, where the latter can be either `Ascending` or `Descending`. 
+* `Skip` - specifies how many rows to skip before returning a query result.
+* `Take` - sets the maximum number of query result rows to be returned. The default value is 0, which means that the limit is not specified.
+
+`Condition` is represented by an object tree structure consisting of "group condition" and "primitive condition" nodes.
+
+A group condition has the following properties:
+
+* `Operator` - logical operator, can be one of `And`, `Or`, and `Not`.
+* `Conditions` - array of conditions to be combined by the logical operator. Please note that `Not` allows only one condition in this array.
+
+A primitive condition has the following properties:
+
+* `ColumnName` - table column to be checked in the condition (the first operand).
+* `Operator` - conditional operator, can be one of `Equals`, `NotEquals`, `In`, `Greater`, `GreaterEquals`, `Lower`, `LowerEquals`, `Contains`, and `StartsWith`.
+* `Value` - specifies the value of the second operand. It is ignored if `RandomizeValue` is `true`. 
+* `RandomizeValue` - specifies if the second operand should be randomized.
+* `ValueRandomizationRule` - specifies value randomization rules.
+
+`Aggregate` has the following top-level properties:
+* `GroupColumnNames` - an array of columns the query result should be grouped by.
+* `ResultColumns` - an array of aggregate function columns to be returned by the query.
+
+Each element of `ResultColumns` array has the following properties:
+* `SourceColumnName` - a table column the aggregate function will be applied to. Can be omitted for `Count` aggregate. 
+* `Function` - an aggregate function, can be one of `Average`, `Count`, `DistinctCount`, `Max`, `Min`, `Sum`.
+* `ResultColumnName` - a name assigned to the aggregate expression in the result set.
 
 ### Limitations
 
