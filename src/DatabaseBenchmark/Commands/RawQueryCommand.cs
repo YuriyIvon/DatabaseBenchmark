@@ -30,7 +30,16 @@ namespace DatabaseBenchmark.Commands
 
             var databaseFactory = new DatabaseFactory(_environment, _optionsProvider);
             var database = databaseFactory.Create(options.DatabaseType, options.ConnectionString);
-            var query = JsonUtils.DeserializeFile<RawQuery>(options.QueryFilePath);
+            var query = new RawQuery
+            {
+                Text = File.ReadAllText(options.QueryFilePath),
+                TableName = options.TableName
+            };
+
+            if (options.QueryParametersFilePath != null)
+            {
+                query.Parameters = JsonUtils.DeserializeFile<RawQueryParameter[]>(options.QueryParametersFilePath);
+            }
 
             var executorFactory = database.CreateRawQueryExecutorFactory(query);
             benchmark.Benchmark(executorFactory, options);

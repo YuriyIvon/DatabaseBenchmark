@@ -12,7 +12,13 @@ namespace DatabaseBenchmark.Commands.Options
         [Option("Connection string", true)]
         public string ConnectionString { get; set; }
 
-        [Option("Path to a JSON file describing the query to be executed", true)]
+        [Option("Table to be queried")]
+        public string TableName { get; set; }
+
+        [Option("Path to a text file with a raw query pattern to be executed", true)]
         public string QueryFilePath { get; set; }
+
+        [Option("Path to a JSON file with a list of query parameter definitions")]
+        public string QueryParametersFilePath { get; set; }
     }
 }

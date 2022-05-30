@@ -1,0 +1,11 @@
+[
+  {
+    "Name": "ItemType",
+    "Type": "String",
+    "RandomizeValue": true,
+    "ValueRandomizationRule": {
+      "ExistingValuesSourceTableName": "Sales",
+      "ExistingValuesSourceColumnName": "ItemType"
+    }
+  }
+]
