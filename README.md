@@ -47,7 +47,7 @@ DatabaseBenchmark create --DatabaseType=Postgres --ConnectionString="Host=localh
 DatabaseBenchmark create --DatabaseType=MongoDb --ConnectionString="mongodb://localhost/benchmark" --TableFilePath=SalesTable.json --TraceQueries=true
 ```
 
-**Please note that in a real-life scenario, the benchmark tool and a database engine usually must run on separate machines to take network throughput into account and avoid resource contention.**
+**Please note that in most real-life scenarios, the benchmark tool and a database engine must run on separate machines to take network throughput into account and avoid resource contention.**
 
 Supported values for `DatabaseType` attribute are:
 * `ClickHouse`
@@ -76,10 +76,10 @@ These snippets use a sample CSV file from [here](https://eforexcel.com/wp/wp-con
 Alternatively, data can be imported from any database supported by the tool:
 
 ```
-DatabaseBenchmark import --DatabaseType=Postgres --ConnectionString="Host=localhost;Port=5432;Database=benchmark;Username=postgres;Password=postgres" --TableFilePath=SalesTable.json --DataSourceType=Database --DataSourceFilePath=SqlServerDataSource.json
+DatabaseBenchmark import --DatabaseType=Postgres --ConnectionString="Host=localhost;Port=5432;Database=benchmark;Username=postgres;Password=postgres" --TableFilePath=SalesTable.json --DataSourceType=Database --DataSourceFilePath=SalesSqlServerDataSource.json
 ```
 
-Here file [SqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SqlServerDataSource.json) defines where and how to get source data. With relational databases, a raw query specified in `Query` parameter must return all columns declared in the target table definition. Extra columns are ignored. For those databases where container name doesn't appear in a query, there is an optional data source parameter `TableName`.
+Here file [SalesSqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesSqlServerDataSource.json) defines where and how to get source data. With relational databases, a raw query specified in `Query` parameter must return all columns declared in the target table definition. Extra columns are ignored. For those databases where container name doesn't appear in a query, there is an optional data source parameter `TableName`.
 
 ### Query benchmark<a name="query_benchmark"></a>
 

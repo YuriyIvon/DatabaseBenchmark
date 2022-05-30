@@ -52,7 +52,16 @@ namespace DatabaseBenchmark.Commands
 
                     var databaseFactory = new DatabaseFactory(_environment, jsonOptionsProvider);
                     var database = databaseFactory.Create(scenarioStep.DatabaseType, scenarioStep.ConnectionString);
-                    var query = JsonUtils.DeserializeFile<RawQuery>(scenarioStep.QueryFilePath);
+                    var query = new RawQuery
+                    {
+                        Text = File.ReadAllText(scenarioStep.QueryFilePath),
+                        TableName = scenarioStep.TableName,
+                    };
+
+                    if (scenarioStep.QueryParametersFilePath != null)
+                    {
+                        query.Parameters = JsonUtils.DeserializeFile<RawQueryParameter[]>(scenarioStep.QueryParametersFilePath);
+                    }
 
                     var executorFactory = database.CreateRawQueryExecutorFactory(query);
 
