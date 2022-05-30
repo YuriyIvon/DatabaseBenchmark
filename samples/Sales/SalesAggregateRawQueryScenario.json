@@ -1,0 +1,24 @@
+{
+  "Name": "Sales scenario",
+  "Items": [
+    {
+      "BenchmarkName": "SQL Server 1 thread - Raw Aggregate Query",
+      "DatabaseType": "SqlServer",
+      "ConnectionString": "Data Source=.;Initial Catalog=benchmark;Integrated Security=True;",
+      "QueryFilePath": "SalesAggregateRawSqlQuery.txt",
+      "QueryParametersFilePath": "SalesAggregateRawQueryParameters.json",
+      "QueryParallelism": 1,
+      "QueryCount": 100
+    },
+    {
+      "BenchmarkName": "MongoDb 1 thread - Raw Aggregate Query",
+      "DatabaseType": "MongoDb",
+      "ConnectionString": "mongodb://localhost/benchmark",
+      "QueryFilePath": "SalesAggregateRawMongoDbQuery.txt",
+      "QueryParametersFilePath": "SalesAggregateRawQueryParameters.json",
+      "TableName": "Sales",
+      "QueryParallelism": 1,
+      "QueryCount": 100
+    }
+  ]
+}

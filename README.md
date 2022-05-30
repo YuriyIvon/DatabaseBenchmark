@@ -21,6 +21,7 @@ This tool addresses the issues from above by introducing a data import and query
   * [Query benchmark](#query_benchmark)
   * [Query benchmark scenarios](#query_benchmark_scenarios)
   * [Raw query benchmark](#raw_query_benchmark)
+  * [Raw query benchmark scenarios](#raw_query_benchmark_scenarios)
   * [Query definition](#query_definition)
   * [Value randomization rules](#value_randomization_rules)
 * [Limitations](#limitations)
@@ -79,7 +80,7 @@ Alternatively, data can be imported from any database supported by the tool:
 DatabaseBenchmark import --DatabaseType=Postgres --ConnectionString="Host=localhost;Port=5432;Database=benchmark;Username=postgres;Password=postgres" --TableFilePath=SalesTable.json --DataSourceType=Database --DataSourceFilePath=SalesSqlServerDataSource.json
 ```
 
-Here file [SalesSqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesSqlServerDataSource.json) defines where and how to get source data. With relational databases, a raw query specified in `Query` parameter must return all columns declared in the target table definition. Extra columns are ignored. For those databases where container name doesn't appear in a query, there is an optional data source parameter `TableName`.
+Here file [SalesSqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesSqlServerDataSource.json) defines where and how to get source data. With relational databases, a raw query specified in `Query` parameter must return all columns declared in the target table definition. Extra columns are ignored. For those databases where the container name doesn't appear in a query, there is an optional data source parameter `TableName`.
 
 ### Query benchmark<a name="query_benchmark"></a>
 
@@ -107,6 +108,8 @@ There are some parameters specific to the query command:
 * `TraceResults` - Boolean parameter specifying if query results should be printed to the console.
 
 **Please note that the tool, in general, is not responsible for index creation and other database configuration tweaks. Any settings that can be modified after the table has been created must be controlled by the person responsible for the benchmark. Thus, ensure that all indexes and other required settings are in place before running a real benchmark.**
+
+To speed up sample queries used in this manual, you can create two indexes in each database: one on `Country` column and another on `ItemType` and `OrderDate` columns. Alternatively, in SQL Server, you can create a columnstore index instead.
 
 When everything is ready, a full benchmark can be run.
 
@@ -148,7 +151,35 @@ DatabaseBenchmark query-scenario --QueryScenarioFilePath=SalesPageQueryParallelS
 
 ### Raw query benchmark<a name="raw_query_benchmark"></a>
 
-TODO
+If the query you want to benchmark can't be expressed as a [query definition](#query_definition), you can leverage the Database Benchmark's raw query feature.
+
+```
+DatabaseBenchmark raw-query --DatabaseType=SqlServer --ConnectionString="Data Source=.;Initial Catalog=benchmark;Integrated Security=True;" --TableName=Sales --QueryFilePath=SalesAggregateRawSqlQuery.txt --QueryParametersFilePath=SalesAggregateRawQueryParameters.json --QueryCount=100
+
+DatabaseBenchmark raw-query --DatabaseType=MongoDb --ConnectionString="mongodb://localhost/benchmark" --TableName=Sales --QueryFilePath=SalesAggregateRawMongoDbQuery.txt --QueryParametersFilePath=SalesAggregateRawQueryParameters.json --QueryCount=100
+```
+Here files [SalesAggregateRawSqlQuery.txt](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesAggregateRawSqlQuery.txt) and [SalesAggregateRawMongoDbQuery.txt](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesAggregateRawMongoDbQuery.txt) contain database-specific query patterns, while [SalesAggregateRawQueryParameters.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesAggregateRawQueryParameters.json) provide a common list of parameter definitions. 
+
+This command differs from the regular query command by the following parameters:
+* `QueryFilePath` - path to a text file containing a query pattern. The pattern is parameterized with placeholders like `${ParameterName}`.
+* `QueryParametersFilePath`- path to a JSON file containing query parameter definitions. If you manually write equivalent raw queries for different databases, they all can share the same parameter file.  This parameter is optional and can be omitted if the query has no parameters.
+* `TableName` -  for those databases where the container name doesn't appear in a query, specifies the container to be queried.
+
+A parameter file must contain a JSON array of objects having the following properties:
+* `Name` - parameter name.
+* `Type` - parameter type. Similarly to the column type, can be one of `Boolean`, `DateTime`, `Double`, `Guid`, `Integer`, `Long`,  `String`, and `Text`. 
+* `Value` - parameter value. Is ignored if `RandomizeValue` is `true`.
+* `Collection` - when `RandomizeValue` is `true`, specifies if a random collection should be generated.
+* `RandomizeValue` - specifies if the value should be randomized.
+* `ValueRandomizationRule` - specifies [value randomization rules](#value_randomization_rules).
+
+### Raw query benchmark scenarios<a name="raw_query_benchmark_scenarios"></a>
+
+Raw query benchmark scenarios are very similar to [regular scenarios](#query_benchmark_scenarios). The only difference is in a few step definition properties that are explained in the [raw query benchmark](#raw_query_benchmark) section.
+
+```
+DatabaseBenchmark raw-query-scenario --QueryScenarioFilePath=SalesAggregateRawQueryScenario.json
+```
 
 ### Query definition<a name="query_definition"></a>
 
@@ -172,8 +203,8 @@ A primitive condition has the following properties:
 
 * `ColumnName` - table column to be checked in the condition (the first operand).
 * `Operator` - conditional operator, can be one of `Equals`, `NotEquals`, `In`, `Greater`, `GreaterEquals`, `Lower`, `LowerEquals`, `Contains`, and `StartsWith`.
-* `Value` - specifies the value of the second operand. It is ignored if `RandomizeValue` is `true`. 
-* `RandomizeValue` - specifies if the second operand should be randomized.
+* `Value` - specifies the value of the second operand. Is ignored if `RandomizeValue` is `true`. 
+* `RandomizeValue` - specifies if the value should be randomized.
 * `ValueRandomizationRule` - specifies [value randomization rules](#value_randomization_rules).
 
 `Aggregate` has the following top-level properties:
