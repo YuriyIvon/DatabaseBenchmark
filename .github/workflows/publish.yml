@@ -28,3 +28,23 @@ jobs:
         run: dotnet publish ./src/DatabaseBenchmark/DatabaseBenchmark.csproj --no-restore -c Release -r linux-x64 --self-contained true
       - name: Publish OSX
         run: dotnet publish ./src/DatabaseBenchmark/DatabaseBenchmark.csproj --no-restore -c Release -r osx-x64 --self-contained true
+      - name: Archive artifacts
+        run: |
+          zip DatabaseBenchmark-win-x64.zip ./src/DatabaseBenchmark/bin/Release/net6.0/win-x64/publish/* -r
+          zip DatabaseBenchmark-linux-x64.zip ./src/DatabaseBenchmark/bin/Release/net6.0/linux-x64/publish/* -r
+          zip DatabaseBenchmark-osx-x64.zip ./src/DatabaseBenchmark/bin/Release/net6.0/osx-x64/publish/* -r
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: DatabaseBenchmark-win-x64.zip
+          path: DatabaseBenchmark-win-x64.zip
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: DatabaseBenchmark-linux-x64.zip
+          path: DatabaseBenchmark-linux-x64.zip
+      - name: Upload OSX artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: DatabaseBenchmark-osx-x64.zip
+          path: DatabaseBenchmark-osx-x64.zip
