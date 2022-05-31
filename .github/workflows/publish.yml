@@ -12,12 +12,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Get version
+        run: echo "APP_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
-      - name: Get version
-        run: echo "APP_VERSION=`git describe --tags --abbrev=0`" >> $GITHUB_ENV
       - name: Install dependencies
         run: dotnet restore
       - name: Build
