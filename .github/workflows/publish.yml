@@ -12,6 +12,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Get version
         run: echo "APP_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
