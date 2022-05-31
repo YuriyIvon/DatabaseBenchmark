@@ -1,5 +1,5 @@
 # Database Benchmark
-![Application Status](https://github.com/YuriyIvon/DatabaseBenchmark/actions/workflows/application.yml/badge.svg)
+![Application Status](https://github.com/YuriyIvon/DatabaseBenchmark/actions/workflows/build.yml/badge.svg)
 
 A universal multi-database query benchmark tool
 
