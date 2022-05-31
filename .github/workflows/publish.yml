@@ -28,18 +28,20 @@ jobs:
         run: dotnet publish ./src/DatabaseBenchmark/DatabaseBenchmark.csproj --no-restore -c Release -r linux-x64 --self-contained true
       - name: Publish OSX
         run: dotnet publish ./src/DatabaseBenchmark/DatabaseBenchmark.csproj --no-restore -c Release -r osx-x64 --self-contained true
+      - name: Get tag
+        run: echo "APP_VERSION=`git describe --tags --abbrev=0`" >> $GITHUB_ENV
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: DatabaseBenchmark-win-x64.zip
+          name: DatabaseBenchmark-${{ env.APP_VERSION }}-win-x64
           path: src/DatabaseBenchmark/bin/Release/net6.0/win-x64/publish
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: DatabaseBenchmark-linux-x64.zip
+          name: DatabaseBenchmark-${{ env.APP_VERSION }}-linux-x64
           path: src/DatabaseBenchmark/bin/Release/net6.0/linux-x64/publish
       - name: Upload OSX artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: DatabaseBenchmark-osx-x64.zip
+          name: DatabaseBenchmark-${{ env.APP_VERSION }}-osx-x64
           path: src/DatabaseBenchmark/bin/Release/net6.0/osx-x64/publish
