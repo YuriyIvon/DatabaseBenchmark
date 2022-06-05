@@ -14,10 +14,12 @@ namespace DatabaseBenchmark.Core
         public double GetRandomDouble(double minValue, double maxValue) =>
             minValue + (_random.NextDouble() * (maxValue - minValue));
 
-        public DateTime GetRandomDateTime(DateTime minValue, DateTime maxValue)
+        public DateTime GetRandomDateTime(DateTime minValue, DateTime maxValue, TimeSpan step)
         {
-            int range = (int)(maxValue - minValue).TotalHours;
-            return minValue.AddHours(_random.Next(range));
+            double range = (maxValue - minValue).TotalSeconds;
+            int steps = (int)(range / step.TotalSeconds);
+
+            return minValue.AddSeconds(_random.Next(steps + 1) * step.TotalSeconds);
         }
 
         public string GetRandomString(int minLength, int maxLength, string allowedCharacters)

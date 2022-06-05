@@ -140,14 +140,14 @@ namespace DatabaseBenchmark.Tests.Common
         }
 
         [Fact]
-        public void GenerateValueDateTimeColumn()
+        public void GenerateValueDateTimeColumnDefaultRule()
         {
             DateTime sampleValue = DateTime.Now;
             DateTime minDateTimeValue = DateTime.Now.AddDays(-1);
             DateTime maxDateTimeValue = DateTime.Now;
-            const string doubleColumn = "CreatedAt";
+            const string dateTimeColumn = "CreatedAt";
 
-            _randomGenerator.GetRandomDateTime(minDateTimeValue, maxDateTimeValue).Returns(sampleValue);
+            _randomGenerator.GetRandomDateTime(minDateTimeValue, maxDateTimeValue, TimeSpan.FromSeconds(1)).Returns(sampleValue);
             var randomizationRule = new ValueRandomizationRule
             {
                 UseExistingValues = false,
@@ -155,9 +155,52 @@ namespace DatabaseBenchmark.Tests.Common
                 MaxDateTimeValue = maxDateTimeValue
             };
 
-            var value = _randomValueProvider.GetRandomValue(_tableName, doubleColumn, randomizationRule);
+            var value = _randomValueProvider.GetRandomValue(_tableName, dateTimeColumn, randomizationRule);
 
             Assert.Equal(sampleValue, value);
+        }
+
+        [Fact]
+        public void GenerateValueDateTimeColumn()
+        {
+            var randomGenerator = new RandomGenerator();
+            var columnPropertiesProvider = new TableColumnPropertiesProvider(SampleInputs.Table);
+            var randomValueProvider = new RandomValueProvider(randomGenerator, columnPropertiesProvider, null);
+            const string dateTimeColumn = "CreatedAt";
+            DateTime maxDateTimeValue = DateTime.Now;
+            DateTime minDateTimeValue = maxDateTimeValue.AddYears(-10);
+
+            ValueRandomizationRule BuildDateTimeRandomizationRule(TimeSpan step) =>
+                new()
+                {
+                    UseExistingValues = false,
+                    MinDateTimeValue = minDateTimeValue,
+                    MaxDateTimeValue = maxDateTimeValue,
+                    DateTimeValueStep = step
+                };
+
+            var dailyValue = (DateTime)randomValueProvider.GetRandomValue(_tableName, dateTimeColumn,
+                BuildDateTimeRandomizationRule(TimeSpan.FromDays(1)));
+            var hourlyValue = (DateTime)randomValueProvider.GetRandomValue(_tableName, dateTimeColumn,
+                BuildDateTimeRandomizationRule(TimeSpan.FromHours(1)));
+            var minutelyValue = (DateTime)randomValueProvider.GetRandomValue(_tableName, dateTimeColumn,
+                BuildDateTimeRandomizationRule(TimeSpan.FromHours(1)));
+
+            Assert.True(dailyValue < maxDateTimeValue);
+            Assert.True(dailyValue >= minDateTimeValue);
+            Assert.True(hourlyValue < maxDateTimeValue);
+            Assert.True(hourlyValue >= minDateTimeValue);
+            Assert.True(minutelyValue < maxDateTimeValue);
+            Assert.True(minutelyValue >= minDateTimeValue);
+
+            Assert.Equal(maxDateTimeValue.Hour, dailyValue.Hour);
+            Assert.Equal(maxDateTimeValue.Minute, dailyValue.Minute);
+            Assert.Equal(maxDateTimeValue.Second, dailyValue.Second);
+
+            Assert.Equal(maxDateTimeValue.Minute, hourlyValue.Minute);
+            Assert.Equal(maxDateTimeValue.Second, hourlyValue.Second);
+
+            Assert.Equal(maxDateTimeValue.Second, minutelyValue.Second);
         }
 
         [Fact]
