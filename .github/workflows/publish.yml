@@ -47,7 +47,8 @@ jobs:
           release_name: ${{ env.APP_VERSION }}
           draft: true
           prerelease: false
-      - uses: actions/upload-release-asset@v1.0.1
+      - name: Upload Windows Artifact
+        uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -55,7 +56,8 @@ jobs:
           asset_path: ./DatabaseBenchmark-${{ env.APP_VERSION }}-win-x64.zip
           asset_name: DatabaseBenchmark-${{ env.APP_VERSION }}-win-x64.zip
           asset_content_type: application/zip
-      - uses: actions/upload-release-asset@v1.0.1
+      - name: Upload Linux Artifact
+        uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -63,7 +65,8 @@ jobs:
           asset_path: ./DatabaseBenchmark-${{ env.APP_VERSION }}-linux-x64.zip
           asset_name: DatabaseBenchmark-${{ env.APP_VERSION }}-linux-x64.zip
           asset_content_type: application/zip
-      - uses: actions/upload-release-asset@v1.0.1
+      - name: Upload OSX Artifact
+        uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -71,7 +74,8 @@ jobs:
           asset_path: ./DatabaseBenchmark-${{ env.APP_VERSION }}-osx-x64.zip
           asset_name: DatabaseBenchmark-${{ env.APP_VERSION }}-osx-x64.zip
           asset_content_type: application/zip
-      - uses: eregon/publish-release@v1
+      - name: Publish Release
+        uses: eregon/publish-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
