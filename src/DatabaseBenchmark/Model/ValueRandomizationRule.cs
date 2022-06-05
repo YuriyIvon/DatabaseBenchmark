@@ -25,6 +25,8 @@ namespace DatabaseBenchmark.Model
 
         public DateTime MaxDateTimeValue { get; set; } = DateTime.Now;
 
+        public TimeSpan DateTimeValueStep { get; set; } = TimeSpan.FromSeconds(1);
+
         public int MinStringValueLength { get; set; } = 1;
 
         public int MaxStringValueLength { get; set; } = 10;

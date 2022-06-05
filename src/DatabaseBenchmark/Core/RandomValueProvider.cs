@@ -72,7 +72,8 @@ namespace DatabaseBenchmark.Core
                     randomizationRule.AllowedCharacters),
                 ColumnType.DateTime => _randomGenerator.GetRandomDateTime(
                     randomizationRule.MinDateTimeValue,
-                    randomizationRule.MaxDateTimeValue),
+                    randomizationRule.MaxDateTimeValue,
+                    randomizationRule.DateTimeValueStep),
                 _ => throw new InputArgumentException($"Unsupported random value type \"{columnType}\"")
             };
         }

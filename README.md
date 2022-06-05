@@ -230,6 +230,7 @@ When `RandomizeValue` is `true` on a query condition or on a raw query parameter
 * `MaxNumericValue` - maximum numeric value. Is equal to `100` by default.
 * `MinDateTimeValue` - minimum date time value. Is equal to the current date and time minus 10 years by default. 
 * `MaxDateTimeValue` - maximum date time value. Is equal to the current date and time by default.
+* `DateTimeValueStep` - date time value step in `D.HH:MM:SS` format. Is `0.00:00:01` by default, which corresponds to 1 second.
 * `MinStringValueLength` - minimum random string length. Is equal to `1` by default.
 * `MaxStringValueLength` - maximum random string length. Is equal to `10` by default.
 * `AllowedCharacters` - characters to be used when generating a random string. By default contains uppercase Latin letters and digits.
@@ -240,5 +241,5 @@ There are some limitations that are going to be addressed in the future:
 
 * Query definitions don't support joins. A workaround is using the raw queries approach.
 * Random inclusion of condition parts into generated queries - there is a reserved property `RandomizeInclusion` on each part of a query condition, but it is not handled yet.
-* Configurable partitioning in Cosmos DB and other databases is not supported yet.
+* Configurable partitioning in Cosmos DB and other databases is not supported yet. The current implementation populates a dummy partition key with a hard-coded constant.
 * Importing from Elasticsearch database doesn't support unlimited number of rows.

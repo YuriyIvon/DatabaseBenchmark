@@ -8,7 +8,7 @@
 
         double GetRandomDouble(double minValue, double maxValue);
 
-        DateTime GetRandomDateTime(DateTime minValue, DateTime maxValue);
+        DateTime GetRandomDateTime(DateTime minValue, DateTime maxValue, TimeSpan step);
 
         string GetRandomString(int minLength, int maxLength, string allowedCharacters);
     }
