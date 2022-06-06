@@ -1,5 +1,5 @@
-SELECT Country, SUM(UnitsSold * UnitPrice) TotalPrice
+SELECT ItemType, SUM(UnitsSold * UnitPrice) TotalPrice
 FROM Sales
-WHERE ItemType=${ItemType}
-GROUP BY Country
-ORDER BY Country
+WHERE Country=${Country}
+GROUP BY ItemType
+ORDER BY ItemType

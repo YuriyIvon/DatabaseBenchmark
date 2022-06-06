@@ -22,6 +22,7 @@ This tool addresses the issues from above by introducing a data import and query
   * [Query benchmark scenarios](#query_benchmark_scenarios)
   * [Raw query benchmark](#raw_query_benchmark)
   * [Raw query benchmark scenarios](#raw_query_benchmark_scenarios)
+  * [Table definition](#table_definition)
   * [Query definition](#query_definition)
   * [Value randomization rules](#value_randomization_rules)
 * [Limitations](#limitations)
@@ -30,13 +31,9 @@ This tool addresses the issues from above by introducing a data import and query
 
 ### Table creation<a name="table_creation"></a>
 
-Create a table definition - see [SaleTable.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesTable.json) as an example.
+Create a [table definition](#table_definition) - see [SaleTable.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesTable.json) as an example.
 
 **Though different databases may use different terminology for data objects, the tool uses relational terms such as table, column, and row for consistency.**
-
-Supported values for `Type` attribute are `Boolean`, `DateTime`, `Double`, `Guid`, `Integer`, `Long`,  `String`, and `Text`.
-
-`Queryable` gives a hint if the column is going to participate in query conditions. Based on this information some table builders may generate more optimal definitions.
 
 Once the definition is ready, you can create the table in all database management systems you are comparing:
 
@@ -109,7 +106,7 @@ There are some parameters specific to the query command:
 
 **Please note that the tool, in general, is not responsible for index creation and other database configuration tweaks. Any settings that can be modified after the table has been created must be controlled by the person responsible for the benchmark. Thus, ensure that all indexes and other required settings are in place before running a real benchmark.**
 
-To speed up sample queries used in this manual, you can create two indexes in each database: one on `Country` column and another on `ItemType` and `OrderDate` columns. Alternatively, in SQL Server, you can create a columnstore index instead.
+To speed up sample queries used in this manual, you can create a compound index in each database on `Country` and `OrderDate` columns. Alternatively, in SQL Server, you can create a columnstore index instead.
 
 When everything is ready, a full benchmark can be run.
 
@@ -180,6 +177,19 @@ Raw query benchmark scenarios are very similar to [regular scenarios](#query_ben
 ```
 DatabaseBenchmark raw-query-scenario --QueryScenarioFilePath=SalesAggregateRawQueryScenario.json
 ```
+### Table definition<a name="table_definition"></a>
+A table definition has the following top-level properties:
+
+* `Name` - table name.
+* `Columns` - an array of column definitions.
+
+Where each column definition has the following properties:
+
+* `Name` - column name.
+* `Type` - column type, can be one of `Boolean`, `DateTime`, `Double`, `Guid`, `Integer`, `Long`,  `String`, and `Text`.
+* `Nullable` - specifies if the column is nullable.
+* `Queryable` - gives a hint if the column is going to participate in query conditions. Based on this information some table builders may generate more optimal definitions.
+* `DatabaseGenerated` - specifies if the column is auto-generated. Databases that don't support auto-generated columns will report a warning.
 
 ### Query definition<a name="query_definition"></a>
 
