@@ -31,7 +31,7 @@ This tool addresses the issues from above by introducing a data import and query
 
 ### Table creation<a name="table_creation"></a>
 
-Create a [table definition](#table_definition) - see [SaleTable.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesTable.json) as an example.
+Create a [table definition](#table_definition) - see [SalesTable.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesTable.json) as an example.
 
 **Though different databases may use different terminology for data objects, the tool uses relational terms such as table, column, and row for consistency.**
 
