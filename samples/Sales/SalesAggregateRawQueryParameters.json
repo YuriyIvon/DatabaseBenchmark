@@ -1,11 +1,11 @@
 [
   {
-    "Name": "ItemType",
+    "Name": "Country",
     "Type": "String",
     "RandomizeValue": true,
     "ValueRandomizationRule": {
       "ExistingValuesSourceTableName": "Sales",
-      "ExistingValuesSourceColumnName": "ItemType"
+      "ExistingValuesSourceColumnName": "Country"
     }
   }
 ]

@@ -1,4 +1,5 @@
 {
   "DatabaseType": "MongoDb",
-  "ConnectionString": "mongodb://localhost/benchmark"
+  "ConnectionString": "mongodb://localhost/benchmark",
+  "TableFilePath": "SalesTable.json"
 }
