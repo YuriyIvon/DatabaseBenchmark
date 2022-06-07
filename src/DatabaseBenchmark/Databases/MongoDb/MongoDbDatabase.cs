@@ -30,7 +30,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
             //TODO: allow _id field to be marked as database-generated
             if (table.Columns.Any(c => c.DatabaseGenerated))
             {
-                throw new InputArgumentException("MongoDB doesn't support database-generated fields");
+                _environment.WriteLine("WARNING: MongoDB doesn't support database-generated columns");
             }
 
             var database = GetDatabase();

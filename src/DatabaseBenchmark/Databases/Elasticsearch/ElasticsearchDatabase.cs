@@ -113,13 +113,14 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             return new ElasticClient(connectionSettings);
         }
 
-        private static PropertiesDescriptor<object> BuildProperties(Table table, PropertiesDescriptor<object> propertiesDescriptor)
+        private PropertiesDescriptor<object> BuildProperties(Table table, PropertiesDescriptor<object> propertiesDescriptor)
         {
             foreach (var column in table.Columns)
             {
                 if (column.DatabaseGenerated)
                 {
-                    throw new InputArgumentException("Elasticsearch doesn't support database-generated columns");
+                    _environment.WriteLine("WARNING: Elasticsearch doesn't support database-generated columns");
+                    continue;
                 }
 
                 switch (column.Type)

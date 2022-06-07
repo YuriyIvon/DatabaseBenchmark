@@ -36,7 +36,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
         {
             if (table.Columns.Any(c => c.DatabaseGenerated))
             {
-                throw new InputArgumentException("Cosmos DB doesn't support database-generated columns");
+                _environment.WriteLine("WARNING: Cosmos DB doesn't support database-generated columns");
             }
 
             using var client = new CosmosClient(_connectionString);
