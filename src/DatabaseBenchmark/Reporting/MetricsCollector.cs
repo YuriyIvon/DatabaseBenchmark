@@ -1,10 +1,8 @@
-﻿using System.Collections.Concurrent;
-
-namespace DatabaseBenchmark.Reporting
+﻿namespace DatabaseBenchmark.Reporting
 {
     public class MetricsCollector
     {
-        private readonly ConcurrentBag<MetricsCollection> _collections = new();
+        private readonly List<MetricsCollection> _collections = new();
         private MetricsCollection _currentMetrics;
 
         public IEnumerable<MetricsCollection> Collections => _collections;
@@ -17,7 +15,7 @@ namespace DatabaseBenchmark.Reporting
 
         public void Abort()
         {
-            _collections.TryTake(out var _);
+            _collections.Remove(_currentMetrics);
         }
 
         public void AppendResult(DateTime startTimestamp,
