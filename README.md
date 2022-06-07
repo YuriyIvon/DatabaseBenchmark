@@ -47,7 +47,7 @@ DatabaseBenchmark create --DatabaseType=MongoDb --ConnectionString="mongodb://lo
 
 **Please note that in most real-life scenarios, the benchmark tool and a database engine must run on separate machines to take network throughput into account and avoid resource contention.**
 
-Supported values for `DatabaseType` attribute are:
+Supported values for `DatabaseType` parameter are:
 * `ClickHouse`
 * `CosmosDb` - SQL API only, connection string must contain a non-standard property specifying a database name to be used - `Database=database_name`.
 * `Elasticsearch`
@@ -57,6 +57,11 @@ Supported values for `DatabaseType` attribute are:
 * `Postgres`
 * `PostgresJsonb` - stores all queryable "logical" columns in a single JSONB column indexed with GIN index of  jsonb_path_ops type. Supports only `Equals` and `In` primitive operators. 
 * `SqlServer`
+
+This command has a few database-specific parameters:
+* `ClickHouse.Engine` - table engine. Default is `MergeTree()`.
+* `ClickHouse.OrderBy` - table sort order. Default is `tuple()`.
+* `MySql.Engine` - table engine. Default is `InnoDB`.
 
 ### Data import<a name="data_import"></a>
 
@@ -103,6 +108,9 @@ There are some parameters specific to the query command:
 * `ReportFormatterType` - benchmark result report output format, currently can be either `Text` or `Csv`.
 * `ReportFilePath` - path to the result report output file. If not specified, the report is written to the console. 
 * `TraceResults` - Boolean parameter specifying if query results should be printed to the console.
+
+This command also has a database-specific parameter:
+* `CosmosDb.BatchSize` - a maximum number of items to be fetched in one round-trip.
 
 **Please note that the tool, in general, is not responsible for index creation and other database configuration tweaks. Any settings that can be modified after the table has been created must be controlled by the person responsible for the benchmark. Thus, ensure that all indexes and other required settings are in place before running a real benchmark.**
 
@@ -234,15 +242,15 @@ When `RandomizeValue` is `true` on a query condition or on a raw query parameter
 * `ExistingValuesOverride` - provides a specific array of values to pick a random value from. Can be particularly useful in case "distinct" queries are too slow on the database being tested. 
 * `ExistingValuesSourceTableName` - provides an alternative table to select existing values from.
 * `ExistingValuesSourceColumnName` - provides an alternative column name to select existing values from. 
-* `MinCollectionLength` - minimum random collection length. Is equal to `1` by default.
-* `MaxCollectionLength` - maximum random collection length. Is equal to `10` by default.
-* `MinNumericValue` - minimum numeric value. Is equal to `0` by default.
-* `MaxNumericValue` - maximum numeric value. Is equal to `100` by default.
-* `MinDateTimeValue` - minimum date time value. Is equal to the current date and time minus 10 years by default. 
-* `MaxDateTimeValue` - maximum date time value. Is equal to the current date and time by default.
+* `MinCollectionLength` - minimum random collection length. Default value is `1`.
+* `MaxCollectionLength` - maximum random collection length. Default value is `10`.
+* `MinNumericValue` - minimum numeric value. Default value is `0`.
+* `MaxNumericValue` - maximum numeric value. Default value is `100`.
+* `MinDateTimeValue` - minimum date-time value. Is equal to the current date and time minus 10 years by default. 
+* `MaxDateTimeValue` - maximum date-time value. Is equal to the current date and time by default.
 * `DateTimeValueStep` - date time value step in `D.HH:MM:SS` format. Is `0.00:00:01` by default, which corresponds to 1 second.
-* `MinStringValueLength` - minimum random string length. Is equal to `1` by default.
-* `MaxStringValueLength` - maximum random string length. Is equal to `10` by default.
+* `MinStringValueLength` - minimum random string length. Default value is `1`.
+* `MaxStringValueLength` - maximum random string length. Default value is `10`.
 * `AllowedCharacters` - characters to be used when generating a random string. By default contains uppercase Latin letters and digits.
 
 ## Limitations<a name="limitations"></a>
