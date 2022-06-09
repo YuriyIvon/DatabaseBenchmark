@@ -64,7 +64,12 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
                 if (buffer.Count >= batchSize)
                 {
-                    collection.InsertMany(buffer);
+                    collection.InsertMany(buffer,
+                        new InsertManyOptions
+                        {
+                            IsOrdered = false
+                        });
+
                     progressReporter.Increment(buffer.Count);
                     buffer.Clear();
                 }
