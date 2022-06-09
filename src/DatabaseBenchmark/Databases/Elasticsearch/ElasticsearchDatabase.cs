@@ -50,9 +50,11 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
             while (source.Read())
             {
-                var document = table.Columns.ToDictionary(
-                    x => x.Name,
-                    x => source.GetValue(x.Name));
+                var document = table.Columns
+                    .Where(c => !c.DatabaseGenerated)
+                    .ToDictionary(
+                        x => x.Name,
+                        x => source.GetValue(x.Name));
 
                 buffer.Add(document);
 
