@@ -64,9 +64,11 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 
             while (source.Read())
             {
-                var item = table.Columns.ToDictionary(
-                    x => x.Name,
-                    x => source.GetValue(x.Name));
+                var item = table.Columns
+                    .Where(c => !c.DatabaseGenerated)
+                    .ToDictionary(
+                        x => x.Name,
+                        x => source.GetValue(x.Name));
 
                 item.Add("id", Guid.NewGuid().ToString("N"));
                 item.Add(CosmosDbConstants.DummyPartitionKeyName, CosmosDbConstants.DummyPartitionKeyValue);
