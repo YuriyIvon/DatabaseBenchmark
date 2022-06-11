@@ -51,10 +51,11 @@ namespace DatabaseBenchmark.DataSources.Database
         {
             var options = JsonUtils.DeserializeFile<DatabaseDataSourceOptions>(_filePath);
             var database = _databaseFactory.Create(options.DatabaseType, options.ConnectionString);
+            var queryText = File.ReadAllText(options.QueryFilePath);
 
             var query = new RawQuery
             {
-                Text = options.Query,
+                Text = queryText,
                 TableName = options.TableName
             };
 

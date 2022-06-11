@@ -32,7 +32,7 @@ namespace DatabaseBenchmark.Commands
                 table.Name = options.TableName;
             }
 
-            var dataSourceFactory = new DataSourceFactory(databaseFactory);
+            var dataSourceFactory = new DataSourceFactory(databaseFactory, _optionsProvider);
             using var dataSource = dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath, table);
 
             var result = database.ImportData(table, dataSource, options.ImportBatchSize);

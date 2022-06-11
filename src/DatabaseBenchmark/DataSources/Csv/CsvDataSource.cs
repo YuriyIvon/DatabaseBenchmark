@@ -1,8 +1,11 @@
 ﻿using CsvHelper;
+using CsvHelper.Configuration;
 using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace DatabaseBenchmark.DataSources.Csv
 {
@@ -10,14 +13,19 @@ namespace DatabaseBenchmark.DataSources.Csv
     {
         private readonly string _filePath;
         private readonly Dictionary<string, Type> _columnTypes;
+        private readonly IOptionsProvider _optionsProvider;
 
         private StreamReader _streamReader;
         private CsvReader _reader;
 
-        public CsvDataSource(string filePath, Table table)
+        public CsvDataSource(
+            string filePath,
+            Table table,
+            IOptionsProvider optionsProvider)
         {
             _filePath = filePath;
             _columnTypes = table.Columns.ToDictionary(c => c.Name, c => GetColumnType(c.Type));
+            _optionsProvider = optionsProvider;
         }
 
         public void Dispose()
@@ -50,8 +58,16 @@ namespace DatabaseBenchmark.DataSources.Csv
 
         private void Open()
         {
+            var options = _optionsProvider.GetOptions<CsvDataSourceOptions>();
+            var configuration = new CsvConfiguration(CultureInfo.InvariantCulture);
+
+            if (options.Delimiter != null)
+            {
+                configuration.Delimiter = Regex.Unescape(options.Delimiter);
+            }
+
             _streamReader = new StreamReader(_filePath);
-            _reader = new CsvReader(_streamReader, CultureInfo.InvariantCulture);
+            _reader = new CsvReader(_streamReader, configuration);
 
             _reader.Read();
             _reader.ReadHeader();

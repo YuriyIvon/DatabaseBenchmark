@@ -4,8 +4,10 @@ using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
 using DatabaseBenchmark.Databases.ClickHouse;
 using DatabaseBenchmark.Databases.CosmosDb;
+using DatabaseBenchmark.Databases.MongoDb;
 using DatabaseBenchmark.Databases.MySql;
 using DatabaseBenchmark.DataSources;
+using DatabaseBenchmark.DataSources.Csv;
 using DatabaseBenchmark.Reporting;
 using System.Reflection;
 
@@ -56,7 +58,15 @@ namespace DatabaseBenchmark.Commands
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(ImportCommandOptions.DataSourceType),
-                        AllowedValuesProvider = new DataSourceFactory(null)
+                        AllowedValuesProvider = new DataSourceFactory(null, null),
+                        ValueSpecificOptions = new ValueSpecificOptionsDescriptor[]
+                        {
+                            new ValueSpecificOptionsDescriptor
+                            {
+                                Value = "Csv",
+                                OptionsContainerType = typeof(CsvDataSourceOptions)
+                            }
+                        }
                     }
                 }
             },
@@ -76,6 +86,11 @@ namespace DatabaseBenchmark.Commands
                             {
                                 Value = "CosmosDb",
                                 OptionsContainerType = typeof(CosmosDbQueryOptions)
+                            },
+                            new ValueSpecificOptionsDescriptor
+                            {
+                                Value = "MongoDb",
+                                OptionsContainerType = typeof(MongoDbQueryOptions)
                             }
                         }
                     },
@@ -115,6 +130,11 @@ namespace DatabaseBenchmark.Commands
                             {
                                 Value = "CosmosDb",
                                 OptionsContainerType = typeof(CosmosDbQueryOptions)
+                            },
+                            new ValueSpecificOptionsDescriptor
+                            {
+                                Value = "MongoDb",
+                                OptionsContainerType = typeof(MongoDbQueryOptions)
                             }
                         }
                     },

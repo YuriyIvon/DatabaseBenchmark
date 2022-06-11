@@ -14,11 +14,11 @@ namespace DatabaseBenchmark.DataSources
         public IEnumerable<string> Options => _factories.Keys;
 
         //TODO: find a way to avoid the direct database project dependency
-        public DataSourceFactory(IDatabaseFactory databaseFactory)
+        public DataSourceFactory(IDatabaseFactory databaseFactory, IOptionsProvider optionsProvider)
         {
             _factories = new()
             {
-                ["Csv"] = (filePath, table) => new CsvDataSource(filePath, table),
+                ["Csv"] = (filePath, table) => new CsvDataSource(filePath, table, optionsProvider),
                 ["Database"] = (filePath, table) => new DatabaseDataSource(filePath, databaseFactory)
             };
         }
