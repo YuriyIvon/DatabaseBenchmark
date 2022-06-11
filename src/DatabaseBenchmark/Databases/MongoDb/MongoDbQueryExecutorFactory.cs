@@ -13,19 +13,22 @@ namespace DatabaseBenchmark.Databases.MongoDb
         private readonly Table _table;
         private readonly Query _query;
         private readonly IExecutionEnvironment _environment;
+        private readonly IOptionsProvider _optionsProvider;
         private readonly IRandomGenerator _randomGenerator;
 
         public MongoDbQueryExecutorFactory(
             string connectionString,
             Table table,
             Query query,
-            IExecutionEnvironment environment)
+            IExecutionEnvironment environment,
+            IOptionsProvider optionsProvider)
         {
             _connectionString = connectionString;
             _table = table;
             _query = query;
             _environment = environment;
             _randomGenerator = new RandomGenerator();
+            _optionsProvider = optionsProvider;
         }
 
         public IQueryExecutor Create()
@@ -39,7 +42,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
             var randomValueProvider = new RandomValueProvider(_randomGenerator, columnPropertiesProvider, distinctValuesProvider);
             var queryBuilder = new MongoDbQueryBuilder(_table, _query, randomValueProvider);
 
-            return new MongoDbQueryExecutor(collection, queryBuilder, _environment);
+            return new MongoDbQueryExecutor(collection, queryBuilder, _environment, _optionsProvider);
         }
     }
 }
