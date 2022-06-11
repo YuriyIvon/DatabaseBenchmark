@@ -10,15 +10,18 @@ namespace DatabaseBenchmark.Databases.MongoDb
         private readonly IMongoCollection<BsonDocument> _collection;
         private readonly IMongoDbQueryBuilder _queryBuilder;
         private readonly IExecutionEnvironment _environment;
+        private readonly IOptionsProvider _optionsProvider;
 
         public MongoDbQueryExecutor(
             IMongoCollection<BsonDocument> collection,
             IMongoDbQueryBuilder queryBuilder,
-            IExecutionEnvironment environment)
+            IExecutionEnvironment environment,
+            IOptionsProvider optionsProvider)
         {
             _collection = collection;
             _queryBuilder = queryBuilder;
             _environment = environment;
+            _optionsProvider = optionsProvider;
         }
 
         public IPreparedQuery Prepare()
@@ -30,7 +33,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
                 _environment.WriteLine(new BsonArray(request).ToString());
             }
 
-            return new MongoDbPreparedQuery(_collection, request);
+            var options = _optionsProvider.GetOptions<MongoDbQueryOptions>();
+            return new MongoDbPreparedQuery(_collection, request, options);
         }
 
         public void Dispose()

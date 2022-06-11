@@ -18,11 +18,16 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
         private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
+        private readonly IOptionsProvider _optionsProvider;
 
-        public MongoDbDatabase(string connectionString, IExecutionEnvironment environment)
+        public MongoDbDatabase(
+            string connectionString,
+            IExecutionEnvironment environment,
+            IOptionsProvider optionsProvider)
         {
             _connectionString = connectionString;
             _environment = environment;
+            _optionsProvider = optionsProvider;
         }
 
         public void CreateTable(Table table)
@@ -91,10 +96,10 @@ namespace DatabaseBenchmark.Databases.MongoDb
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new MongoDbQueryExecutorFactory(_connectionString, table, query, _environment);
+            new MongoDbQueryExecutorFactory(_connectionString, table, query, _environment, _optionsProvider);
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new MongoDbRawQueryExecutorFactory(_connectionString, query, _environment);
+            new MongoDbRawQueryExecutorFactory(_connectionString, query, _environment, _optionsProvider);
 
         private IMongoDatabase GetDatabase()
         {

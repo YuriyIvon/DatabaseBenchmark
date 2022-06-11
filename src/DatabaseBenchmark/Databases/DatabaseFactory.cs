@@ -28,7 +28,7 @@ namespace DatabaseBenchmark.Databases
                 ["Elasticsearch"] = (connectionString) => new ElasticsearchDatabase(connectionString, environment),
                 ["MySql"] = (connectionString) => new MySqlDatabase(connectionString, environment, optionsProvider),
                 ["MonetDb"] = (connectionString) => new MonetDbDatabase(connectionString, environment),
-                ["MongoDb"] = (connectionString) => new MongoDbDatabase(connectionString, environment),
+                ["MongoDb"] = (connectionString) => new MongoDbDatabase(connectionString, environment, optionsProvider),
                 ["CosmosDb"] = (connectionString) => new CosmosDbDatabase(connectionString, environment, optionsProvider),
                 ["ClickHouse"] = (connectionString) => new ClickHouseDatabase(connectionString, environment, optionsProvider)
             };

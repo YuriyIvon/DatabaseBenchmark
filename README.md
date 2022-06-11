@@ -109,8 +109,10 @@ There are some parameters specific to the query command:
 * `ReportFilePath` - path to the result report output file. If not specified, the report is written to the console. 
 * `TraceResults` - Boolean parameter specifying if query results should be printed to the console.
 
-This command also has a database-specific parameter:
+This command also has a few database-specific parameters:
 * `CosmosDb.BatchSize` - a maximum number of items to be fetched in one round-trip.
+* `MongoDb.BatchSize` - a maximum number of items to be fetched in one round-trip.
+* `MongoDb.CollectCosmosDbRequestUnits` - allows to collect request units metric in case the database is hosted by Azure CosmosDB (may affect query timing).
 
 **Please note that the tool, in general, is not responsible for index creation and other database configuration tweaks. Any settings that can be modified after the table has been created must be controlled by the person responsible for the benchmark. Thus, ensure that all indexes and other required settings are in place before running a real benchmark.**
 

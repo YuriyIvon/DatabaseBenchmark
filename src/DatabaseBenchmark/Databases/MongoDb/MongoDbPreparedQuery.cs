@@ -6,28 +6,41 @@ namespace DatabaseBenchmark.Databases.MongoDb
 {
     public class MongoDbPreparedQuery : IPreparedQuery
     {
+        private const string RequestUnitsMetric = "RU";
+
         private readonly IMongoCollection<BsonDocument> _collection;
         private readonly IEnumerable<BsonDocument> _request;
+        private readonly MongoDbQueryOptions _options;
 
         private IAsyncCursor<BsonDocument> _cursor;
         private BsonDocument[] _batchItems;
         private int _batchItemIndex = 0;
+        private double _requestCharge;
 
         public IEnumerable<string> ColumnNames => _batchItems[_batchItemIndex].Names;
 
-        public IDictionary<string, double> CustomMetrics => null;
+        public IDictionary<string, double> CustomMetrics =>
+            _options.CollectCosmosDbRequestUnits 
+                ? new Dictionary<string, double> { [RequestUnitsMetric] = _requestCharge } 
+                : null;
 
         public MongoDbPreparedQuery(
             IMongoCollection<BsonDocument> collection,
-            IEnumerable<BsonDocument> request)
+            IEnumerable<BsonDocument> request,
+            MongoDbQueryOptions options)
         {
             _collection = collection;
             _request = request;
+            _options = options;
         }
 
         public void Execute()
         {
-            _cursor = _collection.Aggregate(PipelineDefinition<BsonDocument, BsonDocument>.Create(_request));
+            _cursor = _collection.Aggregate(PipelineDefinition<BsonDocument, BsonDocument>.Create(_request),
+                new AggregateOptions
+                {
+                    BatchSize = _options.BatchSize
+                });
         }
 
         public object GetValue(string columnName) => ToStandardType(_batchItems[_batchItemIndex][columnName]);
@@ -45,6 +58,11 @@ namespace DatabaseBenchmark.Databases.MongoDb
                 {
                     _batchItems = _cursor.Current.ToArray();
                     _batchItemIndex = 0;
+
+                    if (_options.CollectCosmosDbRequestUnits)
+                    {
+                        CollectRequestUnits();
+                    }
 
                     return _batchItems.Any();
                 }
@@ -76,5 +94,11 @@ namespace DatabaseBenchmark.Databases.MongoDb
                 BsonNull => null,
                 _ => value
             };
+
+        private void CollectRequestUnits()
+        {
+             var stats = _collection.Database.RunCommand(new GetLastRequestStatisticsCommand());
+            _requestCharge += (double)stats["RequestCharge"];
+        }
     }
 }
