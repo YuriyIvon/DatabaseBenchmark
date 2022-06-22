@@ -34,7 +34,6 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 _queryDefinition,
                 requestOptions: new QueryRequestOptions
                 {
-                    PartitionKey = new PartitionKey(CosmosDbConstants.DummyPartitionKeyValue),
                     MaxItemCount = _options.BatchSize
                 });
         }

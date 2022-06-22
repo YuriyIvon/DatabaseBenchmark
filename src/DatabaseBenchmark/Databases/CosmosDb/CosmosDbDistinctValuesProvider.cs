@@ -26,7 +26,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 _environment.WriteLine(query);
             }
 
-            return container.Query<object>(new PartitionKey(CosmosDbConstants.DummyPartitionKeyValue), query).Items;
+            return container.Query<object>(query).Items;
         }
     }
 }
