@@ -4,17 +4,12 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 {
     public static class CosmosDbContainerExtensions
     {
-        public static CosmosDbQueryResult<T> Query<T>(this Container container, PartitionKey partitionKey, string query) =>
-            Query<T>(container, partitionKey, new QueryDefinition(query));
+        public static CosmosDbQueryResult<T> Query<T>(this Container container, string query) =>
+            Query<T>(container, new QueryDefinition(query));
 
-        public static CosmosDbQueryResult<T> Query<T>(this Container container, PartitionKey partitionKey, QueryDefinition queryDefinition)
+        public static CosmosDbQueryResult<T> Query<T>(this Container container, QueryDefinition queryDefinition)
         {
-            using var iterator = container.GetItemQueryIterator<T>(
-                queryDefinition,
-                requestOptions: new QueryRequestOptions
-                {
-                    PartitionKey = partitionKey
-                });
+            using var iterator = container.GetItemQueryIterator<T>(queryDefinition);
 
             var items = new List<T>();
             double totalRequestCharge = 0;
