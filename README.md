@@ -202,6 +202,7 @@ Where each column definition has the following properties:
 * `Nullable` - specifies if the column is nullable.
 * `Queryable` - gives a hint if the column is going to participate in query conditions. Based on this information some table builders may generate more optimal definitions.
 * `DatabaseGenerated` - specifies if the column is auto-generated. Databases that don't support auto-generated columns will report a warning.
+* `PartitionKey` - specifies if the table should be partitioned by this column. Is currently supported for Cosmos DB only (if there is no partition key column in the table definition, a dummy constant-value partition key is created).
 
 ### Query definition<a name="query_definition"></a>
 
@@ -263,5 +264,5 @@ There are some limitations that are going to be addressed in the future:
 
 * Query definitions don't support joins. A workaround is using the raw queries approach.
 * Random inclusion of condition parts into generated queries - there is a reserved property `RandomizeInclusion` on each part of a query condition, but it is not handled yet.
-* Configurable partitioning in Cosmos DB and other databases is not supported yet. The current implementation populates a dummy partition key with a hard-coded constant.
+* Configurable partitioning is supported for Cosmos DB only.
 * Importing from Elasticsearch database doesn't support unlimited number of rows.
