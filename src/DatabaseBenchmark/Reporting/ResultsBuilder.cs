@@ -34,6 +34,9 @@ namespace DatabaseBenchmark.Reporting
             var qpsColumn = results.Columns.Add("qps", typeof(double));
             qpsColumn.Caption = "QPS";
 
+            var avgRowsColumn = results.Columns.Add("avgRows", typeof(double));
+            avgRowsColumn.Caption = "Avg Rows";
+
             foreach (var metric in metrics)
             {
                 var row = results.Rows.Add();
@@ -50,6 +53,7 @@ namespace DatabaseBenchmark.Reporting
                 row[p90Column] = durations.Percentile(90);
                 row[maxColumn] = durations.Max();
                 row[qpsColumn] = GetThroughput(metric);
+                row[avgRowsColumn] = metric.Metrics.Select(m => m.RowCount).Average();
 
                 var customMetrics = metric.Metrics
                     .Where(m => m.CustomMetrics != null)

@@ -60,19 +60,22 @@ namespace DatabaseBenchmark.Core
 
                 var startTimestamp = DateTime.Now;
                 preparedQuery.Execute();
-                FetchResults(preparedQuery);
+                var rowCount = FetchResults(preparedQuery);
                 var endTimestamp = DateTime.Now;
 
-                _metricsCollector.AppendResult(startTimestamp, endTimestamp, preparedQuery.CustomMetrics);
+                _metricsCollector.AppendResult(startTimestamp, endTimestamp, rowCount, preparedQuery.CustomMetrics);
             }
         }
 
-        private void FetchResults(IPreparedQuery query)
+        private int FetchResults(IPreparedQuery query)
         {
             var table = new DataTable();
+            int rowCount = 0;
 
             while (query.Read())
             {
+                rowCount++;
+
                 if (_environment.TraceResults)
                 {
                     foreach (var columnName in query.ColumnNames)
@@ -98,6 +101,8 @@ namespace DatabaseBenchmark.Core
             {
                 _environment.WriteTable(table);
             }
+
+            return rowCount;
         }
     }
 }
