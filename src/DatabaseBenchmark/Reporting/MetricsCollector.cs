@@ -20,9 +20,10 @@
 
         public void AppendResult(DateTime startTimestamp,
             DateTime endTimestamp,
+            int rowCount,
             IDictionary<string, double> customMetrics)
         {
-            _currentMetrics.Metrics.Add(new Metric(startTimestamp, endTimestamp, customMetrics));
+            _currentMetrics.Metrics.Add(new Metric(startTimestamp, endTimestamp, rowCount, customMetrics));
         }
     }
 }
