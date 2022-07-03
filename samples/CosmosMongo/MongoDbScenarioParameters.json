@@ -1,0 +1,5 @@
+{
+  "DatabaseType": "MongoDb",
+  "ConnectionString": "your connection string",
+  "TableFilePath": "SalesTable.json"
+}

@@ -1,0 +1,5 @@
+{
+  "DatabaseType": "CosmosDb",
+  "ConnectionString": "your connection string",
+  "TableFilePath": "SalesTable.json"
+}

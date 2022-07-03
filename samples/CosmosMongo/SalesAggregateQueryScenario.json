@@ -1,0 +1,23 @@
+{
+  "Name": "Sales scenario",
+  "Items": [
+    {
+      "BenchmarkName": "${DatabaseType} 1 thread - Aggregate Query",
+      "QueryFilePath": "SalesAggregateQuery.json",
+      "QueryParallelism": 1,
+      "QueryCount": 500
+    },
+    {
+      "BenchmarkName": "${DatabaseType} 10 threads - Aggregate Query",
+      "QueryFilePath": "SalesAggregateQuery.json",
+      "QueryParallelism": 10,
+      "QueryCount": 500
+    },
+    {
+      "BenchmarkName": "${DatabaseType} 20 threads - Aggregate Query",
+      "QueryFilePath": "SalesAggregateQuery.json",
+      "QueryParallelism": 20,
+      "QueryCount": 500
+    }
+  ]
+}
