@@ -56,6 +56,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
             var stopwatch = Stopwatch.StartNew();
             var progressReporter = new ImportProgressReporter(_environment);
+            var options = _optionsProvider.GetOptions<MongoDbImportOptions>();
+            double totalRequestCharge = 0;
 
             while (source.Read())
             {
@@ -77,6 +79,11 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
                     progressReporter.Increment(buffer.Count);
                     buffer.Clear();
+
+                    if (options.CollectCosmosDbRequestUnits)
+                    {
+                        totalRequestCharge += collection.GetLastCommandRequestCharge();
+                    }
                 }
             }
 
@@ -89,6 +96,11 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
             var rowCount = collection.CountDocuments(new BsonDocument());
             var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
+
+            if (options.CollectCosmosDbRequestUnits)
+            {
+                importResult.AddMetric(Metrics.TotalRequestCharge, totalRequestCharge);
+            }
 
             return importResult;
         }

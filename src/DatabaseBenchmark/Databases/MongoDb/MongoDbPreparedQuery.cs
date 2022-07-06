@@ -15,7 +15,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
         private IAsyncCursor<BsonDocument> _cursor;
         private BsonDocument[] _batchItems;
         private int _batchItemIndex = 0;
-        private double _requestCharge;
+        private double _requestCharge = 0;
 
         public IEnumerable<string> ColumnNames => _batchItems[_batchItemIndex].Names;
 
@@ -61,7 +61,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
                     if (_options.CollectCosmosDbRequestUnits)
                     {
-                        CollectRequestUnits();
+                        _requestCharge += _collection.GetLastCommandRequestCharge();
                     }
 
                     return _batchItems.Any();
@@ -94,11 +94,5 @@ namespace DatabaseBenchmark.Databases.MongoDb
                 BsonNull => null,
                 _ => value
             };
-
-        private void CollectRequestUnits()
-        {
-             var stats = _collection.Database.RunCommand(new GetLastRequestStatisticsCommand());
-            _requestCharge += (double)stats["RequestCharge"];
-        }
     }
 }
