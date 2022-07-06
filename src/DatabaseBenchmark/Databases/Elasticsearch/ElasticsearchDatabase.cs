@@ -77,12 +77,10 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
             var stats = client.Indices.Stats(table.Name);
 
-            return new ImportResult 
-            { 
-                Count = stats.Stats.Primaries.Documents.Count,
-                Duration = stopwatch.ElapsedMilliseconds, 
-                TotalStorageBytes = (long)stats.Stats.Total.Store.SizeInBytes
-            };
+            var importResult = new ImportResult(stats.Stats.Primaries.Documents.Count, stopwatch.ElapsedMilliseconds);
+            importResult.AddMetric(Common.Metrics.TotalStorageBytes, (long)stats.Stats.Total.Store.SizeInBytes);
+
+            return importResult;
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>

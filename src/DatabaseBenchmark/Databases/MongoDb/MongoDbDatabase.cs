@@ -87,12 +87,10 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
             stopwatch.Stop();
 
-            return new ImportResult
-            {
-                Count = collection.CountDocuments(new BsonDocument()),
-                Duration = stopwatch.ElapsedMilliseconds,
-                TotalStorageBytes = GetTotalStorageSize(database, table.Name)
-            };
+            var rowCount = collection.CountDocuments(new BsonDocument());
+            var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
+
+            return importResult;
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
@@ -106,21 +104,6 @@ namespace DatabaseBenchmark.Databases.MongoDb
             var client = new MongoClient(_connectionString);
             var databaseName = MongoUrl.Create(_connectionString).DatabaseName;
             return client.GetDatabase(databaseName);
-        }
-
-        private int? GetTotalStorageSize(IMongoDatabase database, string collectionName)
-        {
-            try
-            {
-                var collectionStats = database.RunCommand<BsonDocument>(new BsonDocument("collstats", collectionName));
-                return (int)collectionStats["totalSize"];
-            }
-            catch
-            {
-                _environment.WriteLine("Can't retrieve total storage size");
-            }
-
-            return null;
         }
     }
 }
