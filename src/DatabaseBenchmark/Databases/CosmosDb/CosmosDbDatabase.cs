@@ -116,7 +116,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             stopwatch.Stop();
 
             var importResult = new ImportResult(container.Count(), stopwatch.ElapsedMilliseconds);
-            importResult.AddMetric("Total Request Units", totalRequestCharge);
+            importResult.AddMetric(Metrics.TotalRequestCharge, totalRequestCharge);
 
             return importResult;
         }
