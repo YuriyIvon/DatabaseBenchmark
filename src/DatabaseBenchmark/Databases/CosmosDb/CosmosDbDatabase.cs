@@ -57,6 +57,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             var database = client.GetDatabase(_databaseName);
             var container = database.GetContainer(table.Name);
 
+            double totalRequestCharge = 0;
             var stopwatch = Stopwatch.StartNew();
             var progressReporter = new ImportProgressReporter(_environment);
 
@@ -93,8 +94,8 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                     var partitionKey = CreatePartitionKey(partitionKeyValue);
                     var transactionalBatch = container.CreateTransactionalBatch(partitionKey);
                     batch.ForEach(i => transactionalBatch.CreateItem(i));
-                    _ = transactionalBatch.ExecuteAsync().Result;
-
+                    var result = transactionalBatch.ExecuteAsync().Result;
+                    totalRequestCharge += result.RequestCharge;
                     progressReporter.Increment(batch.Count);
                     batch.Clear();
                 }
@@ -107,17 +108,17 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                     var partitionKey = CreatePartitionKey(batchEntry.Key);
                     var transactionalBatch = container.CreateTransactionalBatch(partitionKey);
                     batchEntry.Value.ForEach(i => transactionalBatch.CreateItem(i));
-                    _ = transactionalBatch.ExecuteAsync().Result;
+                    var result = transactionalBatch.ExecuteAsync().Result;
+                    totalRequestCharge += result.RequestCharge;
                 }
             }
 
             stopwatch.Stop();
 
-            return new ImportResult
-            {
-                Count = container.Count(),
-                Duration = stopwatch.ElapsedMilliseconds
-            };
+            var importResult = new ImportResult(container.Count(), stopwatch.ElapsedMilliseconds);
+            importResult.AddMetric("Total Request Units", totalRequestCharge);
+
+            return importResult;
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>

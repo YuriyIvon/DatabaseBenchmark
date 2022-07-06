@@ -80,12 +80,12 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
             stopwatch.Stop();
 
-            return new ImportResult
-            {
-                Count = PostgreSqlDatabaseUtils.GetRowCount(connection, table.Name),
-                Duration = stopwatch.ElapsedMilliseconds,
-                TotalStorageBytes = PostgreSqlDatabaseUtils.GetTableSize(connection, table.Name)
-            };
+            var rowCount = PostgreSqlDatabaseUtils.GetRowCount(connection, table.Name);
+            var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
+            var tableSize = PostgreSqlDatabaseUtils.GetTableSize(connection, table.Name);
+            importResult.AddMetric(Metrics.TotalStorageBytes, tableSize);
+
+            return importResult;
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>

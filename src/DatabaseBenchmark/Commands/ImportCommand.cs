@@ -38,9 +38,10 @@ namespace DatabaseBenchmark.Commands
             var result = database.ImportData(table, dataSource, options.ImportBatchSize);
 
             Console.WriteLine($"Imported {result.Count} rows in {result.Duration / 1000.0} sec");
-            if (result.TotalStorageBytes != null)
+            
+            foreach (var metric in result.CustomMetrics)
             {
-                Console.WriteLine($"Total storage size is {result.TotalStorageBytes} bytes");
+                Console.WriteLine($"{metric.Key} = {metric.Value}");
             }
         }
     }

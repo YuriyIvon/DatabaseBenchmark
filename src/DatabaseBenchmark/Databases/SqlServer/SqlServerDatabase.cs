@@ -59,12 +59,12 @@ namespace DatabaseBenchmark.Databases.SqlServer
                 transaction.Commit();
                 stopwatch.Stop();
 
-                return new ImportResult
-                {
-                    Count = GetRowCount(connection, table.Name),
-                    Duration = stopwatch.ElapsedMilliseconds,
-                    TotalStorageBytes = GetTableSize(connection, table.Name)
-                };
+                var rowCount = GetRowCount(connection, table.Name);
+                var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
+                var tableSize = GetTableSize(connection, table.Name);
+                importResult.AddMetric(Metrics.TotalStorageBytes, tableSize);
+
+                return importResult;
             }
             catch
             {
