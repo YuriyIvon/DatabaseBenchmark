@@ -38,10 +38,13 @@ namespace DatabaseBenchmark.Commands
             var result = database.ImportData(table, dataSource, options.ImportBatchSize);
 
             Console.WriteLine($"Imported {result.Count} rows in {result.Duration / 1000.0} sec");
-            
-            foreach (var metric in result.CustomMetrics)
+
+            if (result.CustomMetrics != null)
             {
-                Console.WriteLine($"{metric.Key} = {metric.Value}");
+                foreach (var metric in result.CustomMetrics)
+                {
+                    Console.WriteLine($"{metric.Key} = {metric.Value}");
+                }
             }
         }
     }
