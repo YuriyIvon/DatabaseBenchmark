@@ -86,6 +86,9 @@ Here file [SalesSqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseB
 
 CSV data source has an optional parameter `DataSource.Csv.Delimiter`, which allows you to override the default column delimiter.
 
+This command also has a database-specific parameter:
+* `MongoDb.CollectCosmosDbRequestUnits` - allows collecting request charge metric in case of Azure Cosmos DB API for MongoDB (may affect query timing).
+
 ### Query benchmark<a name="query_benchmark"></a>
 
 To start running benchmarks, you will need to create a set of [query definitions](#query_definition). In our example scenario we will use only two queries - one returning a page of results for some search criteria ([SalesPageQuery.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesPageQuery.json)) and one calculating aggregates for a subset of data ([SalesAggregateQuery.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesAggregateQuery.json)).
@@ -114,7 +117,7 @@ There are some parameters specific to the query command:
 This command also has a few database-specific parameters:
 * `CosmosDb.BatchSize` - a maximum number of items to be fetched in one round-trip.
 * `MongoDb.BatchSize` - a maximum number of items to be fetched in one round-trip.
-* `MongoDb.CollectCosmosDbRequestUnits` - allows to collect request units metric in case the database is hosted by Azure CosmosDB (may affect query timing).
+* `MongoDb.CollectCosmosDbRequestUnits` - allows collecting request charge metric in case of Azure Cosmos DB API for MongoDB (may affect query timing).
 
 **Please note that the tool, in general, is not responsible for index creation and other database configuration tweaks. Any settings that can be modified after the table has been created must be controlled by the person responsible for the benchmark. Thus, ensure that all indexes and other required settings are in place before running a real benchmark.**
 
