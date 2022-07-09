@@ -2,13 +2,20 @@
 {
     public class SqlParametersBuilder
     {
+        private readonly string _prefix;
+
         private int _counter = 0;
 
         public Dictionary<string, object> Values { get; } = new Dictionary<string, object>();
 
+        public SqlParametersBuilder(string prefix = "@")
+        {
+            _prefix = prefix;
+        }
+
         public string Append(object value)
         {
-            string name = $"@p{_counter}";
+            string name = $"{_prefix}p{_counter}";
             _counter++;
 
             Values.Add(name, value);

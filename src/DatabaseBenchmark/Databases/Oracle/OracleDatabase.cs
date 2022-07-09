@@ -6,37 +6,32 @@ using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
-using MySqlConnector;
+using Oracle.ManagedDataAccess.Client;
 using System.Diagnostics;
 
-namespace DatabaseBenchmark.Databases.MySql
+namespace DatabaseBenchmark.Databases.Oracle
 {
-    public class MySqlDatabase: IDatabase
+    public class OracleDatabase : IDatabase
     {
-        private const int DefaultImportBatchSize = 1000;
+        private const int DefaultImportBatchSize = 10;
 
         private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
-        private readonly IOptionsProvider _optionsProvider;
 
-        public MySqlDatabase(
-            string connectionString,
-            IExecutionEnvironment environment,
-            IOptionsProvider optionsProvider)
+        public OracleDatabase(string connectionString, IExecutionEnvironment environment)
         {
             _connectionString = connectionString;
             _environment = environment;
-            _optionsProvider = optionsProvider;
         }
 
         public void CreateTable(Table table)
         {
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = new OracleConnection(_connectionString);
             connection.Open();
 
-            var tableBuilder = new MySqlTableBuilder(_optionsProvider);
+            var tableBuilder = new OracleTableBuilder();
             var commandText = tableBuilder.Build(table);
-            var command = new MySqlCommand(commandText, connection);
+            var command = new OracleCommand(commandText, connection);
 
             _environment.TraceCommand(command);
 
@@ -45,17 +40,18 @@ namespace DatabaseBenchmark.Databases.MySql
 
         public ImportResult ImportData(Table table, IDataSource source, int batchSize)
         {
-            if (batchSize <= 0)
+            if (batchSize == 0)
             {
                 batchSize = DefaultImportBatchSize;
             }
 
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = new OracleConnection(_connectionString);
             connection.Open();
 
             var stopwatch = Stopwatch.StartNew();
             var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new SqlDataImporter(_environment, progressReporter, null, batchSize);
+            var parametersBuilder = new SqlParametersBuilder(":");
+            var dataImporter = new OracleDataImporter(_environment, progressReporter, parametersBuilder, batchSize);
 
             var transaction = connection.BeginTransaction();
             try
@@ -74,29 +70,22 @@ namespace DatabaseBenchmark.Databases.MySql
 
             var rowCount = GetRowCount(connection, table.Name);
             var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
-            var tableSize = GetTableSize(connection, table.Name);
-            importResult.AddMetric(Metrics.TotalStorageBytes, tableSize);
 
             return importResult;
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new SqlQueryExecutorFactory<MySqlConnection>(_connectionString, table, query, _environment)
-               .Customize<ISqlQueryBuilder, MySqlQueryBuilder>();
+            new SqlQueryExecutorFactory<OracleConnection>(_connectionString, table, query, _environment)
+                .Customize<SqlParametersBuilder>(() => new SqlParametersBuilder(":"));
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new SqlRawQueryExecutorFactory<MySqlConnection>(_connectionString, query, _environment);
+            new SqlRawQueryExecutorFactory<OracleConnection>(_connectionString, query, _environment)
+                .Customize<SqlParametersBuilder>(() => new SqlParametersBuilder(":"));
 
-        private static long GetTableSize(MySqlConnection connection, string tableName)
+        private static long GetRowCount(OracleConnection connection, string tableName)
         {
-            var command = new MySqlCommand($"SELECT data_length + index_length FROM information_schema.tables WHERE table_name = '{tableName}'", connection);
-            return (long)(ulong)command.ExecuteScalar();
-        }
-
-        private static long GetRowCount(MySqlConnection connection, string tableName)
-        {
-            var command = new MySqlCommand($"SELECT COUNT(1) FROM {tableName}", connection);
-            return (long)command.ExecuteScalar();
+            var command = new OracleCommand($"SELECT COUNT(1) FROM {tableName}", connection);
+            return (long)(decimal)command.ExecuteScalar();
         }
     }
 }
