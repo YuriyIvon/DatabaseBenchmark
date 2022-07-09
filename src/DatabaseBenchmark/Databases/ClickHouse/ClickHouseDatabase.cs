@@ -3,6 +3,7 @@ using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Model;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Octonica.ClickHouseClient;
@@ -54,7 +55,7 @@ namespace DatabaseBenchmark.Databases.ClickHouse
 
             var stopwatch = Stopwatch.StartNew();
             var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new SqlDataImporter(_environment, progressReporter, false, batchSize);
+            var dataImporter = new SqlDataImporter(_environment, progressReporter, null, batchSize);
 
             dataImporter.Import(source, table, connection, null);
 
@@ -69,8 +70,8 @@ namespace DatabaseBenchmark.Databases.ClickHouse
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new SqlQueryExecutorFactory<ClickHouseConnection>(_connectionString, table, _environment,
-                (parametersBuilder, randomValueProvider) => new ClickHouseQueryBuilder(table, query, parametersBuilder, randomValueProvider));
+            new SqlQueryExecutorFactory<ClickHouseConnection>(_connectionString, table, query, _environment)
+                .Customize<ISqlQueryBuilder, ClickHouseQueryBuilder>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new SqlRawQueryExecutorFactory<ClickHouseConnection>(_connectionString, query, _environment);

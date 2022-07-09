@@ -3,6 +3,7 @@ using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Model;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using MonetDb.Mapi;
@@ -12,7 +13,7 @@ namespace DatabaseBenchmark.Databases.MonetDb
 {
     public class MonetDbDatabase : IDatabase
     {
-        private const int DefaultImportBatchSize = 10;
+        private const int DefaultImportBatchSize = 100;
 
         private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
@@ -47,48 +48,43 @@ namespace DatabaseBenchmark.Databases.MonetDb
             using var connection = new MonetDbConnection(_connectionString);
             connection.Open();
 
-            var transaction = connection.BeginTransaction();
+            var stopwatch = Stopwatch.StartNew();
+            var progressReporter = new ImportProgressReporter(_environment);
+            var dataImporter = new SqlDataImporter(_environment, progressReporter, null, batchSize);
 
+            var transaction = connection.BeginTransaction();
             try
             {
-                var stopwatch = Stopwatch.StartNew();
-                var progressReporter = new ImportProgressReporter(_environment);
-                var dataImporter = new SqlDataImporter(_environment, progressReporter, true, batchSize);
-
                 dataImporter.Import(source, table, connection, null);
 
                 transaction.Commit();
-                stopwatch.Stop();
-
-                var rowCount = GetRowCount(connection, table.Name);
-                var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
-                var tableSize = GetTableSize(connection, table.Name);
-                importResult.AddMetric(Metrics.TotalStorageBytes, tableSize);
-
-                return importResult;
             }
             catch
             {
                 transaction.Rollback();
                 throw;
             }
+
+            stopwatch.Stop();
+
+            var rowCount = GetRowCount(connection, table.Name);
+            var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
+            var tableSize = GetTableSize(connection, table.Name);
+            importResult.AddMetric(Metrics.TotalStorageBytes, tableSize);
+
+            return importResult;
         }
 
-        public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query)
-        {
-            return new SqlQueryExecutorFactory<MonetDbConnection>(
-               _connectionString,
-               table,
-               _environment,
-               (parametersBuilder, randomValueProvider) => new MonetDbQueryBuilder(table, query, parametersBuilder, randomValueProvider));
-        }
+        public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
+            new SqlQueryExecutorFactory<MonetDbConnection>(_connectionString, table, query, _environment)
+                .Customize<ISqlQueryBuilder, MonetDbQueryBuilder>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new SqlRawQueryExecutorFactory<MonetDbConnection>(_connectionString, query, _environment);
 
         private static long GetTableSize(MonetDbConnection connection, string tableName)
         {
-            var command = new MonetDbCommand($"SELECT SUM(columnsize) + SUM(heapsize) + SUM(hashes) + SUM(imprints) + SUM(orderidx) FROM storage() WHERE table = '{tableName}'", connection);
+            var command = new MonetDbCommand($"SELECT SUM(columnsize) + SUM(heapsize) + SUM(hashes) + SUM(imprints) + SUM(orderidx) FROM storage() WHERE table = '{tableName.ToLower()}'", connection);
             return (long)command.ExecuteScalar();
         }
 

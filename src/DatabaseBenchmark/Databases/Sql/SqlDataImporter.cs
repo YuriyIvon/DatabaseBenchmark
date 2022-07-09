@@ -11,18 +11,16 @@ namespace DatabaseBenchmark.Databases.Sql
         private readonly IExecutionEnvironment _environment;
         private readonly IProgressReporter _progressReporter;
         private readonly SqlParametersBuilder _parametersBuilder;
-        private readonly bool _useQueryParameters;
         private readonly int _batchSize;
 
         public SqlDataImporter(IExecutionEnvironment environment, 
             IProgressReporter progressReporter,
-            bool useQueryParameters,
+            SqlParametersBuilder parametersBuilder,
             int batchSize)
         {
             _environment = environment;
             _progressReporter = progressReporter;
-            _parametersBuilder = new SqlParametersBuilder();
-            _useQueryParameters = useQueryParameters;
+            _parametersBuilder = parametersBuilder;
             _batchSize = batchSize;
         }
 
@@ -40,22 +38,19 @@ namespace DatabaseBenchmark.Databases.Sql
 
         private int ImportBatch(IDataSource source, Table table, IDbConnection connection, IDbTransaction transaction)
         {
-            _parametersBuilder.Reset();
+            if (_parametersBuilder != null)
+            {
+                _parametersBuilder.Reset();
+            }
 
             var columns = table.Columns.Where(c => !c.DatabaseGenerated).Select(c => c.Name).ToArray();
 
-            var commandText = new StringBuilder("INSERT INTO ");
-            commandText.Append(table.Name);
-            commandText.Append(" (");
-            commandText.Append(string.Join(", ", columns));
-            commandText.AppendLine(") VALUES ");
-
             int i = 0;
-            var sections = new List<string>();
+            var rows = new List<List<string>>();
 
             while (i < _batchSize && source.Read())
             {
-                var sectionValues = new List<string>();
+                var values = new List<string>();
 
                 foreach (var column in columns)
                 {
@@ -66,28 +61,26 @@ namespace DatabaseBenchmark.Databases.Sql
                         value = null;
                     }
 
-                    var valueRepresentation = _useQueryParameters ? _parametersBuilder.Append(value) : FormatValue(value);
-                    sectionValues.Add(valueRepresentation);
+                    var valueRepresentation = _parametersBuilder != null ? _parametersBuilder.Append(value) : FormatValue(value);
+                    values.Add(valueRepresentation);
                 }
 
-                sections.Add($"({string.Join(", ", sectionValues)})");
+                rows.Add(values);
 
                 i++;
             }
 
-            if (sections.Any())
+            if (rows.Any())
             {
-                commandText.AppendLine(string.Join(", ", sections));
-
                 var command = connection.CreateCommand();
-                command.CommandText = commandText.ToString();
+                command.CommandText = BuildCommandText(table.Name, columns, rows);
 
                 if (transaction != null)
                 {
                     command.Transaction = transaction;
                 }
 
-                if (_useQueryParameters)
+                if (_parametersBuilder != null)
                 {
                     foreach (var parameterValue in _parametersBuilder.Values)
                     {
@@ -106,11 +99,31 @@ namespace DatabaseBenchmark.Databases.Sql
             return i;
         }
 
+        protected virtual string BuildCommandText(
+            string tableName,
+            IEnumerable<string> columns,
+            IEnumerable<IEnumerable<string>> rows)
+        {
+            var commandText = new StringBuilder("INSERT INTO ");
+            commandText.Append(tableName);
+            commandText.Append(" (");
+            commandText.Append(string.Join(", ", columns));
+            commandText.AppendLine(") VALUES ");
+
+            var rowsText = string.Join(",\n",
+                rows.Select(values => $"({string.Join(", ", values)})"));
+
+            commandText.AppendLine(rowsText);
+
+            return commandText.ToString();
+        }
+
+        //TODO: improve constant formatting and make it pluggable
         private static string FormatValue(object value)
         {
             if (value != null)
             {
-                var stringValue = value.ToString();
+                var stringValue = value is DateTime dateTimeValue ? dateTimeValue.ToString("o") : value.ToString();
 
                 return (value is bool || value is int || value is long || value is double)
                     ? stringValue : $"'{stringValue.Replace("'", "''")}'";

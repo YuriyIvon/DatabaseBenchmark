@@ -1,44 +1,33 @@
 ﻿using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Interfaces;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
+using SimpleInjector;
 using System.Data;
 
 namespace DatabaseBenchmark.Databases.Sql
 {
-    public class SqlRawQueryExecutorFactory<TConnection> : IQueryExecutorFactory
-        where TConnection: IDbConnection, new()
+    public class SqlRawQueryExecutorFactory<TConnection> : SqlQueryExecutorFactoryBase
+        where TConnection : class, IDbConnection, new()
     {
-        private readonly string _connectionString;
-        private readonly RawQuery _query;
-        private readonly IExecutionEnvironment _environment;
-        private readonly RandomGenerator _randomGenerator;
-
         public SqlRawQueryExecutorFactory(
             string connectionString,
             RawQuery query,
             IExecutionEnvironment environment)
         {
-            _connectionString = connectionString;
-            _query = query;
-            _environment = environment;
-            _randomGenerator = new RandomGenerator();
-        }
+            Container.Options.AllowOverridingRegistrations = true;
 
-        public IQueryExecutor Create()
-        {
-            var connection = new TConnection
-            {
-                ConnectionString = _connectionString
-            };
-
-            var parametersBuilder = new SqlParametersBuilder();
-            var columnPropertiesProvider = new RawQueryColumnPropertiesProvider(_query);
-            var distinctValuesProvider = new SqlDistinctValuesProvider(connection, _environment);
-            var randomValueProvider = new RandomValueProvider(_randomGenerator, columnPropertiesProvider, distinctValuesProvider);
-            var queryBuilder = new SqlRawQueryBuilder(_query, parametersBuilder, randomValueProvider);
-
-            return new SqlQueryExecutor(connection, queryBuilder, parametersBuilder, _environment);
+            Container.Register<IDbConnection>(() => new TConnection { ConnectionString = connectionString }, Lifestyle);
+            Container.RegisterInstance<RawQuery>(query);
+            Container.RegisterInstance<IExecutionEnvironment>(environment);
+            Container.RegisterSingleton<IColumnPropertiesProvider, RawQueryColumnPropertiesProvider>();
+            Container.RegisterSingleton<IRandomGenerator, RandomGenerator>();
+            Container.Register<IDistinctValuesProvider, SqlDistinctValuesProvider>(Lifestyle);
+            Container.Register<IRandomValueProvider, RandomValueProvider>(Lifestyle);
+            Container.Register<SqlParametersBuilder>(() => new SqlParametersBuilder(), Lifestyle);
+            Container.Register<ISqlQueryBuilder, SqlRawQueryBuilder>(Lifestyle);
+            Container.Register<IQueryExecutor, SqlQueryExecutor>(Lifestyle);
         }
     }
 }

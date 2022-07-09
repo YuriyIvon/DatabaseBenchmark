@@ -3,6 +3,7 @@ using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Model;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Data.SqlClient;
@@ -47,38 +48,36 @@ namespace DatabaseBenchmark.Databases.SqlServer
             using var connection = new SqlConnection(_connectionString);
             connection.Open();
 
+            var stopwatch = Stopwatch.StartNew();
+            var progressReporter = new ImportProgressReporter(_environment);
+            var parametersBuilder = new SqlParametersBuilder();
+            var dataImporter = new SqlDataImporter(_environment, progressReporter, parametersBuilder, batchSize);
+
             var transaction = connection.BeginTransaction();
             try
             {
-                var stopwatch = Stopwatch.StartNew();
-                var progressReporter = new ImportProgressReporter(_environment);
-                var dataImporter = new SqlDataImporter(_environment, progressReporter, true, batchSize);
-
                 dataImporter.Import(source, table, connection, transaction);
 
                 transaction.Commit();
-                stopwatch.Stop();
-
-                var rowCount = GetRowCount(connection, table.Name);
-                var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
-                var tableSize = GetTableSize(connection, table.Name);
-                importResult.AddMetric(Metrics.TotalStorageBytes, tableSize);
-
-                return importResult;
             }
             catch
             {
                 transaction.Rollback();
                 throw;
             }
+
+            stopwatch.Stop();
+
+            var rowCount = GetRowCount(connection, table.Name);
+            var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
+            var tableSize = GetTableSize(connection, table.Name);
+            importResult.AddMetric(Metrics.TotalStorageBytes, tableSize);
+
+            return importResult;
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new SqlQueryExecutorFactory<SqlConnection>(
-                _connectionString, 
-                table, 
-                _environment,
-                (parametersBuilder, randomValueProvider) => new SqlQueryBuilder(table, query, parametersBuilder, randomValueProvider));
+            new SqlQueryExecutorFactory<SqlConnection>(_connectionString, table, query, _environment);
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new SqlRawQueryExecutorFactory<SqlConnection>(_connectionString, query, _environment);
@@ -95,7 +94,7 @@ WHERE t.name = '{tableName}'",
             return (long)command.ExecuteScalar();
         }
 
-        public static long GetRowCount(SqlConnection connection, string tableName)
+        private static long GetRowCount(SqlConnection connection, string tableName)
         {
             var command = new SqlCommand($"SELECT COUNT(1) FROM {tableName}", connection);
             return (int)command.ExecuteScalar();

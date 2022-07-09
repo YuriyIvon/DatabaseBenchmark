@@ -3,6 +3,7 @@ using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Model;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Npgsql;
@@ -89,11 +90,8 @@ namespace DatabaseBenchmark.Databases.PostgreSql
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-             new SqlQueryExecutorFactory<NpgsqlConnection>(
-                _connectionString,
-                table,
-                _environment,
-                (parametersBuilder, randomValueProvider) => new PostgreSqlJsonbQueryBuilder(table, query, parametersBuilder, randomValueProvider));
+             new SqlQueryExecutorFactory<NpgsqlConnection>(_connectionString, table, query, _environment)
+                .Customize<ISqlQueryBuilder, PostgreSqlJsonbQueryBuilder>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             throw new NotImplementedException();

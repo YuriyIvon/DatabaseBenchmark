@@ -3,6 +3,7 @@ using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Model;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Npgsql;
@@ -79,14 +80,8 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             return importResult;
         }
 
-        public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query)
-        {
-            return new SqlQueryExecutorFactory<NpgsqlConnection>(
-               _connectionString,
-               table,
-               _environment,
-               (parametersBuilder, randomValueProvider) => new SqlQueryBuilder(table, query, parametersBuilder, randomValueProvider));
-        }
+        public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
+            new SqlQueryExecutorFactory<NpgsqlConnection>(_connectionString, table, query, _environment);
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new SqlRawQueryExecutorFactory<NpgsqlConnection>(_connectionString, query, _environment);
