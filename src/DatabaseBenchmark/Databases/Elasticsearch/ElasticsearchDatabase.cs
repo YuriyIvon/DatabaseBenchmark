@@ -25,9 +25,20 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             _environment = environment;
         }
 
-        public void CreateTable(Table table)
+        public void CreateTable(Table table, bool dropExisting)
         {
+            table = NormalizeNames(table);
+
             var client = CreateClient();
+
+            if (dropExisting)
+            {
+                var exists = client.Indices.Exists(table.Name);
+                if (exists.Exists)
+                {
+                    client.Indices.Delete(table.Name);
+                }
+            }
 
             client.Indices.CreateAsync(table.Name, ci => ci
                 .Map(md => md
@@ -36,11 +47,13 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
         public ImportResult ImportData(Table table, IDataSource source, int batchSize)
         {
+            table = NormalizeNames(table);
+
             if (batchSize <= 0)
             {
                 batchSize = DefaultImportBatchSize;
             }
-            
+
             var client = CreateClient();
 
             var buffer = new List<object>();
@@ -84,7 +97,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new ElasticsearchQueryExecutorFactory(CreateClient, table, query);
+            new ElasticsearchQueryExecutorFactory(CreateClient, NormalizeNames(table), query);
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new ElasticsearchRawQueryExecutorFactory(CreateClient, query);
@@ -164,6 +177,12 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             }
 
             return propertiesDescriptor;
+        }
+
+        private static Table NormalizeNames(Table table)
+        {
+            table.Name = table.Name.ToLower();
+            return table;
         }
     }
 }

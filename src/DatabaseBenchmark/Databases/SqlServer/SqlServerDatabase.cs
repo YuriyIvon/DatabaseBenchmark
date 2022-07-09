@@ -24,10 +24,15 @@ namespace DatabaseBenchmark.Databases.SqlServer
             _environment = environment;
         }
 
-        public void CreateTable(Table table)
+        public void CreateTable(Table table, bool dropExisting)
         {
             using var connection = new SqlConnection(_connectionString);
             connection.Open();
+
+            if (dropExisting)
+            {
+                connection.DropTableIfExists(table.Name);
+            }
 
             var tableBuilder = new SqlServerTableBuilder();
             var commandText = tableBuilder.Build(table);

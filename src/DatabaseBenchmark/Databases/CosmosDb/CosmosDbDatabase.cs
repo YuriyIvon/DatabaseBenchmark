@@ -32,7 +32,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             _optionsProvider = optionsProvider;
         }
 
-        public void CreateTable(Table table)
+        public void CreateTable(Table table, bool dropExisting)
         {
             if (table.Columns.Any(c => c.DatabaseGenerated))
             {
@@ -41,6 +41,18 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 
             using var client = new CosmosClient(_connectionString);
             var database = client.GetDatabase(_databaseName);
+
+            if (dropExisting)
+            {
+                try
+                {
+                    var container = database.GetContainer(table.Name);
+                    container.DeleteContainerAsync().Wait();
+                }
+                catch
+                {
+                }
+            }
 
             var partitionKeyName = GetPartitionKeyName(table);
             database.CreateContainerIfNotExistsAsync(table.Name, "/" + partitionKeyName).Wait();             
