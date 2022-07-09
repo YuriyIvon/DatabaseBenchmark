@@ -29,10 +29,15 @@ namespace DatabaseBenchmark.Databases.MySql
             _optionsProvider = optionsProvider;
         }
 
-        public void CreateTable(Table table)
+        public void CreateTable(Table table, bool dropExisting)
         {
             using var connection = new MySqlConnection(_connectionString);
             connection.Open();
+
+            if (dropExisting)
+            {
+                connection.DropTableIfExists(table.Name);
+            }
 
             var tableBuilder = new MySqlTableBuilder(_optionsProvider);
             var commandText = tableBuilder.Build(table);

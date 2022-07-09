@@ -19,5 +19,8 @@ namespace DatabaseBenchmark.Commands.Options
 
         [Option("Trace queries text and parameters")]
         public bool TraceQueries { get; set; } = false;
+
+        [Option("Drop table if already exists")]
+        public bool DropExisting { get; set; } = false;
     }
 }

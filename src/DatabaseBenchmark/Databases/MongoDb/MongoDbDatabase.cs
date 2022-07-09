@@ -30,7 +30,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
             _optionsProvider = optionsProvider;
         }
 
-        public void CreateTable(Table table)
+        public void CreateTable(Table table, bool dropExisting)
         {
             //TODO: allow _id field to be marked as database-generated
             if (table.Columns.Any(c => c.DatabaseGenerated))
@@ -39,6 +39,16 @@ namespace DatabaseBenchmark.Databases.MongoDb
             }
 
             var database = GetDatabase();
+
+            if (dropExisting)
+            {
+                var collection = database.GetCollection<BsonDocument>(table.Name);
+                if (collection != null)
+                {
+                    database.DropCollection(table.Name);
+                }
+            }
+
             database.CreateCollection(table.Name);
         }
 

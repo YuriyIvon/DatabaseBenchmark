@@ -31,7 +31,7 @@ namespace DatabaseBenchmark.Commands
                 table.Name = options.TableName;
             }
 
-            database.CreateTable(table);
+            database.CreateTable(table, options.DropExisting);
         }
     }
 }

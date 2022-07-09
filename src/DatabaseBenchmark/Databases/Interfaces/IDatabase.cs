@@ -6,7 +6,7 @@ namespace DatabaseBenchmark.Databases.Interfaces
 {
     public interface IDatabase
     {
-        void CreateTable(Table table);
+        void CreateTable(Table table, bool dropExisting);
 
         ImportResult ImportData(Table table, IDataSource source, int batchSize);
 

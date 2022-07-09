@@ -59,7 +59,10 @@ Supported values for `DatabaseType` parameter are:
 * `PostgresJsonb` - stores all queryable "logical" columns in a single JSONB column indexed with GIN index of  jsonb_path_ops type. Supports only `Equals` and `In` primitive operators. 
 * `SqlServer`
 
-This command has a few database-specific parameters:
+There is a parameter specific to the `create` command:
+* `DropExisting` - specifies whether to re-create the table if it already exists.
+
+This command also has a few database-specific parameters:
 * `ClickHouse.Engine` - table engine. Default is `MergeTree()`.
 * `ClickHouse.OrderBy` - table sort order. Default is `tuple()`.
 * `MySql.Engine` - table engine. Default is `InnoDB`.
@@ -106,7 +109,7 @@ DatabaseBenchmark query --DatabaseType=MongoDb --ConnectionString="mongodb://loc
 
 The same commands can be executed with `--QueryFilePath=SalesAggregateQuery.json` to make sure it works fine with all databases we are going to benchmark.
 
-There are some parameters specific to the query command:
+There are some parameters specific to the `query` command:
 * `BenchmarkName` - benchmark name to be printed in the results table.
 * `QueryParallelism` - number of parallel threads to be run.
 * `QueryCount` - number of query executions on each thread.

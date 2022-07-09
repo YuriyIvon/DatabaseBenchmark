@@ -23,10 +23,15 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             _environment = environment;
         }
 
-        public void CreateTable(Table table)
+        public void CreateTable(Table table, bool dropExisting)
         {
             using var connection = new NpgsqlConnection(_connectionString);
             connection.Open();
+
+            if (dropExisting)
+            {
+                connection.DropTableIfExists(table.Name);
+            }
 
             var tableBuilder = new PostgreSqlTableBuilder();
             var commandText = tableBuilder.Build(table);
