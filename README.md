@@ -54,6 +54,7 @@ Supported values for `DatabaseType` parameter are:
 * `MySql` - any database engine compatible with MySQL: MySQL, MariaDB, SingleStore, etc.
 * `MonetDb`
 * `MongoDb`
+* `Oracle`
 * `Postgres`
 * `PostgresJsonb` - stores all queryable "logical" columns in a single JSONB column indexed with GIN index of  jsonb_path_ops type. Supports only `Equals` and `In` primitive operators. 
 * `SqlServer`
