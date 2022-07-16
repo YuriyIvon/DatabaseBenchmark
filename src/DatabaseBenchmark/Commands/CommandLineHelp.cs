@@ -53,7 +53,15 @@ namespace DatabaseBenchmark.Commands
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(ImportCommandOptions.DatabaseType),
-                        AllowedValuesProvider = new DatabaseFactory(null, null)
+                        AllowedValuesProvider = new DatabaseFactory(null, null),
+                        ValueSpecificOptions = new ValueSpecificOptionsDescriptor[]
+                        {
+                            new ValueSpecificOptionsDescriptor
+                            {
+                                Value = "MongoDb",
+                                OptionsContainerType = typeof(MongoDbImportOptions)
+                            }
+                        }
                     },
                     new RestrictedValueOptionDescriptor
                     {
