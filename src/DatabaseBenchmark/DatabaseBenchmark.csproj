@@ -10,16 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="27.2.1" />
-    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.28.0" />
+    <PackageReference Include="CsvHelper" Version="28.0.1" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.29.0" />
     <PackageReference Include="MonetDB" Version="2.1.2" />
-    <PackageReference Include="MongoDB.Driver" Version="2.16.1" />
-    <PackageReference Include="MySqlConnector" Version="2.1.10" />
+    <PackageReference Include="MongoDB.Driver" Version="2.17.0" />
+    <PackageReference Include="MySqlConnector" Version="2.1.11" />
     <PackageReference Include="NEST" Version="7.17.4" />
     <PackageReference Include="Npgsql" Version="6.0.5" />
     <PackageReference Include="Octonica.ClickHouseClient" Version="2.2.9" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.61" />
-    <PackageReference Include="SimpleInjector" Version="5.3.3" />
+    <PackageReference Include="SimpleInjector" Version="5.4.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
 
