@@ -16,16 +16,34 @@ namespace DatabaseBenchmark.Databases.PostgreSql
         {
         }
 
-        protected override string BuildRegularSelectColumn(string columnName)
-        {
-            var column = GetColumn(columnName);
-            return column.Queryable == true ? $"attributes->>'{columnName}' {columnName}" : columnName;
-        }
+        protected override string BuildRegularSelectColumn(string columnName) =>
+            string.Join(" ", BuildRegularColumnReference(columnName), columnName);
 
         protected override string BuildRegularColumnReference(string columnName)
         {
             var column = GetColumn(columnName);
-            return column.Queryable == true ? $"attributes->>'{columnName}'" : columnName;
+
+            if (column.Queryable)
+            {
+                var castType = column.Type switch
+                {
+                    ColumnType.Boolean => "boolean",
+                    ColumnType.Guid => "uuid",
+                    ColumnType.Integer => "integer",
+                    ColumnType.Long => "bigint",
+                    ColumnType.Double => "double",
+                    ColumnType.DateTime => "timestamp",
+                    _ => null
+                };
+
+                return castType != null
+                    ? $"(attributes->>'{columnName}')::{castType}"
+                    : $"attributes->>'{columnName}'";
+            }
+            else
+            {
+                return columnName;
+            }
         }
 
         protected override string BuildGroupCondition(QueryGroupCondition predicate)
@@ -77,15 +95,9 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
                 return BuildGroupCondition(orCondition);
             }
-            else
+            else if (predicate.Operator == QueryPrimitiveOperator.Equals)
             {
-                var predicateExpression = new StringBuilder("attributes ");
-
-                predicateExpression.Append(predicate.Operator switch
-                {
-                    QueryPrimitiveOperator.Equals => "@>",
-                    _ => throw new InputArgumentException($"Unknown primitive operator \"{predicate.Operator}\"")
-                });
+                var predicateExpression = new StringBuilder("attributes @>");
 
                 var rawValue = predicate.RandomizeValue
                     ? RandomValueProvider.GetRandomValue(Table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
@@ -93,13 +105,17 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
                 var value = rawValue == null 
                     ? "null" 
-                    : rawValue is string 
-                        ? $"\"{rawValue}\"" 
+                    : rawValue is string s
+                        ? $"\"{EscapeString(s)}\"" 
                         : rawValue.ToString();
 
                 predicateExpression.Append($" '{{\"{column.Name}\": {value}}}'::jsonb");
 
                 return predicateExpression.ToString();
+            }
+            else
+            {
+                return base.BuildPrimitiveCondition(predicate);
             }
         }
 
@@ -112,5 +128,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
             return $"{@operator}({inputConditions.First()})";
         }
+
+        private static string EscapeString(string s) => s.Replace("'", "''");
     }
 }
