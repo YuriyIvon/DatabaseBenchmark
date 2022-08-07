@@ -13,7 +13,7 @@ namespace DatabaseBenchmark.Databases.SqlServer
 {
     public class SqlServerDatabase : IDatabase
     {
-        private const int DefaultImportBatchSize = 10;
+        private const int DefaultImportBatchSize = 100000;
 
         private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
@@ -55,13 +55,21 @@ namespace DatabaseBenchmark.Databases.SqlServer
 
             var stopwatch = Stopwatch.StartNew();
             var progressReporter = new ImportProgressReporter(_environment);
-            var parametersBuilder = new SqlParametersBuilder();
-            var dataImporter = new SqlDataImporter(_environment, progressReporter, parametersBuilder, batchSize);
 
             var transaction = connection.BeginTransaction();
             try
             {
-                dataImporter.Import(source, table, connection, transaction);
+                using var dataReaderAdapter = new DataReaderAdapter(source, table);
+                using var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction);
+                bulkCopy.DestinationTableName = table.Name;
+                bulkCopy.BatchSize = batchSize;
+                bulkCopy.NotifyAfter = batchSize;
+                bulkCopy.SqlRowsCopied += (s, e) => progressReporter.Increment(batchSize);
+
+                var sourceColumns = table.Columns.Where(c => !c.DatabaseGenerated).ToList();
+                sourceColumns.ForEach(c => bulkCopy.ColumnMappings.Add(c.Name, c.Name));
+
+                bulkCopy.WriteToServer(dataReaderAdapter);
 
                 transaction.Commit();
             }
