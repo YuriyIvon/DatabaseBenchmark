@@ -16,14 +16,14 @@ namespace DatabaseBenchmark.Databases.Sql
             _connection = connection;
         }
 
-        public List<object> GetDistinctValues(string tableName, string columnName)
+        public object[] GetDistinctValues(string tableName, string columnName)
         {
             var command = _connection.CreateCommand();
             command.CommandText = $"SELECT DISTINCT {columnName} FROM {tableName}";
 
             _environment.TraceCommand(command);
 
-            return command.ReadAsList<object>();
+            return command.ReadAsArray<object>();
         }
     }
 }

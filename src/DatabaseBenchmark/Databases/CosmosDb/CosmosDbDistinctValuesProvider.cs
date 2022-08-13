@@ -16,7 +16,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             _environment = environment;
         }
 
-        public List<object> GetDistinctValues(string tableName, string columnName)
+        public object[] GetDistinctValues(string tableName, string columnName)
         {
             var container = _database.GetContainer(tableName);
             var query = $"SELECT DISTINCT VALUE c.{columnName} FROM c";
@@ -26,7 +26,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 _environment.WriteLine(query);
             }
 
-            return container.Query<object>(query).Items;
+            return container.Query<object>(query).Items.ToArray();
         }
     }
 }

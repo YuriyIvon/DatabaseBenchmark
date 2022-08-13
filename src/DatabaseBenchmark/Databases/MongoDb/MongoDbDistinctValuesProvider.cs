@@ -17,7 +17,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
             _environment = environment;
         }
 
-        public List<object> GetDistinctValues(string tableName, string columnName)
+        public object[] GetDistinctValues(string tableName, string columnName)
         {
             var collection = _database.GetCollection<BsonDocument>(tableName);
             FieldDefinition<BsonDocument, object> field = columnName;
@@ -28,7 +28,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
             }
 
             var result = collection.Distinct(field, new BsonDocument());
-            return result.ToList();
+            return result.ToList().ToArray();
         }
     }
 }

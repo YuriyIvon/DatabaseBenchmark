@@ -2,20 +2,20 @@
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
 
-namespace DatabaseBenchmark.Databases.Sql
+namespace DatabaseBenchmark.Databases.Common
 {
-    public class SqlQueryExecutorFactoryBase : IQueryExecutorFactory
+    public class QueryExecutorFactoryBase : IQueryExecutorFactory
     {
         protected Container Container { get; } = new Container();
 
         protected Lifestyle Lifestyle { get; } = new AsyncScopedLifestyle(); 
 
-        public SqlQueryExecutorFactoryBase()
+        public QueryExecutorFactoryBase()
         {
             Container.Options.AllowOverridingRegistrations = true;
         }
 
-        public SqlQueryExecutorFactoryBase Customize<TInterface, TImplementation>()
+        public QueryExecutorFactoryBase Customize<TInterface, TImplementation>()
             where TInterface : class
             where TImplementation : class, TInterface
         {
@@ -24,7 +24,7 @@ namespace DatabaseBenchmark.Databases.Sql
             return this;
         }
 
-        public SqlQueryExecutorFactoryBase Customize<TInterface>(Func<TInterface> factory)
+        public QueryExecutorFactoryBase Customize<TInterface>(Func<TInterface> factory)
             where TInterface : class
         {
             Container.Register(factory, Lifestyle);

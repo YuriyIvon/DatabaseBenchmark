@@ -1,5 +1,6 @@
 ﻿using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Model;
 using MongoDB.Bson;
@@ -7,39 +8,36 @@ using MongoDB.Driver;
 
 namespace DatabaseBenchmark.Databases.MongoDb
 {
-    public class MongoDbRawQueryExecutorFactory : IQueryExecutorFactory
+    public class MongoDbRawQueryExecutorFactory : QueryExecutorFactoryBase
     {
-        private readonly string _connectionString;
-        private readonly RawQuery _query;
-        private readonly IExecutionEnvironment _environment;
-        private readonly IOptionsProvider _optionsProvider;
-        private readonly IRandomGenerator _randomGenerator;
-
         public MongoDbRawQueryExecutorFactory(
             string connectionString,
             RawQuery query,
             IExecutionEnvironment environment,
             IOptionsProvider optionsProvider)
         {
-            _connectionString = connectionString;
-            _query = query;
-            _environment = environment;
-            _randomGenerator = new RandomGenerator();
-            _optionsProvider = optionsProvider;
-        }
+            Container.RegisterInstance<RawQuery>(query);
+            Container.RegisterInstance<IExecutionEnvironment>(environment);
+            Container.RegisterInstance<IOptionsProvider>(optionsProvider);
+            Container.RegisterSingleton<IColumnPropertiesProvider, RawQueryColumnPropertiesProvider>();
+            Container.RegisterSingleton<IRandomGenerator, RandomGenerator>();
+            Container.RegisterSingleton<ICache, MemoryCache>();
+            Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);
 
-        public IQueryExecutor Create()
-        {
-            var client = new MongoClient(_connectionString);
-            var databaseName = MongoUrl.Create(_connectionString).DatabaseName;
-            var database = client.GetDatabase(databaseName);
-            var collection = database.GetCollection<BsonDocument>(_query.TableName);
-            var columnPropertiesProvider = new RawQueryColumnPropertiesProvider(_query);
-            var distinctValuesProvider = new MongoDbDistinctValuesProvider(database, _environment);
-            var randomValueProvider = new RandomValueProvider(_randomGenerator, columnPropertiesProvider, distinctValuesProvider);
-            var queryBuilder = new MongoDbRawQueryBuilder(_query, randomValueProvider);
-
-            return new MongoDbQueryExecutor(collection, queryBuilder, _environment, _optionsProvider);
+            Container.Register<IMongoDatabase>(() =>
+            {
+                var client = new MongoClient(connectionString);
+                var databaseName = MongoUrl.Create(connectionString).DatabaseName;
+                return client.GetDatabase(databaseName);
+            },
+                Lifestyle);
+            Container.Register<IMongoCollection<BsonDocument>>(() =>
+                Container.GetInstance<IMongoDatabase>().GetCollection<BsonDocument>(query.TableName),
+                Lifestyle);
+            Container.Register<IDistinctValuesProvider, MongoDbDistinctValuesProvider>(Lifestyle);
+            Container.Register<IRandomValueProvider, RandomValueProvider>(Lifestyle);
+            Container.Register<IMongoDbQueryBuilder, MongoDbRawQueryBuilder>(Lifestyle);
+            Container.Register<IQueryExecutor, MongoDbQueryExecutor>(Lifestyle);
         }
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface IDistinctValuesProvider
     {
-        List<object> GetDistinctValues(string tableName, string columnName);
+        object[] GetDistinctValues(string tableName, string columnName);
     }
 }

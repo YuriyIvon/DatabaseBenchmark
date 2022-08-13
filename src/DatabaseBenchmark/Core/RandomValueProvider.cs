@@ -10,7 +10,6 @@ namespace DatabaseBenchmark.Core
         private readonly IRandomGenerator _randomGenerator;
         private readonly IColumnPropertiesProvider _columnPropertiesProvider;
         private readonly IDistinctValuesProvider _distinctValuesProvider;
-        private readonly ConcurrentDictionary<(string, string), object[]> _existingValues = new();
 
         public RandomValueProvider(
             IRandomGenerator randomGenerator,
@@ -90,13 +89,7 @@ namespace DatabaseBenchmark.Core
                     throw new InputArgumentException($"Table name is not specified for the column \"{sourceColumnName}\"");
                 }
 
-                if (!_existingValues.TryGetValue((sourceTableName, sourceColumnName), out var values))
-                {
-                    values = _distinctValuesProvider.GetDistinctValues(sourceTableName, sourceColumnName).ToArray();
-                    _existingValues.TryAdd((sourceTableName, sourceColumnName), values);
-                }
-
-                return values;
+                return _distinctValuesProvider.GetDistinctValues(sourceTableName, sourceColumnName);
             }
             else
             {

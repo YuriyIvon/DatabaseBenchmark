@@ -4,7 +4,7 @@ namespace DatabaseBenchmark.Databases.Sql
 {
     public static class DbCommandExtensions
     {
-        public static List<T> ReadAsList<T>(this IDbCommand command)
+        public static T[] ReadAsArray<T>(this IDbCommand command)
         {
             using var reader = command.ExecuteReader();
 
@@ -14,7 +14,7 @@ namespace DatabaseBenchmark.Databases.Sql
                 values.Add((T)reader.GetValue(0));
             }
 
-            return values;
+            return values.ToArray();
         }
     }
 }

@@ -17,11 +17,11 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             _connection = connection;
         }
 
-        public List<object> GetDistinctValues(string tableName, string columnName)
+        public object[] GetDistinctValues(string tableName, string columnName)
         {
             var command = new NpgsqlCommand($"SELECT DISTINCT {PostgreSqlJsonbConstants.JsonbColumnName}->>'{columnName}' FROM {tableName}", _connection);
             _environment.TraceCommand(command);
-            return command.ReadAsList<object>();
+            return command.ReadAsArray<object>();
         }
     }
 }
