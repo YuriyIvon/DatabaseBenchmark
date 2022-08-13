@@ -14,7 +14,7 @@ namespace DatabaseBenchmark.Tests.Common
     {
         private readonly string _tableName;
         private readonly string _distinctColumnName;
-        private readonly List<object> _distinctValues;
+        private readonly object[] _distinctValues;
         private readonly IRandomGenerator _randomGenerator;
         private readonly IRandomValueProvider _randomValueProvider;
 
@@ -25,7 +25,7 @@ namespace DatabaseBenchmark.Tests.Common
             _distinctColumnName = "Category";
             var columnPropertiesProvider = new TableColumnPropertiesProvider(table);
             _randomGenerator = Substitute.For<IRandomGenerator>();
-            _distinctValues = new List<object> { "One", "Two", "Three", "Four", "Five", "Six", "Seven" };
+            _distinctValues = new object[] { "One", "Two", "Three", "Four", "Five", "Six", "Seven" };
             var distinctValuesProvider = Substitute.For<IDistinctValuesProvider>();
             distinctValuesProvider.GetDistinctValues(_tableName, _distinctColumnName).Returns(_distinctValues);
             _randomValueProvider = new RandomValueProvider(_randomGenerator, columnPropertiesProvider, distinctValuesProvider);
