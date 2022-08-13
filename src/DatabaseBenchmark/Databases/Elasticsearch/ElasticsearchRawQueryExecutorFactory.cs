@@ -1,35 +1,29 @@
 ﻿using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using Nest;
 using RawQuery = DatabaseBenchmark.Model.RawQuery;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
 {
-    public class ElasticsearchRawQueryExecutorFactory : IQueryExecutorFactory
+    public class ElasticsearchRawQueryExecutorFactory : QueryExecutorFactoryBase
     {
-        private readonly Func<ElasticClient> _createClient;
-        private readonly RawQuery _query;
-        private readonly IRandomGenerator _randomGenerator;
-
         public ElasticsearchRawQueryExecutorFactory(
             Func<ElasticClient> createClient,
             RawQuery query)
         {
-            _createClient = createClient;
-            _query = query;
-            _randomGenerator = new RandomGenerator();
-        }
+            Container.RegisterInstance<RawQuery>(query);
+            Container.RegisterSingleton<IColumnPropertiesProvider, RawQueryColumnPropertiesProvider>();
+            Container.RegisterSingleton<IRandomGenerator, RandomGenerator>();
+            Container.RegisterSingleton<ICache, MemoryCache>();
+            Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);
 
-        public IQueryExecutor Create()
-        {
-            var client = _createClient();
-            var columnPropertiesProvider = new RawQueryColumnPropertiesProvider(_query);
-            var distinctValuesProvider = new ElasticsearchDistinctValuesProvider(client);
-            var randomValueProvider = new RandomValueProvider(_randomGenerator, columnPropertiesProvider, distinctValuesProvider);
-            var queryBuilder = new ElasticsearchRawQueryBuilder(_query, client.RequestResponseSerializer, randomValueProvider);
-
-            return new ElasticsearchQueryExecutor(client, queryBuilder);
+            Container.Register<ElasticClient>(createClient, Lifestyle);
+            Container.Register<IDistinctValuesProvider, ElasticsearchDistinctValuesProvider>(Lifestyle);
+            Container.Register<IRandomValueProvider, RandomValueProvider>(Lifestyle);
+            Container.Register<IElasticsearchQueryBuilder, ElasticsearchRawQueryBuilder>(Lifestyle);
+            Container.Register<IQueryExecutor, ElasticsearchQueryExecutor>(Lifestyle);
         }
     }
 }

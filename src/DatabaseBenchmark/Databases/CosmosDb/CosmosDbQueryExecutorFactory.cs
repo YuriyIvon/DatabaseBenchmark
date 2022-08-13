@@ -1,22 +1,16 @@
 ﻿using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 using Microsoft.Azure.Cosmos;
 
 namespace DatabaseBenchmark.Databases.CosmosDb
 {
-    public class CosmosDbQueryExecutorFactory : IQueryExecutorFactory
+    public class CosmosDbQueryExecutorFactory : QueryExecutorFactoryBase
     {
-        private readonly string _connectionString;
-        private readonly string _databaseName;
-        private readonly Table _table;
-        private readonly Query _query;
-        private readonly IExecutionEnvironment _environment;
-        private readonly IOptionsProvider _optionsProvider;
-        private readonly IRandomGenerator _randomGenerator;
-
         public CosmosDbQueryExecutorFactory(
             string connectionString,
             string databaseName,
@@ -25,27 +19,23 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             IExecutionEnvironment environment,
             IOptionsProvider optionsProvider)
         {
-            _connectionString = connectionString;
-            _databaseName = databaseName;
-            _table = table;
-            _query = query;
-            _environment = environment;
-            _optionsProvider = optionsProvider;
-            _randomGenerator = new RandomGenerator();
-        }
+            Container.RegisterInstance<Table>(table);
+            Container.RegisterInstance<Query>(query);
+            Container.RegisterInstance<IExecutionEnvironment>(environment);
+            Container.RegisterInstance<IOptionsProvider>(optionsProvider);
+            Container.RegisterSingleton<IColumnPropertiesProvider, TableColumnPropertiesProvider>();
+            Container.RegisterSingleton<IRandomGenerator, RandomGenerator>();
+            Container.RegisterSingleton<ICache, MemoryCache>();
+            Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);
 
-        public IQueryExecutor Create()
-        {
-            var client = new CosmosClient(_connectionString);
-            var database = client.GetDatabase(_databaseName);
-            var container = database.GetContainer(_table.Name);
-            var columnPropertiesProvider = new TableColumnPropertiesProvider(_table);
-            var distinctValuesProvider = new CosmosDbDistinctValuesProvider(database, _environment);
-            var randomValueProvider = new RandomValueProvider(_randomGenerator, columnPropertiesProvider, distinctValuesProvider);
-            var parametersBuilder = new SqlParametersBuilder();
-            var queryBuilder = new CosmosDbQueryBuilder(_table, _query, parametersBuilder, randomValueProvider);
-
-            return new CosmosDbQueryExecutor(client, container, queryBuilder, parametersBuilder, _environment, _optionsProvider);
+            Container.Register<CosmosClient>(() => new CosmosClient(connectionString), Lifestyle);
+            Container.Register<Database>(() => Container.GetInstance<CosmosClient>().GetDatabase(databaseName), Lifestyle);
+            Container.Register<Container>(() => Container.GetInstance<Database>().GetContainer(table.Name), Lifestyle);
+            Container.Register<IDistinctValuesProvider, CosmosDbDistinctValuesProvider>(Lifestyle);
+            Container.Register<IRandomValueProvider, RandomValueProvider>(Lifestyle);
+            Container.Register<SqlParametersBuilder>(() => new SqlParametersBuilder(), Lifestyle);
+            Container.Register<ISqlQueryBuilder, CosmosDbQueryBuilder>(Lifestyle);
+            Container.Register<IQueryExecutor, CosmosDbQueryExecutor>(Lifestyle);
         }
     }
 }

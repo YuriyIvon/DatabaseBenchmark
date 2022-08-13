@@ -12,7 +12,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             _client = client;
         }
 
-        public List<object> GetDistinctValues(string tableName, string columnName)
+        public object[] GetDistinctValues(string tableName, string columnName)
         {
             const int maxBuckets = 10000;
             const string bucketName = "distinct";
@@ -29,7 +29,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                 .Terms(bucketName)
                 .Buckets
                 .Select(i => (object)i.Key)
-                .ToList();
+                .ToArray();
         }
     }
 }
