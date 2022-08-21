@@ -122,6 +122,7 @@ This command also has a few database-specific parameters:
 * `CosmosDb.BatchSize` - a maximum number of items to be fetched in one round-trip.
 * `MongoDb.BatchSize` - a maximum number of items to be fetched in one round-trip.
 * `MongoDb.CollectCosmosDbRequestUnits` - allows collecting request charge metric in case of Azure Cosmos DB API for MongoDB (may affect query timing).
+* `PostgresJsonb.UseGinOperators` - specifies whether to use GIN-specific query operators such as @> where possible. Is `true` by default.
 
 **Please note that the tool, in general, is not responsible for index creation and other database configuration tweaks. Any settings that can be modified after the table has been created must be controlled by the person responsible for the benchmark. Thus, ensure that all indexes and other required settings are in place before running a real benchmark.**
 
