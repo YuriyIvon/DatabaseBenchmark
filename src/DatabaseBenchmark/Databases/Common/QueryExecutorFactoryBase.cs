@@ -19,7 +19,7 @@ namespace DatabaseBenchmark.Databases.Common
             where TInterface : class
             where TImplementation : class, TInterface
         {
-            Container.Register<TInterface, TImplementation>();
+            Container.Register<TInterface, TImplementation>(Lifestyle);
 
             return this;
         }

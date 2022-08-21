@@ -18,7 +18,7 @@
             string name = $"{_prefix}p{_counter}";
             _counter++;
 
-            Values.Add(name, value);
+            Values.Add(name, PrepareValue(value));
 
             return name;
         }
@@ -28,5 +28,7 @@
             _counter = 0;
             Values.Clear();
         }
+
+        protected virtual object PrepareValue(object value) => value;
     }
 }

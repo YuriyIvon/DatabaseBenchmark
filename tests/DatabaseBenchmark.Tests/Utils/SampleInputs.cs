@@ -46,6 +46,13 @@ namespace DatabaseBenchmark.Tests.Utils
                 },
                 new Column
                 {
+                    Name = "Rating",
+                    Type = ColumnType.Double,
+                    Queryable = true,
+                    Nullable = false
+                },
+                new Column
+                {
                     Name = "Price",
                     Type = ColumnType.Double,
                     Queryable = false,
@@ -62,6 +69,19 @@ namespace DatabaseBenchmark.Tests.Utils
         };
 
         public static Query NoArgumentsQuery { get; } = new Query();
+
+        public static Query SpecificFieldsQuery { get; } = new Query
+        {
+            Columns = new string[] 
+            { 
+                "Id",
+                "Category",
+                "Name",
+                "CreatedAt",
+                "Rating",
+                "Price"
+            }
+        };
 
         public static Query AllArgumentsQuery { get; } = new Query
         {
