@@ -8,12 +8,16 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 {
     public class PostgreSqlJsonbQueryBuilder: SqlQueryBuilder
     {
+        private readonly PostgreSqlJsonbQueryOptions _queryOptions;
+
         public PostgreSqlJsonbQueryBuilder(
             Table table,
             Query query,
             SqlParametersBuilder parametersBuilder,
-            IRandomValueProvider randomValueProvider) : base(table, query, parametersBuilder, randomValueProvider)
+            IRandomValueProvider randomValueProvider,
+            IOptionsProvider optionsProvider) : base(table, query, parametersBuilder, randomValueProvider)
         {
+            _queryOptions = optionsProvider.GetOptions<PostgreSqlJsonbQueryOptions>();
         }
 
         protected override string BuildRegularSelectColumn(string columnName) =>
@@ -32,7 +36,6 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                     ColumnType.Integer => "integer",
                     ColumnType.Long => "bigint",
                     ColumnType.Double => "double",
-                    ColumnType.DateTime => "timestamp",
                     _ => null
                 };
 
@@ -68,55 +71,51 @@ namespace DatabaseBenchmark.Databases.PostgreSql
         {
             var column = Table.Columns.FirstOrDefault(c => c.Name == predicate.ColumnName);
 
-            if (!column.Queryable)
+            if (_queryOptions.UseGinOperators && column.Queryable)
             {
-                throw new InputArgumentException($"Column \"{column.Name}\" is not queryable");
-            }
-
-            if (predicate.Operator == QueryPrimitiveOperator.In)
-            {
-                var rawCollection = predicate.RandomizeValue
-                    ? RandomValueProvider.GetRandomValueCollection(Table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
-                    : (IEnumerable<object>)predicate.Value;
-
-                //Rewrite IN operator as a set of OR expressions
-                var orCondition = new QueryGroupCondition
+                if (predicate.Operator == QueryPrimitiveOperator.In)
                 {
-                    Operator = QueryGroupOperator.Or,
-                    Conditions = rawCollection.Select(v =>
-                        new QueryPrimitiveCondition
-                        {
-                            ColumnName = predicate.ColumnName,
-                            Operator = QueryPrimitiveOperator.Equals,
-                            Value = v
-                        })
-                        .ToArray()
-                };
+                    var rawCollection = predicate.RandomizeValue
+                        ? RandomValueProvider.GetRandomValueCollection(Table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
+                        : (IEnumerable<object>)predicate.Value;
 
-                return BuildGroupCondition(orCondition);
+                    //Rewrite IN operator as a set of OR expressions
+                    var orCondition = new QueryGroupCondition
+                    {
+                        Operator = QueryGroupOperator.Or,
+                        Conditions = rawCollection.Select(v =>
+                            new QueryPrimitiveCondition
+                            {
+                                ColumnName = predicate.ColumnName,
+                                Operator = QueryPrimitiveOperator.Equals,
+                                Value = v
+                            })
+                            .ToArray()
+                    };
+
+                    return BuildGroupCondition(orCondition);
+                }
+                else if (predicate.Operator == QueryPrimitiveOperator.Equals)
+                {
+                    var predicateExpression = new StringBuilder("attributes @>");
+
+                    var rawValue = predicate.RandomizeValue
+                        ? RandomValueProvider.GetRandomValue(Table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
+                        : predicate.Value;
+
+                    var value = rawValue == null
+                        ? "null"
+                        : rawValue is string s
+                            ? $"\"{EscapeString(s)}\""
+                            : rawValue.ToString();
+
+                    predicateExpression.Append($" '{{\"{column.Name}\": {value}}}'::jsonb");
+
+                    return predicateExpression.ToString();
+                }
             }
-            else if (predicate.Operator == QueryPrimitiveOperator.Equals)
-            {
-                var predicateExpression = new StringBuilder("attributes @>");
 
-                var rawValue = predicate.RandomizeValue
-                    ? RandomValueProvider.GetRandomValue(Table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
-                    : predicate.Value;
-
-                var value = rawValue == null 
-                    ? "null" 
-                    : rawValue is string s
-                        ? $"\"{EscapeString(s)}\"" 
-                        : rawValue.ToString();
-
-                predicateExpression.Append($" '{{\"{column.Name}\": {value}}}'::jsonb");
-
-                return predicateExpression.ToString();
-            }
-            else
-            {
-                return base.BuildPrimitiveCondition(predicate);
-            }
+            return base.BuildPrimitiveCondition(predicate);
         }
 
         private static string BuildUnaryCondition(string @operator, string[] inputConditions)

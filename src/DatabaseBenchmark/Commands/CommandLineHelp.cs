@@ -6,6 +6,7 @@ using DatabaseBenchmark.Databases.ClickHouse;
 using DatabaseBenchmark.Databases.CosmosDb;
 using DatabaseBenchmark.Databases.MongoDb;
 using DatabaseBenchmark.Databases.MySql;
+using DatabaseBenchmark.Databases.PostgreSql;
 using DatabaseBenchmark.DataSources;
 using DatabaseBenchmark.DataSources.Csv;
 using DatabaseBenchmark.Reporting;
@@ -99,6 +100,11 @@ namespace DatabaseBenchmark.Commands
                             {
                                 Value = "MongoDb",
                                 OptionsContainerType = typeof(MongoDbQueryOptions)
+                            },
+                            new ValueSpecificOptionsDescriptor
+                            {
+                                Value = "PostgresJsonb",
+                                OptionsContainerType = typeof(PostgreSqlJsonbQueryOptions)
                             }
                         }
                     },
@@ -143,6 +149,11 @@ namespace DatabaseBenchmark.Commands
                             {
                                 Value = "MongoDb",
                                 OptionsContainerType = typeof(MongoDbQueryOptions)
+                            },
+                            new ValueSpecificOptionsDescriptor
+                            {
+                                Value = "PostgresJsonb",
+                                OptionsContainerType = typeof(PostgreSqlJsonbQueryOptions)
                             }
                         }
                     },

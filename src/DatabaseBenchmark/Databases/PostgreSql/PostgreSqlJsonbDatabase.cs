@@ -17,11 +17,16 @@ namespace DatabaseBenchmark.Databases.PostgreSql
     {
         private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
+        private readonly IOptionsProvider _optionsProvider;
 
-        public PostgreSqlJsonbDatabase(string connectionString, IExecutionEnvironment environment)
+        public PostgreSqlJsonbDatabase(
+            string connectionString,
+            IExecutionEnvironment environment,
+            IOptionsProvider optionsProvider)
         {
             _connectionString = connectionString;
             _environment = environment;
+            _optionsProvider = optionsProvider;
         }
 
         public void CreateTable(Table table, bool dropExisting)
@@ -96,7 +101,9 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
              new SqlQueryExecutorFactory<NpgsqlConnection>(_connectionString, table, query, _environment)
+                .Customize<IOptionsProvider>(() => _optionsProvider)
                 .Customize<IDistinctValuesProvider, PostgreSqlJsonbDistinctValuesProvider>()
+                .Customize<SqlParametersBuilder, PostgreSqlJsonbParametersBuilder>()
                 .Customize<ISqlQueryBuilder, PostgreSqlJsonbQueryBuilder>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
