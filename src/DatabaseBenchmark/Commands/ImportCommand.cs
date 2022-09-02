@@ -4,6 +4,7 @@ using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
 using DatabaseBenchmark.DataSources;
+using DatabaseBenchmark.DataSources.Mapping;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Utils;
 
@@ -33,7 +34,10 @@ namespace DatabaseBenchmark.Commands
             }
 
             var dataSourceFactory = new DataSourceFactory(databaseFactory, _optionsProvider);
-            using var dataSource = dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath, table);
+            var baseDataSource = dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath, table);
+            using var dataSource = !string.IsNullOrEmpty(options.MappingFilePath)
+                ? new MappingDataSource(baseDataSource, JsonUtils.DeserializeFile<ColumnMappingCollection>(options.MappingFilePath))
+                : baseDataSource;
 
             var result = database.ImportData(table, dataSource, options.ImportBatchSize);
 
