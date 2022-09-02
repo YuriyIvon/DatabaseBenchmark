@@ -21,8 +21,11 @@ namespace DatabaseBenchmark.Commands.Options
         [Option("Data source type", true)]
         public string DataSourceType { get; set; }
 
-        [Option("Path to data file in case of a file-based data source or to data source definition file otherwise", true)]
+        [Option("Path to a data file in case of a file-based data source or to a data source definition file otherwise", true)]
         public string DataSourceFilePath { get; set; }
+
+        [Option("Path to a JSON file describing the mapping between the data source and the table")]
+        public string MappingFilePath { get; set; }
 
         [Option("Number of records in a batch inserted into the database during import (each database type has its own default)")]
         public int ImportBatchSize { get; set; } = 0;

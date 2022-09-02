@@ -90,6 +90,8 @@ Here file [SalesSqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseB
 
 CSV data source has an optional parameter `DataSource.Csv.Delimiter`, which allows you to override the default column delimiter.
 
+If column names in the data source don't match table columns (for example, when CSV headers contain space characters), a mapping can be applied by specifying `MappingFilePath` parameter pointing to a JSON file with column mappings. An object in this file must have `Columns` array where each item consists of two fields - `SourceColumnName` and `TableColumnName`.
+
 This command also has a database-specific parameter:
 * `MongoDb.CollectCosmosDbRequestUnits` - allows collecting request charge metric in case of Azure Cosmos DB API for MongoDB (may affect query timing).
 
