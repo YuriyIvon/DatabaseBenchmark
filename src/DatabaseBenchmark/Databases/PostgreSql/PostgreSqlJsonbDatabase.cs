@@ -58,20 +58,22 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             using var connection = new NpgsqlConnection(_connectionString);
             connection.Open();
 
-            var columns = new List<string> { PostgreSqlJsonbConstants.JsonbColumnName };
-            var nonQueryableColumns = table.Columns.Where(c => !c.Queryable && !c.DatabaseGenerated).Select(c => c.Name);
-            columns.AddRange(nonQueryableColumns);
+            var columnNames = new List<string> { PostgreSqlJsonbConstants.JsonbColumnName };
+            var nonQueryableColumns = table.Columns.Where(c => !c.Queryable && !c.DatabaseGenerated).ToArray();
+            columnNames.AddRange(nonQueryableColumns.Select(c => c.Name));
 
             var stopwatch = Stopwatch.StartNew();
             var progressReporter = new ImportProgressReporter(_environment);
 
-            using (var writer = connection.BeginBinaryImport($"COPY {table.Name} ({string.Join(", ", columns)}) FROM STDIN (FORMAT BINARY)"))
+            using (var writer = connection.BeginBinaryImport($"COPY {table.Name} ({string.Join(", ", columnNames)}) FROM STDIN (FORMAT BINARY)"))
             {
                 while (source.Read())
                 {
                     var jsonbValues = table.Columns
                         .Where(c => c.Queryable)
-                        .ToDictionary(c => c.Name, c => source.GetValue(c.Name));
+                        .ToDictionary(
+                            c => c.Name, 
+                            c => source.GetValue(c.Type.GetNativeType(), c.Name));
 
                     writer.StartRow();
 
@@ -79,7 +81,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
                     foreach (var column in nonQueryableColumns)
                     {
-                        var value = source.GetValue(column);
+                        var value = source.GetValue(column.Type.GetNativeType(), column.Name);
                         writer.Write(value);
                     }
 

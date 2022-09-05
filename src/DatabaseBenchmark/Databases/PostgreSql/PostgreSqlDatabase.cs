@@ -52,12 +52,13 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             using var connection = new NpgsqlConnection(_connectionString);
             connection.Open();
 
-            var columns = table.Columns.Where(c => !c.DatabaseGenerated).Select(x => x.Name).ToArray();
+            var columns = table.Columns.Where(c => !c.DatabaseGenerated).ToArray();
+            var columnNames = columns.Select(c => c.Name).ToArray();
 
             var stopwatch = Stopwatch.StartNew();
             var progressReporter = new ImportProgressReporter(_environment);
 
-            using (var writer = connection.BeginBinaryImport($"COPY {table.Name} ({string.Join(", ", columns)}) FROM STDIN (FORMAT BINARY)"))
+            using (var writer = connection.BeginBinaryImport($"COPY {table.Name} ({string.Join(", ", columnNames)}) FROM STDIN (FORMAT BINARY)"))
             {
                 while (source.Read())
                 {
@@ -65,7 +66,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
                     foreach (var column in columns)
                     {
-                        var value = source.GetValue(column);
+                        var value = source.GetValue(column.Type.GetNativeType(), column.Name);
                         writer.Write(value);
                     }
 

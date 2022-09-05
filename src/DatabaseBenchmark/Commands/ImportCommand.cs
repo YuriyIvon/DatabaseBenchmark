@@ -34,7 +34,7 @@ namespace DatabaseBenchmark.Commands
             }
 
             var dataSourceFactory = new DataSourceFactory(databaseFactory, _optionsProvider);
-            var baseDataSource = dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath, table);
+            var baseDataSource = dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath);
             using var dataSource = !string.IsNullOrEmpty(options.MappingFilePath)
                 ? new MappingDataSource(baseDataSource, JsonUtils.DeserializeFile<ColumnMappingCollection>(options.MappingFilePath))
                 : baseDataSource;
