@@ -10,7 +10,7 @@ namespace DatabaseBenchmark.DataSources
 {
     public class DataSourceFactory : IDataSourceFactory, IAllowedValuesProvider
     {
-        private readonly Dictionary<string, Func<string, Table, IDataSource>> _factories;
+        private readonly Dictionary<string, Func<string, IDataSource>> _factories;
         public IEnumerable<string> Options => _factories.Keys;
 
         //TODO: find a way to avoid the direct database project dependency
@@ -18,16 +18,16 @@ namespace DatabaseBenchmark.DataSources
         {
             _factories = new()
             {
-                ["Csv"] = (filePath, table) => new CsvDataSource(filePath, table, optionsProvider),
-                ["Database"] = (filePath, table) => new DatabaseDataSource(filePath, databaseFactory)
+                ["Csv"] = filePath => new CsvDataSource(filePath, optionsProvider),
+                ["Database"] = filePath => new DatabaseDataSource(filePath, databaseFactory)
             };
         }
 
-        public IDataSource Create(string type, string filePath, Table table)
+        public IDataSource Create(string type, string filePath)
         {
             if (_factories.TryGetValue(type, out var factory))
             {
-                return factory(filePath, table);
+                return factory(filePath);
             }
 
             throw new InputArgumentException($"Unknown data source type \"{type}\"");

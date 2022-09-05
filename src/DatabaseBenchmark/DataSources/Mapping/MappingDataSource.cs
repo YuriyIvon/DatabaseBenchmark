@@ -15,8 +15,8 @@ namespace DatabaseBenchmark.DataSources.Mapping
 
         public void Dispose() => _baseDataSource.Dispose();
 
-        public object GetValue(string name) =>
-            _baseDataSource.GetValue(_mappings.TryGetValue(name, out var sourceName) ? sourceName : name);
+        public object GetValue(Type type, string name) =>
+            _baseDataSource.GetValue(type, _mappings.TryGetValue(name, out var sourceName) ? sourceName : name);
 
         public bool Read() => _baseDataSource.Read();
     }

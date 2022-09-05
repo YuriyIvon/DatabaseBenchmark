@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.DataSources.Interfaces;
+﻿using DatabaseBenchmark.Databases.Common;
+using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
@@ -9,16 +10,21 @@ namespace DatabaseBenchmark.Databases.SqlServer
     {
         private readonly IDataSource _dataSource;
         private readonly Table _table;
+        private readonly Dictionary<string, Type> _columnTypes;
 
         public DataReaderAdapter(IDataSource dataSource, Table table)
         {
             _dataSource = dataSource;
             _table = table;
+            _columnTypes = table.Columns.ToDictionary(c => c.Name, c => c.Type.GetNativeType());
         }
 
-        public object this[int i] => _dataSource.GetValue(_table.Columns[i].Name);
+        public object this[int i] => this[_table.Columns[i].Name];
 
-        public object this[string name] => _dataSource.GetValue(name);
+        public object this[string name] =>
+            _columnTypes.TryGetValue(name, out var type)
+                ? _dataSource.GetValue(type, name)
+                : _dataSource.GetValue(typeof(string), name);
 
         public int Depth => throw new NotImplementedException();
 

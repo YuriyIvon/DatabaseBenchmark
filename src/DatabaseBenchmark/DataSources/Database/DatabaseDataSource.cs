@@ -6,7 +6,7 @@ using DatabaseBenchmark.Utils;
 
 namespace DatabaseBenchmark.DataSources.Database
 {
-    public class DatabaseDataSource : IDataSource
+    public sealed class DatabaseDataSource : IDataSource
     {
         private readonly string _filePath;
         private readonly IDatabaseFactory _databaseFactory;
@@ -22,7 +22,7 @@ namespace DatabaseBenchmark.DataSources.Database
             _databaseFactory = databaseFactory;
         }
 
-        public object GetValue(string name) => _query.GetValue(name);
+        public object GetValue(Type type, string name) => _query.GetValue(name);
 
         public bool Read()
         {

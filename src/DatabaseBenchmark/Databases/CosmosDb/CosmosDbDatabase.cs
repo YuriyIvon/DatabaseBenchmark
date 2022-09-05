@@ -81,8 +81,8 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 var item = table.Columns
                     .Where(c => !c.DatabaseGenerated)
                     .ToDictionary(
-                        x => x.Name,
-                        x => source.GetValue(x.Name));
+                        c => c.Name,
+                        c => source.GetValue(c.Type.GetNativeType(), c.Name));
 
                 item.Add("id", Guid.NewGuid().ToString("N"));
 

@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Data;
@@ -43,7 +44,8 @@ namespace DatabaseBenchmark.Databases.Sql
                 _parametersBuilder.Reset();
             }
 
-            var columns = table.Columns.Where(c => !c.DatabaseGenerated).Select(c => c.Name).ToArray();
+            var columns = table.Columns.Where(c => !c.DatabaseGenerated).ToArray();
+            var columnNames = columns.Select(c => c.Name).ToArray();
 
             int i = 0;
             var rows = new List<List<string>>();
@@ -54,7 +56,7 @@ namespace DatabaseBenchmark.Databases.Sql
 
                 foreach (var column in columns)
                 {
-                    var value = source.GetValue(column);
+                    var value = source.GetValue(column.Type.GetNativeType(), column.Name);
 
                     if (value is double doubleValue && double.IsNaN(doubleValue))
                     {
@@ -73,7 +75,7 @@ namespace DatabaseBenchmark.Databases.Sql
             if (rows.Any())
             {
                 var command = connection.CreateCommand();
-                command.CommandText = BuildCommandText(table.Name, columns, rows);
+                command.CommandText = BuildCommandText(table.Name, columnNames, rows);
 
                 if (transaction != null)
                 {
