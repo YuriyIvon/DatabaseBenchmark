@@ -16,7 +16,7 @@ namespace DatabaseBenchmark.Databases.SqlServer
         {
             _dataSource = dataSource;
             _table = table;
-            _columnTypes = table.Columns.ToDictionary(c => c.Name, c => c.Type.GetNativeType());
+            _columnTypes = table.Columns.ToDictionary(c => c.Name, c => c.GetNativeType());
         }
 
         public object this[int i] => this[_table.Columns[i].Name];

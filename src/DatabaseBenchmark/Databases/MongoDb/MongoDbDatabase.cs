@@ -75,7 +75,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
                     .Where(c => !c.DatabaseGenerated)
                     .ToDictionary(
                         c => c.Name,
-                        c => source.GetValue(c.Type.GetNativeType(), c.Name));
+                        c => source.GetValue(c.GetNativeType(), c.Name));
 
                 buffer.Add(new BsonDocument(document));
 
