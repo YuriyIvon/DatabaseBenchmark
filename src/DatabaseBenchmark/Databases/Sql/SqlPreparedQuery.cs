@@ -25,7 +25,11 @@ namespace DatabaseBenchmark.Databases.Sql
                 .ToDictionary(i => _reader.GetName(i), i => i, StringComparer.OrdinalIgnoreCase);
         }
 
-        public object GetValue(string name) => _reader.GetValue(_columnNames[name]);
+        public object GetValue(string name)
+        {
+            var value = _reader.GetValue(_columnNames[name]);
+            return value != DBNull.Value ? value : null;
+        }
 
         public bool Read() => _reader.Read();
 
