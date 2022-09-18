@@ -56,7 +56,7 @@ namespace DatabaseBenchmark.Databases.Sql
 
                 foreach (var column in columns)
                 {
-                    var value = source.GetValue(column.Type.GetNativeType(), column.Name);
+                    var value = source.GetValue(column.GetNativeType(), column.Name);
 
                     if (value is double doubleValue && double.IsNaN(doubleValue))
                     {

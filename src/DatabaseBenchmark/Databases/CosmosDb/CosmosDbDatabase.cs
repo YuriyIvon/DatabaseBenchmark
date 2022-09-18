@@ -82,7 +82,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                     .Where(c => !c.DatabaseGenerated)
                     .ToDictionary(
                         c => c.Name,
-                        c => source.GetValue(c.Type.GetNativeType(), c.Name));
+                        c => source.GetValue(c.GetNativeType(), c.Name));
 
                 item.Add("id", Guid.NewGuid().ToString("N"));
 

@@ -73,7 +73,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                         .Where(c => c.Queryable)
                         .ToDictionary(
                             c => c.Name, 
-                            c => source.GetValue(c.Type.GetNativeType(), c.Name));
+                            c => source.GetValue(c.GetNativeType(), c.Name));
 
                     writer.StartRow();
 
@@ -81,7 +81,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
                     foreach (var column in nonQueryableColumns)
                     {
-                        var value = source.GetValue(column.Type.GetNativeType(), column.Name);
+                        var value = source.GetValue(column.GetNativeType(), column.Name);
                         writer.Write(value);
                     }
 

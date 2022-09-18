@@ -67,7 +67,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                     .Where(c => !c.DatabaseGenerated)
                     .ToDictionary(
                         c => c.Name,
-                        c => source.GetValue(c.Type.GetNativeType(), c.Name));
+                        c => source.GetValue(c.GetNativeType(), c.Name));
 
                 buffer.Add(document);
 
