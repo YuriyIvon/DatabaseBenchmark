@@ -58,10 +58,10 @@ namespace DatabaseBenchmark.Core
             {
                 using var preparedQuery = executor.Prepare();
 
-                var startTimestamp = DateTime.Now;
+                var startTimestamp = DateTime.UtcNow;
                 preparedQuery.Execute();
                 var rowCount = FetchResults(preparedQuery);
-                var endTimestamp = DateTime.Now;
+                var endTimestamp = DateTime.UtcNow;
 
                 _metricsCollector.AppendResult(startTimestamp, endTimestamp, rowCount, preparedQuery.CustomMetrics);
             }
