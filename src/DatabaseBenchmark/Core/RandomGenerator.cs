@@ -4,7 +4,7 @@ namespace DatabaseBenchmark.Core
 {
     public class RandomGenerator : IRandomGenerator
     {
-        private readonly Random _random = new();
+        private readonly Random _random = Random.Shared;
 
         public bool GetRandomBoolean() => _random.NextDouble() >= 0.5;
 
