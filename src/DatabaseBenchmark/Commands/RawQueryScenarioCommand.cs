@@ -28,6 +28,7 @@ namespace DatabaseBenchmark.Commands
 
             _environment = new ExecutionEnvironment(options.TraceQueries, options.TraceResults);
             var metricsCollector = new MetricsCollector();
+            var resultsBuilder = new ResultsBuilder(options.ReportColumns, options.ReportCustomMetricColumns);
             var benchmark = new QueryBenchmark(_environment, metricsCollector);
 
             var queryScenario = JsonUtils.DeserializeFile<QueryScenario>(options.QueryScenarioFilePath);
@@ -68,20 +69,19 @@ namespace DatabaseBenchmark.Commands
                     benchmark.Benchmark(executorFactory, scenarioStep);
                 }
 
-                Report(metricsCollector, options);
+                Report(resultsBuilder, metricsCollector, options);
             }
             catch
             {
                 metricsCollector.Abort();
-                Report(metricsCollector, options);
+                Report(resultsBuilder, metricsCollector, options);
 
                 throw;
             }
         }
 
-        private void Report(MetricsCollector metricsCollector, QueryScenarioCommandOptions options)
+        private void Report(ResultsBuilder resultsBuilder, MetricsCollector metricsCollector, QueryScenarioCommandOptions options)
         {
-            var resultsBuilder = new ResultsBuilder();
             var reportFormatterFactory = new ReportFormatterFactory();
             var reportFormatter = reportFormatterFactory.Create(options.ReportFormatterType);
 

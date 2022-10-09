@@ -42,7 +42,15 @@ namespace DatabaseBenchmark.Commands
                 {
                     //TODO: error handling for type conversion
                     Type valueType = Nullable.GetUnderlyingType(cp.Property.PropertyType) ?? cp.Property.PropertyType;
-                    object value = (ip.Value == null) ? null : Convert.ChangeType(ip.Value, valueType);
+
+                    object value = null;
+                    if (ip.Value != null)
+                    {
+                        value = valueType.IsArray 
+                            ? ParseArray(ip.Value, valueType)
+                            : Convert.ChangeType(ip.Value, valueType);
+                    }
+
                     cp.Property.SetValue(options, value);
                 }
             }
@@ -54,5 +62,17 @@ namespace DatabaseBenchmark.Commands
 
         protected static string FormatProperty(string prefix, string propertyName) =>
             prefix != null ? string.Join(".", prefix, propertyName) : propertyName;
+
+        private static object ParseArray(string rawValue, Type valueType)
+        {
+            var rawElements = rawValue.Split(',');
+            var elementType = valueType.GetElementType();
+            var array = Array.CreateInstance(elementType, rawElements.Length);
+            for (var i = 0; i < rawElements.Length; i++)
+            {
+                array.SetValue(Convert.ChangeType(rawElements[i], elementType), i);
+            }
+            return array;
+        }
     }
 }

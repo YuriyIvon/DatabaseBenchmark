@@ -1,61 +1,174 @@
-﻿using DatabaseBenchmark.Reporting.Interfaces;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Reporting.Interfaces;
 using DatabaseBenchmark.Utils;
+using Nest;
 using System.Data;
 
 namespace DatabaseBenchmark.Reporting
 {
     public class ResultsBuilder : IResultsBuilder
     {
+        private const string NameColumn = "name";
+        private const string AvgColumn = "avg";
+        private const string StdDevColumn = "stdDev";
+        private const string MinColumn = "min";
+        private const string P10Column = "p10";
+        private const string P50Column = "p50";
+        private const string P90Column = "p90";
+        private const string MaxColumn = "max";
+        private const string QpsColumn = "qps";
+        private const string AvgRowsColumn = "avgRows";
+
+        private readonly ResultColumn[] _columns = new[]
+        {
+            new ResultColumn
+            { 
+                Name = NameColumn,
+                Caption = "Name",
+                Type = typeof(string),
+                ValueFunc = mc => mc.Name
+            },
+            new ResultColumn
+            { 
+                Name = AvgColumn,
+                Caption = "Avg (ms)",
+                Type = typeof(double),
+                ValueFunc = mc => GetDurations(mc).Average()
+            },
+            new ResultColumn
+            {
+                Name = StdDevColumn,
+                Caption = "StDev (ms)",
+                Type = typeof(double),
+                ValueFunc = mc => StdDev(GetDurations(mc))
+            },
+            new ResultColumn
+            {
+                Name = MinColumn,
+                Caption = "Min (ms)",
+                Type = typeof(double),
+                ValueFunc = mc => GetDurations(mc).Min()
+            },
+            new ResultColumn
+            {
+                Name = P10Column,
+                Caption = "10% (ms)",
+                Type = typeof(double),
+                ValueFunc = mc => GetDurations(mc).Percentile(10)
+            },
+            new ResultColumn
+            {
+                Name = P50Column,
+                Caption = "50% (ms)",
+                Type = typeof(double),
+                ValueFunc = mc => GetDurations(mc).Percentile(50)
+            },
+            new ResultColumn
+            {
+                Name = P90Column,
+                Caption = "90% (ms)",
+                Type = typeof(double),
+                ValueFunc = mc => GetDurations(mc).Percentile(90)
+            },
+            new ResultColumn
+            {
+                Name = MaxColumn,
+                Caption = "Max (ms)",
+                Type = typeof(double),
+                ValueFunc = mc => GetDurations(mc).Max()
+            },
+            new ResultColumn
+            {
+                Name = QpsColumn,
+                Caption = "QPS",
+                Type = typeof(double),
+                ValueFunc = mc => GetThroughput(mc)
+            },
+            new ResultColumn
+            {
+                Name = AvgRowsColumn,
+                Caption = "Avg Rows",
+                Type = typeof(double),
+                ValueFunc = mc => mc.Metrics.Select(m => m.RowCount).Average()
+            }
+        };
+
+        private readonly CustomMetricResultColumn[] _customMetricColumns = new[]
+        {
+            new CustomMetricResultColumn
+            {
+                Name = AvgColumn,
+                Caption = "Avg",
+                ValueFunc = (cm, mt) => cm.Average(m => m[mt])
+            },
+            new CustomMetricResultColumn
+            {
+                Name = StdDevColumn,
+                Caption = "StDev",
+                ValueFunc = (cm, mt) => StdDev(cm.Select(m => m[mt]))
+            },
+            new CustomMetricResultColumn
+            {
+                Name = MinColumn,
+                Caption = "Min",
+                ValueFunc = (cm, mt) => cm.Min(m => m[mt])
+            },
+            new CustomMetricResultColumn
+            {
+                Name = MaxColumn,
+                Caption = "Max",
+                ValueFunc = (cm, mt) => cm.Max(m => m[mt])
+            }
+        };
+
+        private readonly string[] _defaultDisplayColumns = new[]
+        {
+            NameColumn,
+            AvgColumn,
+            StdDevColumn,
+            MinColumn,
+            P50Column,
+            MaxColumn,
+            QpsColumn,
+            AvgRowsColumn
+        };
+
+        private readonly string[] _defaultDisplayCustomMetricColumns = new[]
+        {
+            AvgColumn,
+            StdDevColumn,
+            MinColumn,
+            MaxColumn
+        };
+
+        private readonly string[] _displayColumns;
+        private readonly string[] _displayCustomMetricColumns;
+
+        public ResultsBuilder(
+            string[] displayColumns = null,
+            string[] displayCustomMetricColumns = null)
+        {
+            _displayColumns = displayColumns ?? _defaultDisplayColumns;
+            _displayCustomMetricColumns = displayCustomMetricColumns ?? _defaultDisplayCustomMetricColumns;
+
+            ValidateColumns();
+            ValidateCustomMetricColumns();
+        }
+            
         public DataTable Build(IEnumerable<MetricsCollection> metrics)
         {
             var results = new DataTable();
 
-            var nameColumn = results.Columns.Add("name", typeof(string));
-            nameColumn.Caption = "Name";
-
-            var avgColumn = results.Columns.Add("avg", typeof(double));
-            avgColumn.Caption = "Avg (ms)";
-
-            var minColumn = results.Columns.Add("min", typeof(double));
-            minColumn.Caption = "Min (ms)";
-
-            var p10Column = results.Columns.Add("p10", typeof(double));
-            p10Column.Caption = "10% (ms)";
-
-            var p50Column = results.Columns.Add("p50", typeof(double));
-            p50Column.Caption = "50% (ms)";
-
-            var p90Column = results.Columns.Add("p90", typeof(double));
-            p90Column.Caption = "90% (ms)";
-
-            var maxColumn = results.Columns.Add("max", typeof(double));
-            maxColumn.Caption = "Max (ms)";
-
-            var qpsColumn = results.Columns.Add("qps", typeof(double));
-            qpsColumn.Caption = "QPS";
-
-            var avgRowsColumn = results.Columns.Add("avgRows", typeof(double));
-            avgRowsColumn.Caption = "Avg Rows";
-
-            foreach (var metric in metrics)
+            foreach (var metricsCollection in metrics)
             {
                 var row = results.Rows.Add();
 
-                var durations = metric.Metrics
-                    .Select(m => (m.EndTimestamp - m.StartTimestamp).TotalMilliseconds)
-                    .ToArray();
+                foreach (var columnName in _displayColumns)
+                {
+                    AppendMetricColumn(row, columnName, metricsCollection);
+                }
 
-                row[nameColumn] = metric.Name;
-                row[avgColumn] = durations.Average();
-                row[minColumn] = durations.Min();
-                row[p10Column] = durations.Percentile(10);
-                row[p50Column] = durations.Percentile(50);
-                row[p90Column] = durations.Percentile(90);
-                row[maxColumn] = durations.Max();
-                row[qpsColumn] = GetThroughput(metric);
-                row[avgRowsColumn] = metric.Metrics.Select(m => m.RowCount).Average();
-
-                var customMetrics = metric.Metrics
+                var customMetrics = metricsCollection.Metrics
                     .Where(m => m.CustomMetrics != null)
                     .Select(m => m.CustomMetrics);
 
@@ -63,17 +176,67 @@ namespace DatabaseBenchmark.Reporting
 
                 foreach (var metricType in customMetricTypes)
                 {
-                    var customAvgColumn = EnsureCustomMetricColumn(results, metricType, "avg", "Avg");
-                    var customMinColumn = EnsureCustomMetricColumn(results, metricType, "min", "Min");
-                    var customMaxColumn = EnsureCustomMetricColumn(results, metricType, "max", "Max");
-
-                    row[customAvgColumn] = customMetrics.Average(cm => cm[metricType]);
-                    row[customMinColumn] = customMetrics.Min(cm => cm[metricType]);
-                    row[customMaxColumn] = customMetrics.Max(cm => cm[metricType]);
+                    foreach (var columnName in _displayCustomMetricColumns)
+                    {
+                        AppendCustomMetricColumn(row, metricType, columnName, customMetrics);
+                    }
                 }
             }
 
             return results;
+        }
+
+        private void ValidateColumns()
+        {
+            foreach (var name in _displayColumns)
+            {
+                if (!_columns.Any(c => c.Name == name))
+                {
+                    throw new InputArgumentException($"Column \"{name}\" does not exist");
+                }
+            }
+        }
+
+        private void ValidateCustomMetricColumns()
+        {
+            foreach (var name in _displayCustomMetricColumns)
+            {
+                if (!_customMetricColumns.Any(c => c.Name == name))
+                {
+                    throw new InputArgumentException($"Custom metrics column \"{name}\" does not exist");
+                }
+            }
+        }
+
+        private void AppendMetricColumn(DataRow row, string name, MetricsCollection metricCollection)
+        {
+            var columnDefinition = _columns.FirstOrDefault(c => c.Name == name);
+
+            if (!row.Table.Columns.Contains(name))
+            {
+                var column = row.Table.Columns.Add(name, columnDefinition.Type);
+                column.Caption = columnDefinition.Caption;
+            }
+
+            row[name] = columnDefinition.ValueFunc(metricCollection);
+        }
+
+        private void AppendCustomMetricColumn(
+            DataRow row,
+            string metricType,
+            string prefix,
+            IEnumerable<IDictionary<string, double>> customMetrics)
+        {
+            var columnDefinition = _customMetricColumns.FirstOrDefault(c => c.Name == prefix);
+
+            var columnName = prefix + metricType;
+            if (!row.Table.Columns.Contains(columnName))
+            {
+                var customMetricColumn = row.Table.Columns.Add(prefix + metricType, typeof(double));
+                customMetricColumn.Caption = $"{columnDefinition.Caption} ({metricType})";
+            }
+
+            row[columnName] = columnDefinition.ValueFunc(customMetrics, metricType);
         }
 
         private static double GetThroughput(MetricsCollection metrics)
@@ -83,16 +246,34 @@ namespace DatabaseBenchmark.Reporting
             return metrics.Metrics.Count / (maxTimestamp - minTimestamp).TotalSeconds;
         }
 
-        private static DataColumn EnsureCustomMetricColumn(DataTable dataTable, string metricType, string prefix, string title)
+        private static double StdDev(IEnumerable<double> values)
         {
-            if (!dataTable.Columns.Contains(prefix + metricType))
-            {
-                var customMetricColumn = dataTable.Columns.Add(prefix + metricType, typeof(double));
-                customMetricColumn.Caption = $"{title} ({metricType})";
-                return customMetricColumn;
-            }
+            var average = values.Average();
+            var diffSquares = values.Select(v => (v - average) * (v - average)).Sum();
+            return Math.Sqrt(diffSquares / values.Count());
+        }
 
-            return dataTable.Columns[prefix + metricType];
+        private static IEnumerable<double> GetDurations(MetricsCollection metricsCollection) =>
+            metricsCollection.Metrics.Select(m => (m.EndTimestamp - m.StartTimestamp).TotalMilliseconds);
+
+        private class ResultColumn
+        {
+            public string Name { get; init; }
+
+            public string Caption { get; init; }
+
+            public Type Type { get; init; }
+
+            public Func<MetricsCollection, object> ValueFunc { get; init; }
+        }
+
+        private class CustomMetricResultColumn
+        {
+            public string Name { get; init; }
+
+            public string Caption { get; init; }
+
+            public Func<IEnumerable<IDictionary<string, double>>, string, object> ValueFunc { get; init; }
         }
     }
 }
