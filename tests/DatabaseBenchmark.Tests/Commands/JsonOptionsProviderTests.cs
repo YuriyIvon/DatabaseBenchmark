@@ -20,6 +20,8 @@ namespace DatabaseBenchmark.Tests.Commands
   ""DoubleProperty"": 10.1,
   ""DateProperty"": ""2007-10-10"",
   ""DateTimeProperty"": ""2007-10-10T12:12:12Z"",
+  ""StringArrayProperty"": [""one"", ""two"", ""three""],
+  ""IntArrayProperty"": [1, 2, 3, 4],
   ""StringProperty"": ""string""
 }";
             var optionsProvider = new JsonOptionsProvider(json);
@@ -30,6 +32,8 @@ namespace DatabaseBenchmark.Tests.Commands
             Assert.Equal(10.1, options.DoubleProperty);
             Assert.Equal(DateTime.Parse("2007-10-10"), options.DateProperty);
             Assert.Equal(DateTime.Parse("2007-10-10T12:12:12Z"), options.DateTimeProperty);
+            Assert.Equal(new[] { "one", "two", "three" }, options.StringArrayProperty);
+            Assert.Equal(new[] { 1, 2, 3, 4 }, options.IntArrayProperty);
             Assert.Equal("string", options.StringProperty);
         }
 
@@ -97,6 +101,12 @@ namespace DatabaseBenchmark.Tests.Commands
 
             [Option("")]
             public DateTime? DateTimeProperty { get; set; }
+
+            [Option("")]
+            public string[] StringArrayProperty { get; set; }
+
+            [Option("")]
+            public int[] IntArrayProperty { get; set; }
 
             [Option("", true)]
             public string StringProperty { get; set; }

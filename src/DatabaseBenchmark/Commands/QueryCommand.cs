@@ -26,6 +26,7 @@ namespace DatabaseBenchmark.Commands
 
             _environment = new ExecutionEnvironment(options.TraceQueries, options.TraceResults);
             var metricsCollector = new MetricsCollector();
+            var resultsBuilder = new ResultsBuilder(options.ReportColumns, options.ReportCustomMetricColumns);
             var benchmark = new QueryBenchmark(_environment, metricsCollector);
 
             var databaseFactory = new DatabaseFactory(_environment, _optionsProvider);
@@ -41,12 +42,11 @@ namespace DatabaseBenchmark.Commands
             var executorFactory = database.CreateQueryExecutorFactory(table, query);
             benchmark.Benchmark(executorFactory, options);
 
-            Report(metricsCollector, options);
+            Report(resultsBuilder, metricsCollector, options);
         }
 
-        private void Report(MetricsCollector metricsCollector, QueryCommandOptions options)
+        private void Report(ResultsBuilder resultsBuilder, MetricsCollector metricsCollector, QueryCommandOptions options)
         {
-            var resultsBuilder = new ResultsBuilder();
             var reportFormatterFactory = new ReportFormatterFactory();
             var reportFormatter = reportFormatterFactory.Create(options.ReportFormatterType);
 

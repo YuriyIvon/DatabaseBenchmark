@@ -52,7 +52,7 @@ namespace DatabaseBenchmark.Commands
             {
                 if (property.Value.ValueKind == JsonValueKind.Array)
                 {
-                    throw new InputArgumentException("Array properties are not supported");
+                    dictionary.Add(property.Name, string.Join(",", property.Value.EnumerateArray()));
                 }
                 else if (property.Value.ValueKind == JsonValueKind.Object)
                 {

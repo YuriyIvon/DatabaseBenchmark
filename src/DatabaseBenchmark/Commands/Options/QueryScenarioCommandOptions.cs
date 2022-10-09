@@ -21,6 +21,12 @@ namespace DatabaseBenchmark.Commands.Options
         [Option("Path to output report file")]
         public string ReportFilePath { get; set; }
 
+        [Option("Report columns to be shown")]
+        public string[] ReportColumns { get; set; }
+
+        [Option("Report custom metric columns to be shown for each custom metric")]
+        public string[] ReportCustomMetricColumns { get; set; }
+
         [Option("Trace queries text and parameters")]
         public bool TraceQueries { get; set; } = false;
 
