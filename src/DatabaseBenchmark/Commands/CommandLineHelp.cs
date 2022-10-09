@@ -265,25 +265,31 @@ namespace DatabaseBenchmark.Commands
             var factoryOptionProperty = restrictedValueOptions?.FirstOrDefault(p => p.Name == option.Property.Name);
             Type optionType = Nullable.GetUnderlyingType(option.Property.PropertyType) ?? option.Property.PropertyType;
 
+            var typeStrings = new Dictionary<Type, string>
+            {
+                [typeof(string)] = "string",
+                [typeof(double)] = "double",
+                [typeof(int)] = "int",
+                [typeof(string[])] = "string[]",
+                [typeof(double[])] = "double[]",
+                [typeof(int[])] = "int[]",
+            };
+
             if (factoryOptionProperty != null)
             {
                 Console.Write($"{{ {string.Join(" | ", factoryOptionProperty.AllowedValuesProvider.Options)} }}");
             }
-            else if (optionType == typeof(string))
-            {
-                Console.Write("<string>");
-            }
-            else if (optionType == typeof(double))
-            {
-                Console.Write("<double>");
-            }
-            else if (optionType == typeof(int))
-            {
-                Console.Write("<int>");
-            }
             else if (optionType == typeof(bool))
             {
                 Console.Write("{ True | False }");
+            }
+            else if (typeStrings.TryGetValue(optionType, out var str))
+            {
+                Console.Write($"<{str}>");
+            }
+            else
+            {
+                throw new ArgumentException($"Unsupported option type \"{optionType}\"");
             }
         }
 
