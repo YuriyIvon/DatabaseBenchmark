@@ -25,6 +25,8 @@ This tool addresses the issues from above by introducing a data import and query
   * [Table definition](#table_definition)
   * [Query definition](#query_definition)
   * [Value randomization rules](#value_randomization_rules)
+  * [Report columns](#report_columns)
+
 * [Limitations](#limitations)
 
 ## Usage<a name="usage"></a>
@@ -117,7 +119,9 @@ There are some parameters specific to the `query` command:
 * `QueryCount` - number of query executions on each thread.
 * `WarmupQueryCount` - number of warm-up query executions on each thread.
 * `ReportFormatterType` - benchmark result report output format, currently can be either `Text` or `Csv`.
-* `ReportFilePath` - path to the result report output file. If not specified, the report is written to the console. 
+* `ReportFilePath` - path to the result report output file. If not specified, the report is written to the console.
+* `ReportColumns` - a comma-separated list of report columns to be shown. For the list of supported values refer to [report columns](#report_columns).
+* `ReportCustomMetricColumns` - a comma-separated list of custom metric report columns to be shown. For the list of supported values refer to [report columns](#report_columns).
 * `TraceResults` - Boolean parameter specifying if query results should be printed to the console.
 
 This command also has a few database-specific parameters:
@@ -267,6 +271,33 @@ When `RandomizeValue` is `true` on a query condition or on a raw query parameter
 * `MinStringValueLength` - minimum random string length. Default value is `1`.
 * `MaxStringValueLength` - maximum random string length. Default value is `10`.
 * `AllowedCharacters` - characters to be used when generating a random string. By default contains uppercase Latin letters and digits.
+
+### Report columns<a name="report_columns"></a>
+Each benchmark command has a couple of optional parameters - `ReportColumns` and `ReportCustomMetricColumns`. These parameters control the set of columns to be shown in the benchmark report.
+
+For `ReportColumns` the available column identifiers are:
+* `name` - benchmark name.
+* `avg` - average query execution time.
+* `stdDev` - standard deviation of the query execution time.
+* `min` - minimum query execution time.
+* `p10` - 10th percentile of the query execution time.
+* `p50` - median query execution time.
+* `p90` - 90th percentile of the query execution time.
+* `max` - maximum query execution time.
+* `qps` - average queries per second.
+* `avgRows`  - average number of rows returned by the queries.
+
+By default, all columns are shown except for `p10` and `p90`.
+
+For `ReportCustomMetricColumns`:
+* `avg` - average.
+* `stdDev` - standard deviation.
+* `min` - minimum.
+* `max` - maximum.
+
+By default, all four columns are shown for each custom metric.
+
+Please note that the latter setting is applied to all custom metrics provided by a database plugin, so if only `avg` is specified, the average value will be printed for each custom metric.
 
 ## Limitations<a name="limitations"></a>
 
