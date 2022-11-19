@@ -51,22 +51,27 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             }
         }
 
-        protected override string BuildGroupCondition(QueryGroupCondition predicate)
+        protected override string BuildGroupCondition(QueryGroupCondition condition)
         {
-            var predicates = predicate.Conditions.Select(p => BuildCondition(p)).ToArray();
+            var conditions = condition.Conditions
+                .Select(p => BuildCondition(p))
+                .Where(p => p != null)
+                .ToArray();
 
-            if (!predicates.Any())
+            if (conditions.Any())
             {
-                throw new InputArgumentException("No predicates in a group");
+                return condition.Operator switch
+                {
+                    QueryGroupOperator.And => $"({string.Join(" AND ", conditions)})",
+                    QueryGroupOperator.Or => $"({string.Join(" OR ", conditions)})",
+                    QueryGroupOperator.Not => BuildUnaryCondition("NOT", conditions),
+                    _ => throw new InputArgumentException($"Unknown group operator \"{condition.Operator}\"")
+                };
             }
-
-            return predicate.Operator switch
+            else
             {
-                QueryGroupOperator.And => $"({string.Join(" AND ", predicates)})",
-                QueryGroupOperator.Or => $"({string.Join(" OR ", predicates)})",
-                QueryGroupOperator.Not => BuildUnaryCondition("NOT", predicates),
-                _ => throw new InputArgumentException($"Unknown group operator \"{predicate.Operator}\"")
-            };
+                return null;
+            }
         }
 
         protected override string BuildPrimitiveCondition(QueryPrimitiveCondition predicate)
