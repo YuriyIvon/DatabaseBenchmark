@@ -18,16 +18,20 @@ namespace DatabaseBenchmark.Databases.Sql
 
         protected IRandomValueProvider RandomValueProvider { get; }
 
+        protected IRandomGenerator RandomGenerator { get; }
+
         public SqlQueryBuilder(
             Table table,
             Query query,
             SqlParametersBuilder parametersBuilder,
-            IRandomValueProvider randomValueProvider)
+            IRandomValueProvider randomValueProvider,
+            IRandomGenerator randomGenerator)
         {
             Table = table;
             Query = query;
             ParametersBuilder = parametersBuilder;
             RandomValueProvider = randomValueProvider;
+            RandomGenerator = randomGenerator;
         }
 
         public string Build()
@@ -66,11 +70,13 @@ namespace DatabaseBenchmark.Databases.Sql
 
             if (Query.Condition != null)
             {
-                query.AppendLine("WHERE");
-                query.Append(Spacing);
-
                 var expression = BuildCondition(Query.Condition);
-                query.AppendLine(expression);
+                if (expression != null)
+                {
+                    query.AppendLine("WHERE");
+                    query.Append(Spacing);
+                    query.AppendLine(expression);
+                }
             }
 
             if (Query.Aggregate != null)
@@ -129,13 +135,22 @@ namespace DatabaseBenchmark.Databases.Sql
             return $"{aggregateFunction}({sourceColumnModifier}{sourceColumnExpression}) {column.ResultColumnName}";
         }
 
-        protected virtual string BuildCondition(IQueryCondition condition) =>
-            condition switch
+        protected virtual string BuildCondition(IQueryCondition condition)
+        {
+            if (condition.RandomizeInclusion && RandomGenerator.GetRandomBoolean())
             {
-                QueryGroupCondition groupCondition => BuildGroupCondition(groupCondition),
-                QueryPrimitiveCondition primitiveCondition => BuildPrimitiveCondition(primitiveCondition),
-                _ => throw new InputArgumentException($"Unknown condition type \"{condition.GetType()}\"")
-            };
+                return null;
+            }
+            else
+            {
+                return condition switch
+                {
+                    QueryGroupCondition groupCondition => BuildGroupCondition(groupCondition),
+                    QueryPrimitiveCondition primitiveCondition => BuildPrimitiveCondition(primitiveCondition),
+                    _ => throw new InputArgumentException($"Unknown condition type \"{condition.GetType()}\"")
+                };
+            }
+        }
 
         protected virtual string BuildNullCondition(QueryPrimitiveCondition condition)
         {
@@ -151,20 +166,25 @@ namespace DatabaseBenchmark.Databases.Sql
 
         protected virtual string BuildGroupCondition(QueryGroupCondition condition)
         {
-            var conditions = condition.Conditions.Select(p => BuildCondition(p)).ToArray();
+            var conditions = condition.Conditions
+                .Select(p => BuildCondition(p))
+                .Where(p => p != null)
+                .ToArray();
 
-            if (!conditions.Any())
+            if (conditions.Any())
             {
-                throw new InputArgumentException("No conditions in a group");
+                return condition.Operator switch
+                {
+                    QueryGroupOperator.And => $"({string.Join(" AND ", conditions)})",
+                    QueryGroupOperator.Or => $"({string.Join(" OR ", conditions)})",
+                    QueryGroupOperator.Not => BuildNotCondition(conditions),
+                    _ => throw new InputArgumentException($"Unknown group operator \"{condition.Operator}\"")
+                };
             }
-
-            return condition.Operator switch
+            else
             {
-                QueryGroupOperator.And => $"({string.Join(" AND ", conditions)})",
-                QueryGroupOperator.Or => $"({string.Join(" OR ", conditions)})",
-                QueryGroupOperator.Not => BuildNotCondition(conditions),
-                _ => throw new InputArgumentException($"Unknown group operator \"{condition.Operator}\"")
-            };
+                return null;
+            }
         }
 
         protected virtual string BuildNotCondition(string[] inputConditions)

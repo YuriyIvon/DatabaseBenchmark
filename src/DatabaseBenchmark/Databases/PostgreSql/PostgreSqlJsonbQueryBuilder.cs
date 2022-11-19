@@ -15,7 +15,9 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             Query query,
             SqlParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
-            IOptionsProvider optionsProvider) : base(table, query, parametersBuilder, randomValueProvider)
+            IRandomGenerator randomGenerator,
+            IOptionsProvider optionsProvider) 
+            : base(table, query, parametersBuilder, randomValueProvider, randomGenerator)
         {
             _queryOptions = optionsProvider.GetOptions<PostgreSqlJsonbQueryOptions>();
         }

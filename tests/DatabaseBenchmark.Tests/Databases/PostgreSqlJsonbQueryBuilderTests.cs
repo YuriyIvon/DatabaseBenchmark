@@ -21,7 +21,7 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryNoArguments()
         {
             var parametersBuilder = new SqlParametersBuilder();
-            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, SampleInputs.NoArgumentsQuery, parametersBuilder, null, _optionsProvider);
+            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, SampleInputs.NoArgumentsQuery, parametersBuilder, null, null, _optionsProvider);
 
             var queryText = builder.Build();
 
@@ -33,7 +33,7 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQuerySelectSpecificFields()
         {
             var parametersBuilder = new SqlParametersBuilder();
-            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, SampleInputs.SpecificFieldsQuery, parametersBuilder, null, _optionsProvider);
+            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, SampleInputs.SpecificFieldsQuery, parametersBuilder, null, null, _optionsProvider);
 
             var queryText = builder.Build();
 
@@ -52,7 +52,7 @@ namespace DatabaseBenchmark.Tests.Databases
         {
             var query = SampleInputs.AllArgumentsQuery;
             var parametersBuilder = new SqlParametersBuilder();
-            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, _optionsProvider);
+            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null, _optionsProvider);
 
             var queryText = builder.Build();
 
@@ -73,7 +73,7 @@ namespace DatabaseBenchmark.Tests.Databases
             var query = SampleInputs.AllArgumentsQuery;
             var parametersBuilder = new SqlParametersBuilder();
             _optionsProvider.GetOptions<PostgreSqlJsonbQueryOptions>().Returns(new PostgreSqlJsonbQueryOptions {  UseGinOperators = false });
-            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, _optionsProvider);
+            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null, _optionsProvider);
 
             var queryText = builder.Build();
 
