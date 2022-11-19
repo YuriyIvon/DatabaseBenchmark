@@ -42,7 +42,6 @@ namespace DatabaseBenchmark.Tests.Databases
             Assert.Equal(query.Take, parametersBuilder.Values["@p2"]);
         }
 
-
         [Fact]
         public void BuildQueryAllArgumentsIncludeNone()
         {

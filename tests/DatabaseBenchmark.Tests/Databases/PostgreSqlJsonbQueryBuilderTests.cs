@@ -88,5 +88,50 @@ namespace DatabaseBenchmark.Tests.Databases
             Assert.Equal(query.Skip, parametersBuilder.Values["@p1"]);
             Assert.Equal(query.Take, parametersBuilder.Values["@p2"]);
         }
+
+        [Fact]
+        public void BuildQueryAllArgumentsIncludeNone()
+        {
+            var query = SampleInputs.AllArgumentsQueryRandomizeInclusionAll;
+
+            var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
+            mockRandomValueProvider.GetRandomBoolean().Returns(true);
+            var parametersBuilder = new SqlParametersBuilder();
+            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomValueProvider, _optionsProvider);
+
+            var queryText = builder.Build();
+
+            var normalizedQueryText = queryText.NormalizeSpaces();
+            Assert.Equal("SELECT attributes->>'Category' Category, attributes->>'SubCategory' SubCategory, SUM(Price) TotalPrice FROM Sample"
+                + " GROUP BY attributes->>'Category', attributes->>'SubCategory'"
+                + " ORDER BY attributes->>'Category' ASC, attributes->>'SubCategory' ASC"
+                + " OFFSET @p0 ROWS FETCH NEXT @p1 ROWS ONLY", normalizedQueryText);
+            Assert.Equal(2, parametersBuilder.Values.Count);
+            Assert.Equal(query.Skip, parametersBuilder.Values["@p0"]);
+            Assert.Equal(query.Take, parametersBuilder.Values["@p1"]);
+        }
+
+        [Fact]
+        public void BuildQueryAllArgumentsIncludePartial()
+        {
+            var query = SampleInputs.AllArgumentsQueryRandomizeInclusionPartial;
+
+            var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
+            mockRandomValueProvider.GetRandomBoolean().Returns(true);
+            var parametersBuilder = new SqlParametersBuilder();
+            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomValueProvider, _optionsProvider);
+
+            var queryText = builder.Build();
+
+            var normalizedQueryText = queryText.NormalizeSpaces();
+            Assert.Equal("SELECT attributes->>'Category' Category, attributes->>'SubCategory' SubCategory, SUM(Price) TotalPrice FROM Sample"
+                + " WHERE (attributes @> '{\"SubCategory\": null}'::jsonb)"
+                + " GROUP BY attributes->>'Category', attributes->>'SubCategory'"
+                + " ORDER BY attributes->>'Category' ASC, attributes->>'SubCategory' ASC"
+                + " OFFSET @p0 ROWS FETCH NEXT @p1 ROWS ONLY", normalizedQueryText);
+            Assert.Equal(2, parametersBuilder.Values.Count);
+            Assert.Equal(query.Skip, parametersBuilder.Values["@p0"]);
+            Assert.Equal(query.Take, parametersBuilder.Values["@p1"]);
+        }
     }
 }
