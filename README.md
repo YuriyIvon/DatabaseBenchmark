@@ -235,14 +235,16 @@ A group condition has the following properties:
 
 * `Operator` - logical operator, can be one of `And`, `Or`, and `Not`.
 * `Conditions` - array of conditions to be combined by the logical operator. Please note that `Not` allows only one condition in this array.
+* `RandomizeInclusion` - specifies if this condition should be randomly included in the query. Is `false` by default.
 
 A primitive condition has the following properties:
 
 * `ColumnName` - table column to be checked in the condition (the first operand).
 * `Operator` - conditional operator, can be one of `Equals`, `NotEquals`, `In`, `Greater`, `GreaterEquals`, `Lower`, `LowerEquals`, `Contains`, and `StartsWith`.
 * `Value` - specifies the value of the second operand. Is ignored if `RandomizeValue` is `true`. 
-* `RandomizeValue` - specifies if the value should be randomized.
+* `RandomizeValue` - specifies if the value should be randomized. Is `false` by default.
 * `ValueRandomizationRule` - specifies [value randomization rules](#value_randomization_rules).
+* `RandomizeInclusion` - specifies if this condition should be randomly included in the query. Is `false` by default.
 
 `Aggregate` has the following top-level properties:
 * `GroupColumnNames` - an array of columns the query result should be grouped by.
@@ -304,6 +306,6 @@ Please note that the latter setting is applied to all custom metrics provided by
 There are some limitations that are going to be addressed in the future:
 
 * Query definitions don't support joins. A workaround is using the raw queries approach.
-* Random inclusion of condition parts into generated queries - there is a reserved property `RandomizeInclusion` on each part of a query condition, but it is not handled yet.
+* Random inclusion of condition parts is currently not supported for raw queries.
 * Configurable partitioning is supported for Cosmos DB only.
 * Importing from Elasticsearch database doesn't support unlimited number of rows.
