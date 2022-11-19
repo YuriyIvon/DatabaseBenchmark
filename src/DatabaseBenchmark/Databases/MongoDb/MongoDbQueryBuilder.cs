@@ -10,15 +10,18 @@ namespace DatabaseBenchmark.Databases.MongoDb
         private readonly Table _table;
         private readonly Query _query;
         private readonly IRandomValueProvider _randomValueProvider;
+        private readonly IRandomGenerator _randomGenerator;
 
         public MongoDbQueryBuilder(
             Table table,
             Query query,
-            IRandomValueProvider randomValueProvider)
+            IRandomValueProvider randomValueProvider,
+            IRandomGenerator randomGenerator)
         {
             _table = table;
             _query = query;
             _randomValueProvider = randomValueProvider;
+            _randomGenerator = randomGenerator;
         }
 
         public IEnumerable<BsonDocument> Build()
@@ -27,7 +30,11 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
             if (_query.Condition != null)
             {
-                request.Add(new BsonDocument("$match", BuildCondition(_query.Condition)));
+                var condition = BuildCondition(_query.Condition);
+                if (condition != null)
+                {
+                    request.Add(new BsonDocument("$match", condition));
+                }
             }
 
             if (_query.Aggregate != null)
@@ -61,30 +68,44 @@ namespace DatabaseBenchmark.Databases.MongoDb
             return request;
         }
 
-        private BsonDocument BuildCondition(IQueryCondition predicate) =>
-            predicate switch
+        private BsonDocument BuildCondition(IQueryCondition predicate)
+        {
+            if (predicate.RandomizeInclusion && _randomGenerator.GetRandomBoolean())
             {
-                QueryGroupCondition groupCondition => BuildGroupCondition(groupCondition),
-                QueryPrimitiveCondition primitiveCondition => BuildPrimitiveCondition(primitiveCondition),
-                _ => throw new InputArgumentException($"Unknown predicate type \"{predicate.GetType()}\"")
-            };
+                return null;
+            }
+            else
+            {
+                return predicate switch
+                {
+                    QueryGroupCondition groupCondition => BuildGroupCondition(groupCondition),
+                    QueryPrimitiveCondition primitiveCondition => BuildPrimitiveCondition(primitiveCondition),
+                    _ => throw new InputArgumentException($"Unknown predicate type \"{predicate.GetType()}\"")
+                };
+            }
+        }
 
         private BsonDocument BuildGroupCondition(QueryGroupCondition predicate)
         {
-            var predicates = predicate.Conditions.Select(p => BuildCondition(p)).ToArray();
+            var predicates = predicate.Conditions
+                .Select(p => BuildCondition(p))
+                .Where(p => p != null)
+                .ToArray();
 
-            if (!predicates.Any())
+            if (predicates.Any())
             {
-                throw new InputArgumentException("No predicates in a group");
+                return predicate.Operator switch
+                {
+                    QueryGroupOperator.And => new BsonDocument("$and", new BsonArray(predicates)),
+                    QueryGroupOperator.Or => new BsonDocument("$or", new BsonArray(predicates)),
+                    QueryGroupOperator.Not => new BsonDocument("$nor", new BsonArray(predicates)),
+                    _ => throw new InputArgumentException($"Unknown group operator \"{predicate.Operator}\"")
+                };
             }
-
-            return predicate.Operator switch
+            else
             {
-                QueryGroupOperator.And => new BsonDocument("$and", new BsonArray(predicates)),
-                QueryGroupOperator.Or => new BsonDocument("$or", new BsonArray(predicates)),
-                QueryGroupOperator.Not => new BsonDocument("$nor", new BsonArray(predicates)),
-                _ => throw new InputArgumentException($"Unknown group operator \"{predicate.Operator}\"")
-            };
+                return null;
+            }
         }
 
         private BsonDocument BuildPrimitiveCondition(QueryPrimitiveCondition predicate)

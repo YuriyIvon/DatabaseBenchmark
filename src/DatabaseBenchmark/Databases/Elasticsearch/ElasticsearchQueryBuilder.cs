@@ -10,15 +10,18 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         private readonly Table _table;
         private readonly Query _query;
         private readonly IRandomValueProvider _randomValueProvider;
+        private readonly IRandomGenerator _randomGenerator;
 
         public ElasticsearchQueryBuilder(
             Table table,
             Query query,
-            IRandomValueProvider randomValueProvider)
+            IRandomValueProvider randomValueProvider,
+            IRandomGenerator randomGenerator)
         {
             _table = table;
             _query = query;
             _randomValueProvider = randomValueProvider;
+            _randomGenerator = randomGenerator;
         }
 
         public SearchRequest Build()
@@ -68,30 +71,44 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             return request;
         }
 
-        private QueryContainer BuildCondition(IQueryCondition predicate) =>
-            predicate switch
+        private QueryContainer BuildCondition(IQueryCondition predicate)
+        {
+            if (predicate.RandomizeInclusion && _randomGenerator.GetRandomBoolean())
             {
-                QueryGroupCondition groupCondition => BuildGroupCondition(groupCondition),
-                QueryPrimitiveCondition primitiveCondition => BuildPrimitiveCondition(primitiveCondition),
-                _ => throw new InputArgumentException($"Unknown predicate type \"{predicate.GetType()}\"")
-            };
+                return null;
+            }
+            else
+            {
+                return predicate switch
+                {
+                    QueryGroupCondition groupCondition => BuildGroupCondition(groupCondition),
+                    QueryPrimitiveCondition primitiveCondition => BuildPrimitiveCondition(primitiveCondition),
+                    _ => throw new InputArgumentException($"Unknown predicate type \"{predicate.GetType()}\"")
+                };
+            }
+        }
 
         private QueryContainer BuildGroupCondition(QueryGroupCondition predicate)
         {
-            var predicates = predicate.Conditions.Select(p => BuildCondition(p)).ToArray();
+            var predicates = predicate.Conditions
+                .Select(p => BuildCondition(p))
+                .Where(p => p != null)
+                .ToArray();
 
-            if (!predicates.Any())
+            if (predicates.Any())
             {
-                throw new InputArgumentException("No predicates in a group");
+                return predicate.Operator switch
+                {
+                    QueryGroupOperator.And => new BoolQuery { Must = predicates },
+                    QueryGroupOperator.Or => new BoolQuery { Should = predicates },
+                    QueryGroupOperator.Not => BuildNotCondition(predicates),
+                    _ => throw new InputArgumentException($"Unknown group operator \"{predicate.Operator}\"")
+                };
             }
-
-            return predicate.Operator switch
+            else
             {
-                QueryGroupOperator.And => new BoolQuery { Must = predicates },
-                QueryGroupOperator.Or => new BoolQuery { Should = predicates },
-                QueryGroupOperator.Not => BuildNotCondition(predicates),
-                _ => throw new InputArgumentException($"Unknown group operator \"{predicate.Operator}\"")
-            };
+                return null;
+            }
         }
 
         private static QueryContainer BuildNotCondition(QueryContainer[] inputConditions)
@@ -117,16 +134,27 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             //TODO: double-check DateTime and serialization for all database types
             return predicate.Operator switch
             {
-                QueryPrimitiveOperator.Equals => new TermQuery { Field = predicate.ColumnName, Value = rawValue },
-                QueryPrimitiveOperator.In => new TermQuery { Field = predicate.ColumnName, Value = rawValue },
-                QueryPrimitiveOperator.NotEquals =>
-                    new BoolQuery
-                    {
-                        MustNot = new QueryContainer[]
+                QueryPrimitiveOperator.Equals => 
+                    rawValue != null 
+                        ? new TermQuery { Field = predicate.ColumnName, Value = rawValue }
+                        : new BoolQuery
                         {
-                            new TermQuery { Field = predicate.ColumnName, Value = rawValue }
+                            MustNot = new QueryContainer[]
+                            {
+                                new ExistsQuery { Field = predicate.ColumnName }
+                            }
+                        },
+                QueryPrimitiveOperator.In => new TermQuery { Field = predicate.ColumnName, Value = rawValue },
+                QueryPrimitiveOperator.NotEquals => 
+                    rawValue != null 
+                        ? new BoolQuery 
+                        {
+                            MustNot = new QueryContainer[]
+                            {
+                                new TermQuery { Field = predicate.ColumnName, Value = rawValue }
+                            }
                         }
-                    },
+                        : new ExistsQuery { Field = predicate.ColumnName },
                 QueryPrimitiveOperator.Lower => column.Type switch 
                     {
                         ColumnType.Integer => new LongRangeQuery { Field = predicate.ColumnName, LessThan = (long?)rawValue },

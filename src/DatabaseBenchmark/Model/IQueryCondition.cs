@@ -2,5 +2,6 @@
 {
     public interface IQueryCondition
     {
+        bool RandomizeInclusion { get; }
     }
 }

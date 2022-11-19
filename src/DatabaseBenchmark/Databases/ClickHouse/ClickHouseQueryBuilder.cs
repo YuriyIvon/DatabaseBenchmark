@@ -11,7 +11,9 @@ namespace DatabaseBenchmark.Databases.ClickHouse
             Table table,
             Query query,
             SqlParametersBuilder parametersBuilder,
-            IRandomValueProvider randomValueProvider) : base(table, query, parametersBuilder, randomValueProvider)
+            IRandomValueProvider randomValueProvider,
+            IRandomGenerator randomGenerator) 
+            : base(table, query, parametersBuilder, randomValueProvider, randomGenerator)
         {
         }
 

@@ -1,10 +1,11 @@
 ﻿using DatabaseBenchmark.Model;
+using System.Linq;
 
 namespace DatabaseBenchmark.Tests.Utils
 {
     public static class SampleInputs
     {
-        public static Table Table { get; } = new()
+        public static Table Table => new()
         {
             Name = "Sample",
             Columns = new Column[]
@@ -68,12 +69,12 @@ namespace DatabaseBenchmark.Tests.Utils
             }
         };
 
-        public static Query NoArgumentsQuery { get; } = new Query();
+        public static Query NoArgumentsQuery => new();
 
-        public static Query SpecificFieldsQuery { get; } = new Query
+        public static Query SpecificFieldsQuery => new()
         {
-            Columns = new string[] 
-            { 
+            Columns = new string[]
+            {
                 "Id",
                 "Category",
                 "Name",
@@ -83,7 +84,7 @@ namespace DatabaseBenchmark.Tests.Utils
             }
         };
 
-        public static Query AllArgumentsQuery { get; } = new Query
+        public static Query AllArgumentsQuery => new()
         {
             Columns = new string[] { "Category", "SubCategory" },
             Condition = new QueryGroupCondition
@@ -135,7 +136,34 @@ namespace DatabaseBenchmark.Tests.Utils
             Take = 100
         };
 
-        public static RawQuery RawSqlQuery { get; } = new RawQuery
+        public static Query AllArgumentsQueryRandomizeInclusionAll
+        {
+            get
+            {
+                var query = AllArgumentsQuery;
+                var topCondition = (QueryGroupCondition)query.Condition;
+                foreach (QueryPrimitiveCondition condition in topCondition.Conditions)
+                {
+                    condition.RandomizeInclusion = true;
+                }
+
+                return query;
+            }
+        }
+
+        public static Query AllArgumentsQueryRandomizeInclusionPartial
+        {
+            get
+            {
+                var query = AllArgumentsQuery;
+                var topCondition = (QueryGroupCondition)query.Condition;
+                topCondition.Conditions.Cast<QueryPrimitiveCondition>().First().RandomizeInclusion = true;
+
+                return query;
+            }
+        }
+
+        public static RawQuery RawSqlQuery => new()
         {
             Text = "SELECT * FROM Sample WHERE Category = ${category}",
             Parameters = new RawQueryParameter[]

@@ -15,7 +15,7 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryNoArguments()
         {
             var parametersBuilder = new SqlParametersBuilder(":");
-            var builder = new SqlQueryBuilder(SampleInputs.Table, SampleInputs.NoArgumentsQuery, parametersBuilder, null);
+            var builder = new SqlQueryBuilder(SampleInputs.Table, SampleInputs.NoArgumentsQuery, parametersBuilder, null, null);
 
             var queryText = builder.Build();
 
@@ -28,7 +28,7 @@ namespace DatabaseBenchmark.Tests.Databases
         {
             var query = SampleInputs.AllArgumentsQuery;
             var parametersBuilder = new SqlParametersBuilder(":");
-            var builder = new SqlQueryBuilder(SampleInputs.Table, query, parametersBuilder, null);
+            var builder = new SqlQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null);
 
             var queryText = builder.Build();
 
