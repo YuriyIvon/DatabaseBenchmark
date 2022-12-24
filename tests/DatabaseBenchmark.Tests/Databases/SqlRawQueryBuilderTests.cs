@@ -1,5 +1,7 @@
 ﻿using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
+using System.Linq;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Databases
@@ -10,14 +12,19 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildParameterizedQuery()
         {
             var query = SampleInputs.RawSqlQuery;
-            var parametersBuilder = new SqlParametersBuilder();
+            var parametersBuilder = new SqlQueryParametersBuilder();
             var builder = new SqlRawQueryBuilder(query, parametersBuilder, null);
 
             var queryText = builder.Build();
 
             Assert.Equal("SELECT * FROM Sample WHERE Category = @p0", queryText);
-            Assert.Single(parametersBuilder.Values);
-            Assert.Equal("ABC", parametersBuilder.Values["@p0"]);
+
+            var reference = new SqlQueryParameter[]
+            {
+                new ('@', "p0", "ABC", ColumnType.String)
+            };
+
+            Assert.Equal(reference, parametersBuilder.Parameters);
         }
     }
 }

@@ -14,6 +14,11 @@ namespace DatabaseBenchmark.Databases.Sql
             }
             catch
             {
+                if (connection.State != ConnectionState.Open)
+                {
+                    connection.Close();
+                    connection.Open();
+                }
             }
         }
     }

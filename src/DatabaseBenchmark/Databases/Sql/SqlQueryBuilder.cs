@@ -14,7 +14,7 @@ namespace DatabaseBenchmark.Databases.Sql
 
         protected Query Query { get; }
 
-        protected SqlParametersBuilder ParametersBuilder { get; }
+        protected SqlQueryParametersBuilder ParametersBuilder { get; }
 
         protected IRandomValueProvider RandomValueProvider { get; }
 
@@ -23,7 +23,7 @@ namespace DatabaseBenchmark.Databases.Sql
         public SqlQueryBuilder(
             Table table,
             Query query,
-            SqlParametersBuilder parametersBuilder,
+            SqlQueryParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
             IRandomGenerator randomGenerator)
         {
@@ -199,6 +199,8 @@ namespace DatabaseBenchmark.Databases.Sql
 
         protected virtual string BuildPrimitiveCondition(QueryPrimitiveCondition condition)
         {
+            var column = Table.Columns.FirstOrDefault(c => c.Name == condition.ColumnName);
+
             if (condition.Operator == QueryPrimitiveOperator.In)
             {
                 var conditionExpression = new StringBuilder(BuildRegularColumnReference(condition.ColumnName));
@@ -214,7 +216,7 @@ namespace DatabaseBenchmark.Databases.Sql
                 }
 
                 conditionExpression.Append("IN (");
-                conditionExpression.Append(string.Join(", ", rawCollection.Select(ParametersBuilder.Append)));
+                conditionExpression.Append(string.Join(", ", rawCollection.Select(v => ParametersBuilder.Append(v, column.Type))));
                 conditionExpression.Append(')');
 
                 return conditionExpression.ToString();
@@ -251,7 +253,7 @@ namespace DatabaseBenchmark.Databases.Sql
                     };
 
                     conditionExpression.Append(' ');
-                    conditionExpression.Append(ParametersBuilder.Append(value));
+                    conditionExpression.Append(ParametersBuilder.Append(value, column.Type));
 
                     return conditionExpression.ToString();
                 }
@@ -268,12 +270,12 @@ namespace DatabaseBenchmark.Databases.Sql
 
             if (Query.Skip > 0 || Query.Take > 0)
             {
-                expression.AppendLine($"OFFSET {ParametersBuilder.Append(Query.Skip)} ROWS");
+                expression.AppendLine($"OFFSET {ParametersBuilder.Append(Query.Skip, ColumnType.Integer)} ROWS");
             }
 
             if (Query.Take > 0)
             {
-                expression.AppendLine($"FETCH NEXT {ParametersBuilder.Append(Query.Take)} ROWS ONLY");
+                expression.AppendLine($"FETCH NEXT {ParametersBuilder.Append(Query.Take, ColumnType.Integer)} ROWS ONLY");
             }
 
             return expression.ToString();

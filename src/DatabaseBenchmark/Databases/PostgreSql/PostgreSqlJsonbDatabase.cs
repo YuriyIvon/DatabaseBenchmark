@@ -105,8 +105,8 @@ namespace DatabaseBenchmark.Databases.PostgreSql
              new SqlQueryExecutorFactory<NpgsqlConnection>(_connectionString, table, query, _environment)
                 .Customize<IOptionsProvider>(() => _optionsProvider)
                 .Customize<IDistinctValuesProvider, PostgreSqlJsonbDistinctValuesProvider>()
-                .Customize<SqlParametersBuilder, PostgreSqlJsonbParametersBuilder>()
-                .Customize<ISqlQueryBuilder, PostgreSqlJsonbQueryBuilder>();
+                .Customize<ISqlQueryBuilder, PostgreSqlJsonbQueryBuilder>()
+                .Customize<ISqlParameterAdapter, PostgreSqlJsonbParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             throw new NotImplementedException();

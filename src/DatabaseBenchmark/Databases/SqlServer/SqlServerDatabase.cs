@@ -90,10 +90,12 @@ namespace DatabaseBenchmark.Databases.SqlServer
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new SqlQueryExecutorFactory<SqlConnection>(_connectionString, table, query, _environment);
+            new SqlQueryExecutorFactory<SqlConnection>(_connectionString, table, query, _environment)
+                .Customize<ISqlParameterAdapter, SqlServerParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new SqlRawQueryExecutorFactory<SqlConnection>(_connectionString, query, _environment);
+            new SqlRawQueryExecutorFactory<SqlConnection>(_connectionString, query, _environment)
+                .Customize<ISqlParameterAdapter, SqlServerParameterAdapter>();
 
         private static long GetTableSize(SqlConnection connection, string tableName)
         {

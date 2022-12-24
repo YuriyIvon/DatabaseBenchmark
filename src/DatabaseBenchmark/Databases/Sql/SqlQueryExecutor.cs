@@ -5,22 +5,25 @@ using System.Data;
 
 namespace DatabaseBenchmark.Databases.Sql
 {
-    public class SqlQueryExecutor : IQueryExecutor
+    public sealed class SqlQueryExecutor : IQueryExecutor
     {
         private readonly IDbConnection _connection;
         private readonly ISqlQueryBuilder _queryBuilder;
-        private readonly SqlParametersBuilder _parametersBuilder;
+        private readonly SqlQueryParametersBuilder _parametersBuilder;
+        private readonly ISqlParameterAdapter _parameterAdapter;
         private readonly IExecutionEnvironment _environment;
 
         public SqlQueryExecutor(
             IDbConnection connection,
             ISqlQueryBuilder queryBuilder,
-            SqlParametersBuilder parametersBuilder,
+            SqlQueryParametersBuilder parametersBuilder,
+            ISqlParameterAdapter parameterAdapter,
             IExecutionEnvironment environment)
         {
             _connection = connection;
             _queryBuilder = queryBuilder;
             _parametersBuilder = parametersBuilder;
+            _parameterAdapter = parameterAdapter;
             _environment = environment;
         }
 
@@ -36,11 +39,10 @@ namespace DatabaseBenchmark.Databases.Sql
             var command = _connection.CreateCommand();
             command.CommandText = queryText;
 
-            foreach (var parameter in _parametersBuilder.Values)
+            foreach (var parameter in _parametersBuilder.Parameters)
             {
                 var dbParameter = command.CreateParameter();
-                dbParameter.ParameterName = parameter.Key;
-                dbParameter.Value = parameter.Value;
+                _parameterAdapter.Populate(parameter, dbParameter);
                 command.Parameters.Add(dbParameter);
             }
 

@@ -7,12 +7,12 @@ namespace DatabaseBenchmark.Databases.Sql
     public class SqlRawQueryBuilder : ISqlQueryBuilder
     {
         private readonly RawQuery _query;
-        private readonly SqlParametersBuilder _parametersBuilder;
+        private readonly SqlQueryParametersBuilder _parametersBuilder;
         private readonly IRandomValueProvider _randomValueProvider;
 
         public SqlRawQueryBuilder(
             RawQuery query,
-            SqlParametersBuilder parametersBuilder,
+            SqlQueryParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider)
         {
             _query = query;
@@ -48,12 +48,12 @@ namespace DatabaseBenchmark.Databases.Sql
 
                 if (rawValue is IEnumerable<object> rawCollection)
                 {
-                    var aliases = rawCollection.Select(v => _parametersBuilder.Append(v)).ToArray();
+                    var aliases = rawCollection.Select(v => _parametersBuilder.Append(v, parameter.Type)).ToArray();
                     parameterString = string.Join(", ", aliases);
                 }
                 else
                 {
-                    parameterString = _parametersBuilder.Append(rawValue);
+                    parameterString = _parametersBuilder.Append(rawValue, parameter.Type);
                 }
 
                 queryText = queryText.Replace($"${{{parameter.Name}}}", parameterString);

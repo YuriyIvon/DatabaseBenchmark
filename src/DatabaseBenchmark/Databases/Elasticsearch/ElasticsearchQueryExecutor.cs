@@ -3,7 +3,7 @@ using Nest;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
 {
-    public class ElasticsearchQueryExecutor : IQueryExecutor
+    public sealed class ElasticsearchQueryExecutor : IQueryExecutor
     {
         private readonly ElasticClient _client;
         private readonly IElasticsearchQueryBuilder _queryBuilder;

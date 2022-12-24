@@ -9,6 +9,7 @@ using DatabaseBenchmark.Databases.MongoDb;
 using DatabaseBenchmark.Databases.MySql;
 using DatabaseBenchmark.Databases.Oracle;
 using DatabaseBenchmark.Databases.PostgreSql;
+using DatabaseBenchmark.Databases.Snowflake;
 using DatabaseBenchmark.Databases.SqlServer;
 
 namespace DatabaseBenchmark.Databases
@@ -32,7 +33,8 @@ namespace DatabaseBenchmark.Databases
                 ["MongoDb"] = (connectionString) => new MongoDbDatabase(connectionString, environment, optionsProvider),
                 ["CosmosDb"] = (connectionString) => new CosmosDbDatabase(connectionString, environment, optionsProvider),
                 ["ClickHouse"] = (connectionString) => new ClickHouseDatabase(connectionString, environment, optionsProvider),
-                ["Oracle"] = (connectionString) => new OracleDatabase(connectionString, environment)
+                ["Oracle"] = (connectionString) => new OracleDatabase(connectionString, environment),
+                ["Snowflake"] = (connectionString) => new SnowflakeDatabase(connectionString, environment)
             };
         }
 

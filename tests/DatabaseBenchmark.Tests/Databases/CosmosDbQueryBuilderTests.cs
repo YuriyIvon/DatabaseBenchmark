@@ -1,6 +1,9 @@
 ﻿using DatabaseBenchmark.Databases.CosmosDb;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Databases
@@ -10,7 +13,7 @@ namespace DatabaseBenchmark.Tests.Databases
         [Fact]
         public void BuildQueryNoArguments()
         {
-            var parametersBuilder = new SqlParametersBuilder();
+            var parametersBuilder = new SqlQueryParametersBuilder();
             var builder = new CosmosDbQueryBuilder(SampleInputs.Table, SampleInputs.NoArgumentsQuery, parametersBuilder, null, null);
 
             var queryText = builder.Build();
@@ -23,7 +26,7 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryAllArguments()
         {
             var query = SampleInputs.AllArgumentsQuery;
-            var parametersBuilder = new SqlParametersBuilder();
+            var parametersBuilder = new SqlQueryParametersBuilder();
             var builder = new CosmosDbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null);
 
             var queryText = builder.Build();
@@ -35,10 +38,15 @@ namespace DatabaseBenchmark.Tests.Databases
                 + " GROUP BY Sample.Category, Sample.SubCategory"
                 + " ORDER BY Sample.Category ASC, Sample.SubCategory ASC"
                 + " OFFSET @p1 LIMIT @p2", normalizedQueryText);
-            Assert.Equal(3, parametersBuilder.Values.Count);
-            Assert.Equal("ABC", parametersBuilder.Values["@p0"]);
-            Assert.Equal(10, parametersBuilder.Values["@p1"]);
-            Assert.Equal(100, parametersBuilder.Values["@p2"]);
+
+            var reference = new SqlQueryParameter[]
+            {
+                new ('@', "p0", "ABC", ColumnType.String),
+                new ('@', "p1", 10, ColumnType.Integer),
+                new ('@', "p2", 100, ColumnType.Integer)
+            };
+
+            Assert.Equal(reference, parametersBuilder.Parameters);
         }
     }
 }

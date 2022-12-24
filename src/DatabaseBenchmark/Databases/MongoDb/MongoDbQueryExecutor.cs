@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace DatabaseBenchmark.Databases.MongoDb
 {
-    public class MongoDbQueryExecutor : IQueryExecutor
+    public sealed class MongoDbQueryExecutor : IQueryExecutor
     {
         private readonly IMongoCollection<BsonDocument> _collection;
         private readonly IMongoDbQueryBuilder _queryBuilder;

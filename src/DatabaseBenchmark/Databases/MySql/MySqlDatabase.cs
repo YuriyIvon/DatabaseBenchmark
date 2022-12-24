@@ -2,6 +2,7 @@
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Model;
+using DatabaseBenchmark.Databases.Oracle;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
@@ -60,7 +61,7 @@ namespace DatabaseBenchmark.Databases.MySql
 
             var stopwatch = Stopwatch.StartNew();
             var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new SqlDataImporter(_environment, progressReporter, null, batchSize);
+            var dataImporter = new SqlDataImporter(_environment, progressReporter, batchSize);
 
             var transaction = connection.BeginTransaction();
             try
@@ -87,10 +88,12 @@ namespace DatabaseBenchmark.Databases.MySql
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
             new SqlQueryExecutorFactory<MySqlConnection>(_connectionString, table, query, _environment)
-               .Customize<ISqlQueryBuilder, MySqlQueryBuilder>();
+                .Customize<ISqlQueryBuilder, MySqlQueryBuilder>()
+                .Customize<ISqlParameterAdapter, MySqlParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new SqlRawQueryExecutorFactory<MySqlConnection>(_connectionString, query, _environment);
+            new SqlRawQueryExecutorFactory<MySqlConnection>(_connectionString, query, _environment)
+                .Customize<ISqlParameterAdapter, MySqlParameterAdapter>();
 
         private static long GetTableSize(MySqlConnection connection, string tableName)
         {

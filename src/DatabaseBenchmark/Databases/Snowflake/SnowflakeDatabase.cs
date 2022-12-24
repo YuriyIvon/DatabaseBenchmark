@@ -4,29 +4,37 @@ using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Model;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
+using DatabaseBenchmark.Databases.SqlServer;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
-using Oracle.ManagedDataAccess.Client;
+using Snowflake.Data.Client;
+using System.Data.SqlClient;
 using System.Diagnostics;
 
-namespace DatabaseBenchmark.Databases.Oracle
+namespace DatabaseBenchmark.Databases.Snowflake
 {
-    public class OracleDatabase : IDatabase
+    public class SnowflakeDatabase : IDatabase
     {
-        private const int DefaultImportBatchSize = 10;
+        private const int DefaultImportBatchSize = 10000;
 
         private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
 
-        public OracleDatabase(string connectionString, IExecutionEnvironment environment)
+        public SnowflakeDatabase(string connectionString, IExecutionEnvironment environment)
         {
             _connectionString = connectionString;
             _environment = environment;
+
+            SnowflakeDbConnectionPool.SetPooling(false);
         }
 
         public void CreateTable(Table table, bool dropExisting)
         {
-            using var connection = new OracleConnection(_connectionString);
+            using var connection = new SnowflakeDbConnection
+            {
+                ConnectionString = _connectionString
+            };
+
             connection.Open();
 
             if (dropExisting)
@@ -34,9 +42,12 @@ namespace DatabaseBenchmark.Databases.Oracle
                 connection.DropTableIfExists(table.Name);
             }
 
-            var tableBuilder = new OracleTableBuilder();
+            var tableBuilder = new SnowflakeTableBuilder();
             var commandText = tableBuilder.Build(table);
-            var command = new OracleCommand(commandText, connection);
+            var command = new SnowflakeDbCommand(connection)
+            {
+                CommandText = commandText
+            };
 
             _environment.TraceCommand(command);
 
@@ -45,18 +56,18 @@ namespace DatabaseBenchmark.Databases.Oracle
 
         public ImportResult ImportData(Table table, IDataSource source, int batchSize)
         {
-            if (batchSize == 0)
+            if (batchSize <= 0)
             {
                 batchSize = DefaultImportBatchSize;
             }
 
-            using var connection = new OracleConnection(_connectionString);
+            using var connection = new SnowflakeDbConnection();
+            connection.ConnectionString = _connectionString;
             connection.Open();
 
             var stopwatch = Stopwatch.StartNew();
             var progressReporter = new ImportProgressReporter(_environment);
-            var parametersBuilder = new SqlQueryParametersBuilder(':');
-            var dataImporter = new OracleDataImporter(_environment, progressReporter, parametersBuilder, batchSize);
+            var dataImporter = new SqlDataImporter(_environment, progressReporter, batchSize);
 
             var transaction = connection.BeginTransaction();
             try
@@ -80,19 +91,24 @@ namespace DatabaseBenchmark.Databases.Oracle
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new SqlQueryExecutorFactory<OracleConnection>(_connectionString, table, query, _environment)
+             new SqlQueryExecutorFactory<SnowflakeDbConnection>(_connectionString, table, query, _environment)
+                .Customize<ISqlQueryBuilder, SnowflakeQueryBuilder>()
                 .Customize<SqlQueryParametersBuilder>(() => new SqlQueryParametersBuilder(':'))
-                .Customize<ISqlParameterAdapter, OracleParameterAdapter>();
+                .Customize<ISqlParameterAdapter, SnowflakeParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new SqlRawQueryExecutorFactory<OracleConnection>(_connectionString, query, _environment)
+            new SqlRawQueryExecutorFactory<SnowflakeDbConnection>(_connectionString, query, _environment)
                 .Customize<SqlQueryParametersBuilder>(() => new SqlQueryParametersBuilder(':'))
-                .Customize<ISqlParameterAdapter, OracleParameterAdapter>();
+                .Customize<ISqlParameterAdapter, SnowflakeParameterAdapter>();
 
-        private static long GetRowCount(OracleConnection connection, string tableName)
+        private static long GetRowCount(SnowflakeDbConnection connection, string tableName)
         {
-            var command = new OracleCommand($"SELECT COUNT(1) FROM {tableName}", connection);
-            return (long)(decimal)command.ExecuteScalar();
+            var command = new SnowflakeDbCommand(connection)
+            {
+                CommandText = $"SELECT COUNT(1) FROM {tableName}"
+            };
+
+            return (long)command.ExecuteScalar();
         }
     }
 }
