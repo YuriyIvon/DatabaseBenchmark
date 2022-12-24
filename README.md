@@ -309,33 +309,42 @@ Please note that the latter setting is applied to all custom metrics provided by
 The list below shows only basic examples. For more advanced connection settings please refer to the respective client library documentation.
 
 **ClickHouse**
+
 `Host=myhost;Port=9000;Database=default;Password=mypassword`
 
 **Cosmos DB**
+
 `AccountEndpoint=myendpoint;AccountKey=myaccountkey;Database=mydb`
 
-**Elasticsearch** 
+**Elasticsearch**
+
 `http://localhost:9200`
 
-**MySQL** 
+**MySQL**
 `Server=myhost;Database=mydb;Uid=myuser;Pwd=mypassword;`
 
 **MonetDB**
+
 `Host=myhost;port=50000;Database=mydb;username=myuser;password=mypassword`
 
-**MongoDB** 
+**MongoDB**
+
 `mongodb://myhost/mydb`
 
 **Oracle**
+
 `Data Source=myhost:1521/XE;User Id=myuser;Password=mypassword`
 
 **PostgreSQL**
+
 `Host=myhost;Port=5432;Database=mydb;Username=myuser;Password=mypassword`
 
 **Snowflake**
+
 `account=myaccount;host=myhost;user=myuser;password=mypassword;db=mydb;schema=public;warehouse=mywarehouse`
 
 **SQL Server**
+
 `Data Source=.;Initial Catalog=mydb;Integrated Security=True;`
 
 ## Limitations<a name="limitations"></a>
