@@ -7,11 +7,11 @@ using System.Text;
 
 namespace DatabaseBenchmark.Databases.CosmosDb
 {
-    public class CosmosDbQueryExecutor : IQueryExecutor
+    public sealed class CosmosDbQueryExecutor : IQueryExecutor
     {
         private readonly CosmosClient _client;
         private readonly Container _container;
-        private readonly SqlParametersBuilder _parametersBuilder;
+        private readonly SqlQueryParametersBuilder _parametersBuilder;
         private readonly ISqlQueryBuilder _queryBuilder;
         private readonly IExecutionEnvironment _environment;
         private readonly IOptionsProvider _optionsProvider;
@@ -20,7 +20,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             CosmosClient client,
             Container container,
             ISqlQueryBuilder queryBuilder,
-            SqlParametersBuilder parametersBuilder,
+            SqlQueryParametersBuilder parametersBuilder,
             IExecutionEnvironment environment,
             IOptionsProvider optionsProvider)
         {
@@ -36,12 +36,12 @@ namespace DatabaseBenchmark.Databases.CosmosDb
         {
             var query = _queryBuilder.Build();
 
-            TraceCommand(query, _parametersBuilder.Values);
+            TraceCommand(query, _parametersBuilder.Parameters);
 
             var queryDefinition = new QueryDefinition(query);
-            foreach (var parameter in _parametersBuilder.Values)
+            foreach (var parameter in _parametersBuilder.Parameters)
             {
-                queryDefinition.WithParameter(parameter.Key, parameter.Value);
+                queryDefinition.WithParameter(parameter.Prefix + parameter.Name, parameter.Value);
             }
 
             var options = _optionsProvider.GetOptions<CosmosDbQueryOptions>();
@@ -56,7 +56,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             }
         }
 
-        public void TraceCommand(string query, IDictionary<string, object> parameters)
+        public void TraceCommand(string query, IEnumerable<SqlQueryParameter> parameters)
         {
             if (_environment.TraceQueries)
             {
@@ -65,13 +65,13 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 traceBuilder.AppendLine("Query:");
                 traceBuilder.AppendLine(query);
 
-                if (parameters.Count > 0)
+                if (parameters.Any())
                 {
                     traceBuilder.AppendLine("Parameters:");
 
                     foreach (var parameter in parameters)
                     {
-                        traceBuilder.AppendLine($"{parameter.Key}={parameter.Value}");
+                        traceBuilder.AppendLine($"{parameter.Prefix}{parameter.Name}={parameter.Value}");
                     }
                 }
 

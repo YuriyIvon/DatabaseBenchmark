@@ -40,7 +40,7 @@ namespace DatabaseBenchmark.Databases.ClickHouse
                 ColumnType.Double => "Float64",
                 ColumnType.String => "String",
                 ColumnType.Text => "String",
-                ColumnType.DateTime => "DateTime",
+                ColumnType.DateTime => "DateTime64",
                 _ => throw new InputArgumentException($"Unknown column type \"{column.Type}\"")
             };
 

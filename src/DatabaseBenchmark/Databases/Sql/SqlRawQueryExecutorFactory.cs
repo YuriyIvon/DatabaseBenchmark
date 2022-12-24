@@ -29,7 +29,7 @@ namespace DatabaseBenchmark.Databases.Sql
             Container.Register<IDbConnection>(() => new TConnection { ConnectionString = connectionString }, Lifestyle);
             Container.Register<IDistinctValuesProvider, SqlDistinctValuesProvider>(Lifestyle);
             Container.Register<IRandomValueProvider, RandomValueProvider>(Lifestyle);
-            Container.Register<SqlParametersBuilder>(() => new SqlParametersBuilder(), Lifestyle);
+            Container.Register<SqlQueryParametersBuilder>(() => new SqlQueryParametersBuilder(), Lifestyle);
             Container.Register<ISqlQueryBuilder, SqlRawQueryBuilder>(Lifestyle);
             Container.Register<IQueryExecutor, SqlQueryExecutor>(Lifestyle);
         }

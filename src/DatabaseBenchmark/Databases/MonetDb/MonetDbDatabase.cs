@@ -55,7 +55,7 @@ namespace DatabaseBenchmark.Databases.MonetDb
 
             var stopwatch = Stopwatch.StartNew();
             var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new SqlDataImporter(_environment, progressReporter, null, batchSize);
+            var dataImporter = new SqlDataImporter(_environment, progressReporter, batchSize);
 
             var transaction = connection.BeginTransaction();
             try
@@ -82,10 +82,12 @@ namespace DatabaseBenchmark.Databases.MonetDb
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
             new SqlQueryExecutorFactory<MonetDbConnection>(_connectionString, table, query, _environment)
-                .Customize<ISqlQueryBuilder, MonetDbQueryBuilder>();
+                .Customize<ISqlQueryBuilder, MonetDbQueryBuilder>()
+                .Customize<ISqlParameterAdapter, MonetDbParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new SqlRawQueryExecutorFactory<MonetDbConnection>(_connectionString, query, _environment);
+            new SqlRawQueryExecutorFactory<MonetDbConnection>(_connectionString, query, _environment)
+                .Customize<ISqlParameterAdapter, MonetDbParameterAdapter>();
 
         private static long GetTableSize(MonetDbConnection connection, string tableName)
         {

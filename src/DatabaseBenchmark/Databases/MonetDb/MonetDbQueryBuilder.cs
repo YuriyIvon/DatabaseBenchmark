@@ -10,7 +10,7 @@ namespace DatabaseBenchmark.Databases.MonetDb
         public MonetDbQueryBuilder(
             Table table,
             Query query,
-            SqlParametersBuilder parametersBuilder,
+            SqlQueryParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
             IRandomGenerator randomGenerator) 
             : base(table, query, parametersBuilder, randomValueProvider, randomGenerator)
@@ -23,12 +23,12 @@ namespace DatabaseBenchmark.Databases.MonetDb
 
             if (Query.Take > 0)
             {
-                expression.AppendLine($"LIMIT {ParametersBuilder.Append(Query.Take)}");
+                expression.AppendLine($"LIMIT {ParametersBuilder.Append(Query.Take, ColumnType.Integer)}");
             }
 
             if (Query.Skip > 0)
             {
-                expression.AppendLine($"OFFSET {ParametersBuilder.Append(Query.Skip)}");
+                expression.AppendLine($"OFFSET {ParametersBuilder.Append(Query.Skip, ColumnType.Integer)}");
             }
 
             return expression.ToString();

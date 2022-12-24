@@ -1,5 +1,6 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Data;
@@ -11,17 +12,20 @@ namespace DatabaseBenchmark.Databases.Sql
     {
         private readonly IExecutionEnvironment _environment;
         private readonly IProgressReporter _progressReporter;
-        private readonly SqlParametersBuilder _parametersBuilder;
+        private readonly SqlQueryParametersBuilder _parametersBuilder;
+        private readonly ISqlParameterAdapter _parameterAdapter;
         private readonly int _batchSize;
 
         public SqlDataImporter(IExecutionEnvironment environment, 
             IProgressReporter progressReporter,
-            SqlParametersBuilder parametersBuilder,
-            int batchSize)
+            int batchSize,
+            SqlQueryParametersBuilder parametersBuilder = null,
+            ISqlParameterAdapter parameterAdapter = null)
         {
             _environment = environment;
             _progressReporter = progressReporter;
             _parametersBuilder = parametersBuilder;
+            _parameterAdapter = parameterAdapter;
             _batchSize = batchSize;
         }
 
@@ -63,7 +67,7 @@ namespace DatabaseBenchmark.Databases.Sql
                         value = null;
                     }
 
-                    var valueRepresentation = _parametersBuilder != null ? _parametersBuilder.Append(value) : FormatValue(value);
+                    var valueRepresentation = _parametersBuilder != null ? _parametersBuilder.Append(value, column.Type) : FormatValue(value);
                     values.Add(valueRepresentation);
                 }
 
@@ -84,12 +88,11 @@ namespace DatabaseBenchmark.Databases.Sql
 
                 if (_parametersBuilder != null)
                 {
-                    foreach (var parameterValue in _parametersBuilder.Values)
+                    foreach (var parameter in _parametersBuilder.Parameters)
                     {
-                        var parameter = command.CreateParameter();
-                        parameter.ParameterName = parameterValue.Key;
-                        parameter.Value = parameterValue.Value ?? DBNull.Value;
-                        command.Parameters.Add(parameter);
+                        var dbParameter = command.CreateParameter();
+                        _parameterAdapter.Populate(parameter, dbParameter);
+                        command.Parameters.Add(dbParameter);
                     }
                 }
 

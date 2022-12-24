@@ -13,7 +13,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
         public PostgreSqlJsonbQueryBuilder(
             Table table,
             Query query,
-            SqlParametersBuilder parametersBuilder,
+            SqlQueryParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
             IRandomGenerator randomGenerator,
             IOptionsProvider optionsProvider) 
@@ -74,17 +74,17 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             }
         }
 
-        protected override string BuildPrimitiveCondition(QueryPrimitiveCondition predicate)
+        protected override string BuildPrimitiveCondition(QueryPrimitiveCondition condition)
         {
-            var column = Table.Columns.FirstOrDefault(c => c.Name == predicate.ColumnName);
+            var column = Table.Columns.FirstOrDefault(c => c.Name == condition.ColumnName);
 
             if (_queryOptions.UseGinOperators && column.Queryable)
             {
-                if (predicate.Operator == QueryPrimitiveOperator.In)
+                if (condition.Operator == QueryPrimitiveOperator.In)
                 {
-                    var rawCollection = predicate.RandomizeValue
-                        ? RandomValueProvider.GetRandomValueCollection(Table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
-                        : (IEnumerable<object>)predicate.Value;
+                    var rawCollection = condition.RandomizeValue
+                        ? RandomValueProvider.GetRandomValueCollection(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                        : (IEnumerable<object>)condition.Value;
 
                     //Rewrite IN operator as a set of OR expressions
                     var orCondition = new QueryGroupCondition
@@ -93,7 +93,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                         Conditions = rawCollection.Select(v =>
                             new QueryPrimitiveCondition
                             {
-                                ColumnName = predicate.ColumnName,
+                                ColumnName = condition.ColumnName,
                                 Operator = QueryPrimitiveOperator.Equals,
                                 Value = v
                             })
@@ -102,13 +102,13 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
                     return BuildGroupCondition(orCondition);
                 }
-                else if (predicate.Operator == QueryPrimitiveOperator.Equals)
+                else if (condition.Operator == QueryPrimitiveOperator.Equals)
                 {
                     var predicateExpression = new StringBuilder("attributes @>");
 
-                    var rawValue = predicate.RandomizeValue
-                        ? RandomValueProvider.GetRandomValue(Table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
-                        : predicate.Value;
+                    var rawValue = condition.RandomizeValue
+                        ? RandomValueProvider.GetRandomValue(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                        : condition.Value;
 
                     var value = rawValue == null
                         ? "null"
@@ -122,7 +122,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                 }
             }
 
-            return base.BuildPrimitiveCondition(predicate);
+            return base.BuildPrimitiveCondition(condition);
         }
 
         private static string BuildUnaryCondition(string @operator, string[] inputConditions)

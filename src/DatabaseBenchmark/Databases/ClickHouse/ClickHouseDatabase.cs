@@ -39,6 +39,11 @@ namespace DatabaseBenchmark.Databases.ClickHouse
                 connection.DropTableIfExists(table.Name);
             }
 
+            if (table.Columns.Any(c => c.DatabaseGenerated))
+            {
+                _environment.WriteLine("WARNING: ClickHouse doesn't support database-generated columns");
+            }
+
             var tableBuilder = new ClickHouseTableBuilder(_optionsProvider);
             var commandText = tableBuilder.Build(table);
             var command = connection.CreateCommand(commandText);
@@ -60,7 +65,7 @@ namespace DatabaseBenchmark.Databases.ClickHouse
 
             var stopwatch = Stopwatch.StartNew();
             var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new SqlDataImporter(_environment, progressReporter, null, batchSize);
+            var dataImporter = new SqlDataImporter(_environment, progressReporter, batchSize);
 
             dataImporter.Import(source, table, connection, null);
 
@@ -76,10 +81,12 @@ namespace DatabaseBenchmark.Databases.ClickHouse
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
             new SqlQueryExecutorFactory<ClickHouseConnection>(_connectionString, table, query, _environment)
-                .Customize<ISqlQueryBuilder, ClickHouseQueryBuilder>();
+                .Customize<ISqlQueryBuilder, ClickHouseQueryBuilder>()
+                .Customize<ISqlParameterAdapter, ClickHouseParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new SqlRawQueryExecutorFactory<ClickHouseConnection>(_connectionString, query, _environment);
+            new SqlRawQueryExecutorFactory<ClickHouseConnection>(_connectionString, query, _environment)
+                .Customize<ISqlParameterAdapter, ClickHouseParameterAdapter>();
 
         private static long GetRowCount(ClickHouseConnection connection, string tableName)
         {

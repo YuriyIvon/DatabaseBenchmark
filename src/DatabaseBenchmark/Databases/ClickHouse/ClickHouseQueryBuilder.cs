@@ -10,7 +10,7 @@ namespace DatabaseBenchmark.Databases.ClickHouse
         public ClickHouseQueryBuilder(
             Table table,
             Query query,
-            SqlParametersBuilder parametersBuilder,
+            SqlQueryParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
             IRandomGenerator randomGenerator) 
             : base(table, query, parametersBuilder, randomValueProvider, randomGenerator)

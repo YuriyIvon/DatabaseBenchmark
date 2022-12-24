@@ -3,16 +3,16 @@ using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Model;
 using System.Text;
 
-namespace DatabaseBenchmark.Databases.MySql
+namespace DatabaseBenchmark.Databases.Snowflake
 {
-    public class MySqlQueryBuilder : SqlQueryBuilder
+    public class SnowflakeQueryBuilder : SqlQueryBuilder
     {
-        public MySqlQueryBuilder(
+        public SnowflakeQueryBuilder(
             Table table,
             Query query,
             SqlQueryParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
-            IRandomGenerator randomGenerator) 
+            IRandomGenerator randomGenerator)
             : base(table, query, parametersBuilder, randomValueProvider, randomGenerator)
         {
         }
@@ -21,13 +21,14 @@ namespace DatabaseBenchmark.Databases.MySql
         {
             var expression = new StringBuilder();
 
-            if (Query.Take > 0 && Query.Skip > 0)
-            {
-                expression.AppendLine($"LIMIT {Query.Skip}, {Query.Take}");
-            }
-            else if (Query.Take > 0)
+            if (Query.Take > 0)
             {
                 expression.AppendLine($"LIMIT {Query.Take}");
+            }
+
+            if (Query.Skip > 0)
+            {
+                expression.AppendLine($"OFFSET {Query.Skip}");
             }
 
             return expression.ToString();

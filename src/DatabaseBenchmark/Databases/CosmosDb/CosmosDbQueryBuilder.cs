@@ -11,7 +11,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
         public CosmosDbQueryBuilder(
             Table table,
             Query query,
-            SqlParametersBuilder parametersBuilder,
+            SqlQueryParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
             IRandomGenerator randomGenerator) 
             : base(table, query, parametersBuilder, randomValueProvider, randomGenerator)
@@ -38,12 +38,12 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 
             if (Query.Skip > 0 || Query.Take > 0)
             {
-                expression.AppendLine($"OFFSET {ParametersBuilder.Append(Query.Skip)}");
+                expression.AppendLine($"OFFSET {ParametersBuilder.Append(Query.Skip, ColumnType.Integer)}");
             }
 
             if (Query.Take > 0)
             {
-                expression.AppendLine($"LIMIT {ParametersBuilder.Append(Query.Take)}");
+                expression.AppendLine($"LIMIT {ParametersBuilder.Append(Query.Take, ColumnType.Integer)}");
             }
 
             return expression.ToString();

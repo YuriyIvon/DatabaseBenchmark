@@ -14,8 +14,13 @@ namespace DatabaseBenchmark.Databases.Oracle
 
         public OracleDataImporter(IExecutionEnvironment environment,
             IProgressReporter progressReporter,
-            SqlParametersBuilder parametersBuilder,
-            int batchSize) : base(environment, progressReporter, parametersBuilder, batchSize)
+            SqlQueryParametersBuilder parametersBuilder,
+            int batchSize) : base(
+                  environment, 
+                  progressReporter,
+                  batchSize,
+                  parametersBuilder, 
+                  new OracleParameterAdapter())
         {
         }
 

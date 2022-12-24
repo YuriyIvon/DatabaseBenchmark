@@ -1,6 +1,8 @@
 ﻿using DatabaseBenchmark.Databases.MySql;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
+using System.Linq;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Databases
@@ -10,7 +12,7 @@ namespace DatabaseBenchmark.Tests.Databases
         [Fact]
         public void BuildQueryNoArguments()
         {
-            var parametersBuilder = new SqlParametersBuilder();
+            var parametersBuilder = new SqlQueryParametersBuilder();
             var builder = new MySqlQueryBuilder(SampleInputs.Table, SampleInputs.NoArgumentsQuery, parametersBuilder, null, null);
 
             var queryText = builder.Build();
@@ -23,7 +25,7 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryAllArguments()
         {
             var query = SampleInputs.AllArgumentsQuery;
-            var parametersBuilder = new SqlParametersBuilder();
+            var parametersBuilder = new SqlQueryParametersBuilder();
             var builder = new MySqlQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null);
 
             var queryText = builder.Build();
@@ -34,8 +36,13 @@ namespace DatabaseBenchmark.Tests.Databases
                 + " GROUP BY Category, SubCategory"
                 + " ORDER BY Category ASC, SubCategory ASC"
                 + " LIMIT 10, 100", normalizedQueryText);
-            Assert.Single(parametersBuilder.Values);
-            Assert.Equal("ABC", parametersBuilder.Values["@p0"]);
+
+            var reference = new SqlQueryParameter[]
+            {
+                new ('@', "p0", "ABC", ColumnType.String)
+            };
+
+            Assert.Equal(reference, parametersBuilder.Parameters);
         }
     }
 }

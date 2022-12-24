@@ -31,7 +31,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             Container.Register<Container>(() => Container.GetInstance<Database>().GetContainer(query.TableName), Lifestyle);
             Container.Register<IDistinctValuesProvider, CosmosDbDistinctValuesProvider>(Lifestyle);
             Container.Register<IRandomValueProvider, RandomValueProvider>(Lifestyle);
-            Container.Register<SqlParametersBuilder>(() => new SqlParametersBuilder(), Lifestyle);
+            Container.Register<SqlQueryParametersBuilder>(() => new SqlQueryParametersBuilder(), Lifestyle);
             Container.Register<ISqlQueryBuilder, SqlRawQueryBuilder>(Lifestyle);
             Container.Register<IQueryExecutor, CosmosDbQueryExecutor>(Lifestyle);
         }
