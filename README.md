@@ -26,6 +26,7 @@ This tool addresses the issues from above by introducing a data import and query
   * [Query definition](#query_definition)
   * [Value randomization rules](#value_randomization_rules)
   * [Report columns](#report_columns)
+  * [Connection strings](#connection_strings)
 
 * [Limitations](#limitations)
 
@@ -59,7 +60,10 @@ Supported values for `DatabaseType` parameter are:
 * `Oracle`
 * `Postgres`
 * `PostgresJsonb` - stores all queryable "logical" columns in a single JSONB column indexed with GIN index of  jsonb_path_ops type. Supports only `Equals` and `In` primitive operators. 
+* `Snowflake`
 * `SqlServer`
+
+Connection string samples for each of the database engines can be found in the [corresponding section](#connection_strings).
 
 There is a parameter specific to the `create` command:
 * `DropExisting` - specifies whether to re-create the table if it already exists.
@@ -300,6 +304,30 @@ For `ReportCustomMetricColumns`:
 By default, all four columns are shown for each custom metric.
 
 Please note that the latter setting is applied to all custom metrics provided by a database plugin, so if only `avg` is specified, the average value will be printed for each custom metric.
+
+### Connection strings<a name="connection_strings"></a>
+The list below shows only basic examples. For more advanced connection settings please refer to the respective client library documentation.
+
+**ClickHouse**
+`Host=myhost;Port=9000;Database=default;Password=mypassword`
+**Cosmos DB**
+`AccountEndpoint=myendpoint;AccountKey=myaccountkey;Database=mydb`
+**Elasticsearch** 
+`http://localhost:9200`
+**MySQL** 
+`Server=myhost;Database=mydb;Uid=myuser;Pwd=mypassword;`
+**MonetDB**
+`Host=myhost;port=50000;Database=mydb;username=myuser;password=mypassword`
+**MongoDB** 
+`mongodb://myhost/mydb`
+**Oracle**
+`Data Source=myhost:1521/XE;User Id=myuser;Password=mypassword`
+**PostgreSQL**
+`Host=myhost;Port=5432;Database=mydb;Username=myuser;Password=mypassword`
+**Snowflake**
+`account=myaccount;host=myhost;user=myuser;password=mypassword;db=mydb;schema=public;warehouse=mywarehouse`
+**SQL Server**
+`Data Source=.;Initial Catalog=mydb;Integrated Security=True;`
 
 ## Limitations<a name="limitations"></a>
 
