@@ -321,6 +321,7 @@ The list below shows only basic examples. For more advanced connection settings 
 `http://localhost:9200`
 
 **MySQL**
+
 `Server=myhost;Database=mydb;Uid=myuser;Pwd=mypassword;`
 
 **MonetDB**
