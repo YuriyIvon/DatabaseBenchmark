@@ -26,6 +26,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                 ColumnType.Guid => NpgsqlDbType.Uuid,
                 ColumnType.String => NpgsqlDbType.Varchar,
                 ColumnType.Text => NpgsqlDbType.Varchar,
+                ColumnType.Json => NpgsqlDbType.Jsonb,
                 _ => throw new InputArgumentException($"Parameter type {source.Type} is not supported")
             };
         }

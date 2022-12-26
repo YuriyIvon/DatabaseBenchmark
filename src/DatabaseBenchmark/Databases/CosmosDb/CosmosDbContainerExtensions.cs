@@ -4,10 +4,10 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 {
     public static class CosmosDbContainerExtensions
     {
-        public static CosmosDbQueryResult<T> Query<T>(this Container container, string query) =>
+        public static CosmosDbQueryResponse<T> Query<T>(this Container container, string query) =>
             Query<T>(container, new QueryDefinition(query));
 
-        public static CosmosDbQueryResult<T> Query<T>(this Container container, QueryDefinition queryDefinition)
+        public static CosmosDbQueryResponse<T> Query<T>(this Container container, QueryDefinition queryDefinition)
         {
             using var iterator = container.GetItemQueryIterator<T>(queryDefinition);
 
@@ -22,7 +22,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 totalRequestCharge += result.RequestCharge;
             }
 
-            return new CosmosDbQueryResult<T>(items, totalRequestCharge);
+            return new CosmosDbQueryResponse<T>(items, totalRequestCharge);
         }
 
         public static int Count(this Container container)

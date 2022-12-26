@@ -6,7 +6,6 @@ using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Data;
 using System.Diagnostics;
 
 namespace DatabaseBenchmark.Databases.MongoDb
@@ -60,45 +59,27 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
             var database = GetDatabase();
             var collection = database.GetCollection<BsonDocument>(table.Name);
-
-            var buffer = new List<BsonDocument>();
-
-            var stopwatch = Stopwatch.StartNew();
             var progressReporter = new ImportProgressReporter(_environment);
             var options = _optionsProvider.GetOptions<MongoDbImportOptions>();
+            var insertBuilder = new MongoDbInsertBuilder(table, source) { BatchSize = batchSize };
+            var insertExecutor = new MongoDbInsertExecutor(collection, insertBuilder);
+
             double totalRequestCharge = 0;
+            var stopwatch = Stopwatch.StartNew();
 
-            while (source.Read())
+            //TODO: dispose correctly
+            var preparedInsert = insertExecutor.Prepare();
+            while (preparedInsert != null)
             {
-                var document = table.Columns
-                    .Where(c => !c.DatabaseGenerated)
-                    .ToDictionary(
-                        c => c.Name,
-                        c => source.GetValue(c.GetNativeType(), c.Name));
+                var rowsInserted = preparedInsert.Execute();
+                progressReporter.Increment(rowsInserted);
 
-                buffer.Add(new BsonDocument(document));
-
-                if (buffer.Count >= batchSize)
+                if (options.CollectCosmosDbRequestUnits)
                 {
-                    collection.InsertMany(buffer,
-                        new InsertManyOptions
-                        {
-                            IsOrdered = false
-                        });
-
-                    progressReporter.Increment(buffer.Count);
-                    buffer.Clear();
-
-                    if (options.CollectCosmosDbRequestUnits)
-                    {
-                        totalRequestCharge += collection.GetLastCommandRequestCharge();
-                    }
+                    totalRequestCharge += preparedInsert.CustomMetrics[MongoDbConstants.RequestUnitsMetric];
                 }
-            }
 
-            if (buffer.Count > 0)
-            {
-                collection.InsertMany(buffer);
+                preparedInsert = insertExecutor.Prepare();
             }
 
             stopwatch.Stop();

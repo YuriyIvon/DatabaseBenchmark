@@ -24,9 +24,10 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             _documents = documents;
         }
 
-        public void Execute()
+        public int Execute()
         {
-            _client.IndexMany(_documents, _table.Name);
+            var response = _client.IndexMany(_documents, _table.Name);
+            return response.Items.Count;
         }
 
         public void Dispose()

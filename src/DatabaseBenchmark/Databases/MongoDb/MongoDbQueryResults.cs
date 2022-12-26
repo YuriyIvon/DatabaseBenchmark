@@ -57,10 +57,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
             return _batchItemIndex < _batchItems.Length;
         }
 
-        public void Dispose()
-        {
-            _cursor?.Dispose();
-        }
+        public void Dispose() => _cursor?.Dispose();
 
         private static object ToStandardType(object value) =>
             value switch

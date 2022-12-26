@@ -16,10 +16,7 @@ namespace DatabaseBenchmark.Databases.Sql
             _command = command;
         }
 
-        public void Execute()
-        {
-            _command.ExecuteNonQuery();
-        }
+        public int Execute() => _command.ExecuteNonQuery();
 
         public void Dispose()
         {

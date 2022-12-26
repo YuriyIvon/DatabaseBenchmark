@@ -48,10 +48,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             return new CosmosDbPreparedQuery(_container, queryDefinition, options);
         }
 
-        public void Dispose()
-        {
-            _client?.Dispose();
-        }
+        public void Dispose() => _client?.Dispose();
 
         public void TraceCommand(string query, IEnumerable<SqlQueryParameter> parameters)
         {

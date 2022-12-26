@@ -24,7 +24,9 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         public IPreparedQuery Prepare()
         {
             var documents = _insertBuilder.Build();
-            return new ElasticsearchPreparedInsert(_client, _table, documents);
+            return documents.Any() 
+                ? new ElasticsearchPreparedInsert(_client, _table, documents)
+                : null;
         }
 
         public void Dispose()

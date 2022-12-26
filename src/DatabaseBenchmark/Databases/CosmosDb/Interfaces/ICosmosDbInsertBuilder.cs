@@ -4,6 +4,8 @@
     {
         int BatchSize { get; }
 
-        IEnumerable<object> Build();
+        string PartitionKeyName { get; }
+
+        IEnumerable<IDictionary<string, object>> Build();
     }
 }

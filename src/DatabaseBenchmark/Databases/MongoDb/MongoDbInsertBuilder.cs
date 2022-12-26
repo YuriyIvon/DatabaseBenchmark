@@ -21,7 +21,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
         public IEnumerable<BsonDocument> Build()
         {
-            var buffer = new List<BsonDocument>();
+            var documents = new List<BsonDocument>();
 
             for (int i = 0; i < BatchSize && _source.Read(); i++)
             {
@@ -31,10 +31,10 @@ namespace DatabaseBenchmark.Databases.MongoDb
                         c => c.Name,
                         c => _source.GetValue(c.GetNativeType(), c.Name));
 
-                buffer.Add(new BsonDocument(document));
+                documents.Add(new BsonDocument(document));
             }
 
-            return buffer;
+            return documents;
         }
     }
 }
