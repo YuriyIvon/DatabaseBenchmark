@@ -22,7 +22,7 @@ namespace DatabaseBenchmark.Tests.Databases
         [Fact]
         public void BuildQueryNoArguments()
         {
-            var parametersBuilder = new SqlQueryParametersBuilder();
+            var parametersBuilder = new SqlParametersBuilder();
             var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, SampleInputs.NoArgumentsQuery, parametersBuilder, null, null, _optionsProvider);
 
             var queryText = builder.Build();
@@ -34,7 +34,7 @@ namespace DatabaseBenchmark.Tests.Databases
         [Fact]
         public void BuildQuerySelectSpecificFields()
         {
-            var parametersBuilder = new SqlQueryParametersBuilder();
+            var parametersBuilder = new SqlParametersBuilder();
             var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, SampleInputs.SpecificFieldsQuery, parametersBuilder, null, null, _optionsProvider);
 
             var queryText = builder.Build();
@@ -53,7 +53,7 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryAllArgumentsGinOperators()
         {
             var query = SampleInputs.AllArgumentsQuery;
-            var parametersBuilder = new SqlQueryParametersBuilder();
+            var parametersBuilder = new SqlParametersBuilder();
             var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null, _optionsProvider);
 
             var queryText = builder.Build();
@@ -78,7 +78,7 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryAllArgumentsNoGinOperators()
         {
             var query = SampleInputs.AllArgumentsQuery;
-            var parametersBuilder = new SqlQueryParametersBuilder();
+            var parametersBuilder = new SqlParametersBuilder();
             _optionsProvider.GetOptions<PostgreSqlJsonbQueryOptions>().Returns(new PostgreSqlJsonbQueryOptions {  UseGinOperators = false });
             var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null, _optionsProvider);
 
@@ -108,7 +108,7 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
             mockRandomValueProvider.GetRandomBoolean().Returns(true);
-            var parametersBuilder = new SqlQueryParametersBuilder();
+            var parametersBuilder = new SqlParametersBuilder();
             var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomValueProvider, _optionsProvider);
 
             var queryText = builder.Build();
@@ -135,7 +135,7 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
             mockRandomValueProvider.GetRandomBoolean().Returns(true);
-            var parametersBuilder = new SqlQueryParametersBuilder();
+            var parametersBuilder = new SqlParametersBuilder();
             var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomValueProvider, _optionsProvider);
 
             var queryText = builder.Build();

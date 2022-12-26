@@ -7,12 +7,12 @@ namespace DatabaseBenchmark.Databases.Sql
     public class SqlRawQueryBuilder : ISqlQueryBuilder
     {
         private readonly RawQuery _query;
-        private readonly SqlQueryParametersBuilder _parametersBuilder;
+        private readonly ISqlParametersBuilder _parametersBuilder;
         private readonly IRandomValueProvider _randomValueProvider;
 
         public SqlRawQueryBuilder(
             RawQuery query,
-            SqlQueryParametersBuilder parametersBuilder,
+            ISqlParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider)
         {
             _query = query;

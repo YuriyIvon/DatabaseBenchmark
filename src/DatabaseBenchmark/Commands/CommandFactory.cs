@@ -16,6 +16,7 @@ namespace DatabaseBenchmark.Commands
             {
                 ["create"] = () => new CreateCommand(optionsProvider),
                 ["import"] = () => new ImportCommand(optionsProvider),
+                ["insert"] = () => new InsertCommand(optionsProvider),
                 ["query"] = () =>  new QueryCommand(optionsProvider),
                 ["query-scenario"] = () => new QueryScenarioCommand(optionsProvider),
                 ["raw-query"] = () => new RawQueryCommand(optionsProvider),

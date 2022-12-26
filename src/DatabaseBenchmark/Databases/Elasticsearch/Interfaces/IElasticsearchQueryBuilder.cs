@@ -1,6 +1,6 @@
 ﻿using Nest;
 
-namespace DatabaseBenchmark.Databases.Elasticsearch
+namespace DatabaseBenchmark.Databases.Elasticsearch.Interfaces
 {
     public interface IElasticsearchQueryBuilder
     {

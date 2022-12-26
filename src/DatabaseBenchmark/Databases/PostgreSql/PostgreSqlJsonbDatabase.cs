@@ -110,5 +110,10 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             throw new NotImplementedException();
+
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
+             new SqlInsertExecutorFactory<NpgsqlConnection>(_connectionString, table, source, _environment)
+                .Customize<ISqlQueryBuilder, PostgreSqlJsonbInsertBuilder>()
+                .Customize<ISqlParameterAdapter, PostgreSqlJsonbParameterAdapter>();
     }
 }

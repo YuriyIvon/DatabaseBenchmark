@@ -17,7 +17,9 @@ namespace DatabaseBenchmark.Tests.Common
             var queryBenchmark = new QueryBenchmark(environment, metricsCollector);
 
             var preparedQuery = Substitute.For<IPreparedQuery>();
-            preparedQuery.Read().Returns(false);
+            var results = Substitute.For<IQueryResults>();
+            results.Read().Returns(false);
+            preparedQuery.Results.Returns(results);
             var queryExecutor = Substitute.For<IQueryExecutor>();
             queryExecutor.Prepare().Returns(preparedQuery);
             var queryExecutorFactory = Substitute.For<IQueryExecutorFactory>();
@@ -33,7 +35,7 @@ namespace DatabaseBenchmark.Tests.Common
             queryBenchmark.Benchmark(queryExecutorFactory, options);
 
             preparedQuery.Received(14).Execute();
-            preparedQuery.Received(14).Read();
+            results.Received(14).Read();
             preparedQuery.Received(14).Dispose();
         }
     }

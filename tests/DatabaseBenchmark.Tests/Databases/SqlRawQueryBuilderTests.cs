@@ -12,7 +12,7 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildParameterizedQuery()
         {
             var query = SampleInputs.RawSqlQuery;
-            var parametersBuilder = new SqlQueryParametersBuilder();
+            var parametersBuilder = new SqlParametersBuilder();
             var builder = new SqlRawQueryBuilder(query, parametersBuilder, null);
 
             var queryText = builder.Build();

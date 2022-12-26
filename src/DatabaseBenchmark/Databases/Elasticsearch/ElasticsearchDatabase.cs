@@ -102,6 +102,9 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new ElasticsearchRawQueryExecutorFactory(CreateClient, query);
 
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
+            new ElasticsearchInsertExecutorFactory(CreateClient, table, source);
+
         private ElasticClient CreateClient()
         {
             var connectionSettings = new ConnectionSettings(new Uri(_connectionString))

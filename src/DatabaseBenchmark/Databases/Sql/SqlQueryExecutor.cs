@@ -9,14 +9,14 @@ namespace DatabaseBenchmark.Databases.Sql
     {
         private readonly IDbConnection _connection;
         private readonly ISqlQueryBuilder _queryBuilder;
-        private readonly SqlQueryParametersBuilder _parametersBuilder;
+        private readonly ISqlParametersBuilder _parametersBuilder;
         private readonly ISqlParameterAdapter _parameterAdapter;
         private readonly IExecutionEnvironment _environment;
 
         public SqlQueryExecutor(
             IDbConnection connection,
             ISqlQueryBuilder queryBuilder,
-            SqlQueryParametersBuilder parametersBuilder,
+            ISqlParametersBuilder parametersBuilder,
             ISqlParameterAdapter parameterAdapter,
             IExecutionEnvironment environment)
         {
@@ -53,10 +53,7 @@ namespace DatabaseBenchmark.Databases.Sql
 
         public void Dispose()
         {
-            if (_connection != null)
-            {
-                _connection.Dispose();
-            }
+            _connection?.Dispose();
         }
     }
 }

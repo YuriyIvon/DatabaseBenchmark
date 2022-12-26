@@ -22,7 +22,7 @@ namespace DatabaseBenchmark.DataSources.Database
             _databaseFactory = databaseFactory;
         }
 
-        public object GetValue(Type type, string name) => _query.GetValue(name);
+        public object GetValue(Type type, string name) => _query.Results.GetValue(name);
 
         public bool Read()
         {
@@ -31,7 +31,7 @@ namespace DatabaseBenchmark.DataSources.Database
                 Open();
             }
 
-            return _query.Read();
+            return _query.Results.Read();
         }
 
         public void Dispose()

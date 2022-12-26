@@ -51,7 +51,11 @@ namespace DatabaseBenchmark.Core
             {
                 using var preparedQuery = executor.Prepare();
                 preparedQuery.Execute();
-                FetchResults(preparedQuery);
+
+                if (preparedQuery.Results != null)
+                {
+                    FetchResults(preparedQuery);
+                }
             }
 
             for (int i = 0; i < queryCount; i++)
@@ -60,7 +64,13 @@ namespace DatabaseBenchmark.Core
 
                 var startTimestamp = DateTime.UtcNow;
                 preparedQuery.Execute();
-                var rowCount = FetchResults(preparedQuery);
+
+                var rowCount = 0;
+                if (preparedQuery.Results != null)
+                {
+                    rowCount = FetchResults(preparedQuery);
+                }
+
                 var endTimestamp = DateTime.UtcNow;
 
                 _metricsCollector.AppendResult(startTimestamp, endTimestamp, rowCount, preparedQuery.CustomMetrics);
@@ -69,16 +79,18 @@ namespace DatabaseBenchmark.Core
 
         private int FetchResults(IPreparedQuery query)
         {
+            var results = query.Results;
+
             var table = new DataTable();
             int rowCount = 0;
 
-            while (query.Read())
+            while (results.Read())
             {
                 rowCount++;
 
                 if (_environment.TraceResults)
                 {
-                    foreach (var columnName in query.ColumnNames)
+                    foreach (var columnName in results.ColumnNames)
                     {
                         if (!table.Columns.Contains(columnName))
                         {
@@ -88,9 +100,9 @@ namespace DatabaseBenchmark.Core
 
                     DataRow row = table.NewRow();
 
-                    foreach (var columnName in query.ColumnNames)
+                    foreach (var columnName in results.ColumnNames)
                     {
-                        row[columnName] = query.GetValue(columnName);
+                        row[columnName] = results.GetValue(columnName);
                     }
 
                     table.Rows.Add(row);

@@ -1,6 +1,7 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Text;
 
@@ -11,7 +12,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
         public CosmosDbQueryBuilder(
             Table table,
             Query query,
-            SqlQueryParametersBuilder parametersBuilder,
+            ISqlParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
             IRandomGenerator randomGenerator) 
             : base(table, query, parametersBuilder, randomValueProvider, randomGenerator)

@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
 using Elasticsearch.Net;
 using Nest;
 using System.Reflection;

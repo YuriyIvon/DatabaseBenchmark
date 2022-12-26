@@ -1,8 +1,9 @@
-﻿using DatabaseBenchmark.Model;
+﻿using DatabaseBenchmark.Databases.Sql.Interfaces;
+using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Databases.Sql
 {
-    public class SqlQueryParametersBuilder
+    public class SqlParametersBuilder : ISqlParametersBuilder
     {
         private readonly List<SqlQueryParameter> _parameters = new();
 
@@ -12,7 +13,7 @@ namespace DatabaseBenchmark.Databases.Sql
 
         public IEnumerable<SqlQueryParameter> Parameters => _parameters;
 
-        public SqlQueryParametersBuilder(char prefix = '@')
+        public SqlParametersBuilder(char prefix = '@')
         {
             Prefix = prefix;
         }

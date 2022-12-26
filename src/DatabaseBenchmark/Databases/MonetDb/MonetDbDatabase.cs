@@ -51,25 +51,18 @@ namespace DatabaseBenchmark.Databases.MonetDb
             }
 
             using var connection = new MonetDbConnection(_connectionString);
-            connection.Open();
+            var parametersBuilder = new SqlNoParametersBuilder();
+            var insertBuilder = new SqlInsertBuilder(table, source, parametersBuilder) { BatchSize = batchSize };
+            var parameterAdapter = new MonetDbParameterAdapter();
+            var dataImporter = new SqlDataImporter(
+                connection,
+                insertBuilder,
+                parametersBuilder,
+                parameterAdapter,
+                _environment);
 
             var stopwatch = Stopwatch.StartNew();
-            var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new SqlDataImporter(_environment, progressReporter, batchSize);
-
-            var transaction = connection.BeginTransaction();
-            try
-            {
-                dataImporter.Import(source, table, connection, null);
-
-                transaction.Commit();
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
-
+            dataImporter.Import();
             stopwatch.Stop();
 
             var rowCount = GetRowCount(connection, table.Name);
@@ -87,6 +80,10 @@ namespace DatabaseBenchmark.Databases.MonetDb
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new SqlRawQueryExecutorFactory<MonetDbConnection>(_connectionString, query, _environment)
+                .Customize<ISqlParameterAdapter, MonetDbParameterAdapter>();
+
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
+            new SqlInsertExecutorFactory<MonetDbConnection>(_connectionString, table, source, _environment)
                 .Customize<ISqlParameterAdapter, MonetDbParameterAdapter>();
 
         private static long GetTableSize(MonetDbConnection connection, string tableName)

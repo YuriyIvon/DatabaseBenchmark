@@ -1,5 +1,4 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Model;
 using DatabaseBenchmark.Databases.Sql;
@@ -63,25 +62,18 @@ namespace DatabaseBenchmark.Databases.Snowflake
 
             using var connection = new SnowflakeDbConnection();
             connection.ConnectionString = _connectionString;
-            connection.Open();
+            var parametersBuilder = new SqlNoParametersBuilder();
+            var insertBuilder = new SqlInsertBuilder(table, source, parametersBuilder) { BatchSize = batchSize };
+            var parameterAdapter = new SnowflakeParameterAdapter();
+            var dataImporter = new SqlDataImporter(
+                connection,
+                insertBuilder,
+                parametersBuilder,
+                parameterAdapter,
+                _environment);
 
             var stopwatch = Stopwatch.StartNew();
-            var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new SqlDataImporter(_environment, progressReporter, batchSize);
-
-            var transaction = connection.BeginTransaction();
-            try
-            {
-                dataImporter.Import(source, table, connection, transaction);
-
-                transaction.Commit();
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
-
+            dataImporter.Import();
             stopwatch.Stop();
 
             var rowCount = GetRowCount(connection, table.Name);
@@ -93,12 +85,17 @@ namespace DatabaseBenchmark.Databases.Snowflake
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
              new SqlQueryExecutorFactory<SnowflakeDbConnection>(_connectionString, table, query, _environment)
                 .Customize<ISqlQueryBuilder, SnowflakeQueryBuilder>()
-                .Customize<SqlQueryParametersBuilder>(() => new SqlQueryParametersBuilder(':'))
+                .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
                 .Customize<ISqlParameterAdapter, SnowflakeParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new SqlRawQueryExecutorFactory<SnowflakeDbConnection>(_connectionString, query, _environment)
-                .Customize<SqlQueryParametersBuilder>(() => new SqlQueryParametersBuilder(':'))
+                .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
+                .Customize<ISqlParameterAdapter, SnowflakeParameterAdapter>();
+
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
+            new SqlInsertExecutorFactory<SnowflakeDbConnection>(_connectionString, table, source, _environment)
+                .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
                 .Customize<ISqlParameterAdapter, SnowflakeParameterAdapter>();
 
         private static long GetRowCount(SnowflakeDbConnection connection, string tableName)

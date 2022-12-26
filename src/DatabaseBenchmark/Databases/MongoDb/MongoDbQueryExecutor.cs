@@ -1,5 +1,6 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Interfaces;
+using DatabaseBenchmark.Databases.MongoDb.Interfaces;
 using MongoDB.Bson;
 using MongoDB.Driver;
 

@@ -1,6 +1,7 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Text;
 
@@ -13,7 +14,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
         public PostgreSqlJsonbQueryBuilder(
             Table table,
             Query query,
-            SqlQueryParametersBuilder parametersBuilder,
+            ISqlParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
             IRandomGenerator randomGenerator,
             IOptionsProvider optionsProvider) 
