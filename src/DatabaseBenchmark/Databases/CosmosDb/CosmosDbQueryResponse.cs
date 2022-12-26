@@ -1,12 +1,12 @@
 ﻿namespace DatabaseBenchmark.Databases.CosmosDb
 {
-    public class CosmosDbQueryResult<T>
+    public class CosmosDbQueryResponse<T>
     {
         public List<T> Items { get; }
 
         public double TotalRequestCharge { get; }
 
-        public CosmosDbQueryResult(List<T> items, double totalRequestCharge)
+        public CosmosDbQueryResponse(List<T> items, double totalRequestCharge)
         {
             Items = items;
             TotalRequestCharge = totalRequestCharge;

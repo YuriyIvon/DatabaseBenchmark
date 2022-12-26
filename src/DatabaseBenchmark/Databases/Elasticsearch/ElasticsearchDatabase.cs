@@ -55,33 +55,19 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             }
 
             var client = CreateClient();
-
-            var buffer = new List<object>();
+            var progressReporter = new ImportProgressReporter(_environment);
+            var insertBuilder = new ElasticsearchInsertBuilder(table, source) { BatchSize = batchSize }; 
+            var insertExecutor = new ElasticsearchInsertExecutor(client, table, insertBuilder);
 
             var stopwatch = Stopwatch.StartNew();
-            var progressReporter = new ImportProgressReporter(_environment);
 
-            while (source.Read())
+            //TODO: dispose correctly
+            var preparedInsert = insertExecutor.Prepare();
+            while (preparedInsert != null)
             {
-                var document = table.Columns
-                    .Where(c => !c.DatabaseGenerated)
-                    .ToDictionary(
-                        c => c.Name,
-                        c => source.GetValue(c.GetNativeType(), c.Name));
-
-                buffer.Add(document);
-
-                if (buffer.Count >= batchSize)
-                {
-                    client.IndexMany(buffer, table.Name);
-                    progressReporter.Increment(buffer.Count);
-                    buffer.Clear();
-                }
-            }
-
-            if (buffer.Count > 0)
-            {
-                client.IndexMany(buffer, table.Name);
+                var rowsInserted = preparedInsert.Execute();
+                progressReporter.Increment(rowsInserted);
+                preparedInsert = insertExecutor.Prepare();
             }
 
             client.Indices.Refresh(table.Name);

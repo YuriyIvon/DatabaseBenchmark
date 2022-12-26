@@ -63,9 +63,8 @@ namespace DatabaseBenchmark.Core
                 using var preparedQuery = executor.Prepare();
 
                 var startTimestamp = DateTime.UtcNow;
-                preparedQuery.Execute();
+                var rowCount = preparedQuery.Execute();
 
-                var rowCount = 0;
                 if (preparedQuery.Results != null)
                 {
                     rowCount = FetchResults(preparedQuery);

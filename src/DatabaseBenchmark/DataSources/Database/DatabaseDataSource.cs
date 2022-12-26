@@ -36,15 +36,8 @@ namespace DatabaseBenchmark.DataSources.Database
 
         public void Dispose()
         {
-            if (_query != null)
-            {
-                _query.Dispose();
-            }
-
-            if (_executor != null)
-            {
-                _executor.Dispose();
-            }
+            _query?.Dispose();
+            _executor?.Dispose();
         }
 
         private void Open()

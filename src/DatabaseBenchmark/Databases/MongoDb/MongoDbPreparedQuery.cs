@@ -6,8 +6,6 @@ namespace DatabaseBenchmark.Databases.MongoDb
 {
     public sealed class MongoDbPreparedQuery : IPreparedQuery
     {
-        private const string RequestUnitsMetric = "RU";
-
         private readonly IMongoCollection<BsonDocument> _collection;
         private readonly IEnumerable<BsonDocument> _request;
         private readonly MongoDbQueryOptions _options;
@@ -16,7 +14,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
         public IDictionary<string, double> CustomMetrics =>
             _options.CollectCosmosDbRequestUnits 
-                ? new Dictionary<string, double> { [RequestUnitsMetric] = _results.RequestCharge } 
+                ? new Dictionary<string, double> { [MongoDbConstants.RequestUnitsMetric] = _results.RequestCharge } 
                 : null;
 
         public IQueryResults Results => _results;
@@ -31,7 +29,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
             _options = options;
         }
 
-        public void Execute()
+        public int Execute()
         {
             var cursor = _collection.Aggregate(PipelineDefinition<BsonDocument, BsonDocument>.Create(_request),
                 new AggregateOptions
@@ -40,11 +38,10 @@ namespace DatabaseBenchmark.Databases.MongoDb
                 });
 
             _results = new MongoDbQueryResults(_collection, cursor, _options);
+
+            return 0;
         }
 
-        public void Dispose()
-        {
-            _results?.Dispose();
-        }
+        public void Dispose() => _results?.Dispose();
     }
 }

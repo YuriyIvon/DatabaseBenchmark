@@ -12,6 +12,7 @@ namespace DatabaseBenchmark.Model
         Double,
         String,
         Text,
-        DateTime
+        DateTime,
+        Json
     }
 }

@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace DatabaseBenchmark.Databases.MongoDb
 {
-    public class MongoDbInsertExecutor : IQueryExecutor
+    public sealed class MongoDbInsertExecutor : IQueryExecutor
     {
         private readonly IMongoCollection<BsonDocument> _collection;
         private readonly IMongoDbInsertBuilder _insertBuilder;
@@ -21,7 +21,9 @@ namespace DatabaseBenchmark.Databases.MongoDb
         public IPreparedQuery Prepare()
         {
             var documents = _insertBuilder.Build();
-            return new MongoDbPreparedInsert(_collection, documents);
+            return documents.Any()
+                ? new MongoDbPreparedInsert(_collection, documents)
+                : null;
         }
 
         public void Dispose()

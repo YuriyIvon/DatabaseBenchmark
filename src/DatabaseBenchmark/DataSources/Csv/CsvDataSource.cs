@@ -25,15 +25,8 @@ namespace DatabaseBenchmark.DataSources.Csv
 
         public void Dispose()
         {
-            if (_reader != null)
-            {
-                _reader.Dispose();
-            }
-
-            if (_streamReader != null)
-            {
-                _streamReader.Dispose();
-            }
+            _reader?.Dispose();
+            _streamReader?.Dispose();
         }
 
         public object GetValue(Type type, string name) =>

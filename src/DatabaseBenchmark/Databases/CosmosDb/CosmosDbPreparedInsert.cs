@@ -1,16 +1,13 @@
 ﻿using DatabaseBenchmark.Databases.Interfaces;
 using Microsoft.Azure.Cosmos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DatabaseBenchmark.Databases.CosmosDb
 {
-    public class CosmosDbPreparedInsert : IPreparedQuery
+    public sealed class CosmosDbPreparedInsert : IPreparedQuery
     {
         private readonly Container _container;
+        private readonly IEnumerable<IDictionary<string, object>> _items;
+        private readonly string _partitionKeyName;
 
         private double _requestCharge;
 
@@ -19,19 +16,51 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 
         public IQueryResults Results => null;
 
-        public CosmosDbPreparedInsert(Container container)
+        public CosmosDbPreparedInsert(
+            Container container,
+            IEnumerable<IDictionary<string, object>> items,
+            string partitionKeyName)
         {
             _container = container;
+            _items = items;
+            _partitionKeyName = partitionKeyName;
         }
 
-        public void Execute()
+        public int Execute()
         {
-            throw new NotImplementedException();
+            var partitionKeyValue = _items.First()[_partitionKeyName];
+            var partitionKey = CreatePartitionKey(partitionKeyValue);
+
+            if (_items.Count() == 1)
+            {
+                var result = _container.CreateItemAsync(_items.First(), partitionKey).Result;
+                _requestCharge = result.RequestCharge;
+            }
+            else
+            {
+                var transactionalBatch = _container.CreateTransactionalBatch(partitionKey);
+                foreach (var item in _items)
+                {
+                    transactionalBatch.CreateItem(item);
+                }
+
+                var result = transactionalBatch.ExecuteAsync().Result;
+                _requestCharge = result.RequestCharge;
+            }
+
+            return _items.Count();
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
+
+        private static PartitionKey CreatePartitionKey(object key) =>
+            key switch
+            {
+                bool boolKey => new PartitionKey(boolKey),
+                double doubleKey => new PartitionKey(doubleKey),
+                _ => new PartitionKey(key.ToString())
+            };
     }
 }

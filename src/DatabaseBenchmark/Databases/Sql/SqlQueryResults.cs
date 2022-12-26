@@ -25,12 +25,6 @@ namespace DatabaseBenchmark.Databases.Sql
 
         public bool Read() => _reader.Read();
 
-        public void Dispose()
-        {
-            if (_reader != null)
-            {
-                _reader.Dispose();
-            }
-        }
+        public void Dispose() => _reader?.Dispose();
     }
 }

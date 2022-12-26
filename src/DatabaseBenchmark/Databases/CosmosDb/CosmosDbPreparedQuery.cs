@@ -23,7 +23,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             _options = options;
         }
 
-        public void Execute()
+        public int Execute()
         {
             var iterator = _container.GetItemQueryIterator<Dictionary<string, object>>(
                 _queryDefinition,
@@ -33,11 +33,10 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 });
 
             _results = new CosmosDbQueryResults(iterator);
+
+            return 0;
         }
 
-        public void Dispose()
-        {
-            _results?.Dispose();
-        }
+        public void Dispose() => _results?.Dispose();
     }
 }

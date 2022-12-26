@@ -18,15 +18,14 @@ namespace DatabaseBenchmark.Databases.Sql
             _command = command;
         }
 
-        public void Execute()
+        public int Execute()
         {
             var reader = _command.ExecuteReader();
             _results = new SqlQueryResults(reader);
+
+            return 0;
         }
 
-        public void Dispose()
-        {
-            _results?.Dispose();
-        }
+        public void Dispose() => _results?.Dispose();
     }
 }

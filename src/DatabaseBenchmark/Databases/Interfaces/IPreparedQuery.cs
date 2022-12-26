@@ -6,6 +6,6 @@
 
         IQueryResults Results { get; }
 
-        void Execute();
+        int Execute();
     }
 }

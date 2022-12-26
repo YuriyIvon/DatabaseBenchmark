@@ -42,9 +42,6 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             return _responseItemIndex < _responseItems.Length;
         }
 
-        public void Dispose()
-        {
-            _iterator?.Dispose();
-        }
+        public void Dispose() => _iterator?.Dispose();
     }
 }

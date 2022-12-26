@@ -4,16 +4,20 @@ using MongoDB.Driver;
 
 namespace DatabaseBenchmark.Databases.MongoDb
 {
+    //TODO: request charge
     public sealed class MongoDbPreparedInsert : IPreparedQuery
     {
         private readonly IMongoCollection<BsonDocument> _collection;
         private readonly IEnumerable<BsonDocument> _documents;
 
+        //private double _requestCharge;
+
         public IDictionary<string, double> CustomMetrics => null;
+            /*_options.CollectCosmosDbRequestUnits
+                ? new Dictionary<string, double> { [MongoDbConstants.RequestUnitsMetric] = _requestCharge }
+                : null;*/
 
         public IQueryResults Results => null;
-
-        public double RequestCharge { get; private set; }
 
         public MongoDbPreparedInsert(
             IMongoCollection<BsonDocument> collection,
@@ -23,7 +27,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
             _documents = documents;
         }
 
-        public void Execute()
+        public int Execute()
         {
             _collection.InsertMany(_documents,
                 new InsertManyOptions
@@ -31,9 +35,11 @@ namespace DatabaseBenchmark.Databases.MongoDb
                     IsOrdered = false
                 });
 
-            /*if (options.CollectCosmosDbRequestUnits)
+            return _documents.Count();
+
+            /*if (_options.CollectCosmosDbRequestUnits)
             {
-                RequestCharge += _collection.GetLastCommandRequestCharge();
+                _requestCharge += _collection.GetLastCommandRequestCharge();
             }*/
         }
 

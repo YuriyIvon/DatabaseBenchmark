@@ -51,9 +51,6 @@ namespace DatabaseBenchmark.Databases.Sql
             return new SqlPreparedQuery(command);
         }
 
-        public void Dispose()
-        {
-            _connection?.Dispose();
-        }
+        public void Dispose() => _connection?.Dispose();
     }
 }

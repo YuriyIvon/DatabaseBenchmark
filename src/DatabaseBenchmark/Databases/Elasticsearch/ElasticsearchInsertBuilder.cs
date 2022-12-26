@@ -20,7 +20,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
         public IEnumerable<object> Build()
         {
-            var buffer = new List<object>();
+            var documents = new List<object>();
 
             for (int i = 0; i < BatchSize && _source.Read(); i++)
             {
@@ -30,10 +30,10 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                         c => c.Name,
                         c => _source.GetValue(c.GetNativeType(), c.Name));
 
-                buffer.Add(document);
+                documents.Add(document);
             }
 
-            return buffer;
+            return documents;
         }
     }
 }

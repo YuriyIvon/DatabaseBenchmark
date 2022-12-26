@@ -20,10 +20,12 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             _request = request;
         }
 
-        public void Execute()
+        public int Execute()
         {
             var response = _client.Search<Dictionary<string, object>>(_request);
             _results = new ElasticsearchQueryResults(response);
+
+            return 0;
         }
 
         public void Dispose()

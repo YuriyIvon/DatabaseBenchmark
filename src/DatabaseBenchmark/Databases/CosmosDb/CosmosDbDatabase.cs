@@ -69,60 +69,21 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             var database = client.GetDatabase(_databaseName);
             var container = database.GetContainer(table.Name);
 
+            var progressReporter = new ImportProgressReporter(_environment);
+            var insertBuilder = new CosmosDbInsertBuilder(table, source) { BatchSize = batchSize };
+            var insertExecutor = new CosmosDbInsertExecutor(client, container, insertBuilder);
+
             double totalRequestCharge = 0;
             var stopwatch = Stopwatch.StartNew();
-            var progressReporter = new ImportProgressReporter(_environment);
 
-            var batches = new Dictionary<object, List<Dictionary<string, object>>>();
-            var partitionKeyName = GetPartitionKeyName(table);
-
-            while (source.Read())
+            //TODO: dispose correctly
+            var preparedInsert = insertExecutor.Prepare();
+            while (preparedInsert != null)
             {
-                var item = table.Columns
-                    .Where(c => !c.DatabaseGenerated)
-                    .ToDictionary(
-                        c => c.Name,
-                        c => source.GetValue(c.GetNativeType(), c.Name));
-
-                item.Add("id", Guid.NewGuid().ToString("N"));
-
-                if (partitionKeyName == CosmosDbConstants.DummyPartitionKeyName)
-                {
-                    item.Add(partitionKeyName, CosmosDbConstants.DummyPartitionKeyValue);
-                }
-
-                var partitionKeyValue = item[partitionKeyName];
-
-                if (!batches.TryGetValue(partitionKeyValue, out var batch))
-                {
-                    batch = new List<Dictionary<string, object>>();
-                    batches.Add(partitionKeyValue, batch);
-                }
-
-                batch.Add(item);
-
-                if (batch.Count >= batchSize)
-                {
-                    var partitionKey = CreatePartitionKey(partitionKeyValue);
-                    var transactionalBatch = container.CreateTransactionalBatch(partitionKey);
-                    batch.ForEach(i => transactionalBatch.CreateItem(i));
-                    var result = transactionalBatch.ExecuteAsync().Result;
-                    totalRequestCharge += result.RequestCharge;
-                    progressReporter.Increment(batch.Count);
-                    batch.Clear();
-                }
-            }
-
-            foreach (var batchEntry in batches)
-            {
-                if (batchEntry.Value.Any())
-                {
-                    var partitionKey = CreatePartitionKey(batchEntry.Key);
-                    var transactionalBatch = container.CreateTransactionalBatch(partitionKey);
-                    batchEntry.Value.ForEach(i => transactionalBatch.CreateItem(i));
-                    var result = transactionalBatch.ExecuteAsync().Result;
-                    totalRequestCharge += result.RequestCharge;
-                }
+                var rowsInserted = preparedInsert.Execute();
+                progressReporter.Increment(rowsInserted);
+                totalRequestCharge += preparedInsert.CustomMetrics[CosmosDbConstants.RequestUnitsMetric];
+                preparedInsert = insertExecutor.Prepare();
             }
 
             stopwatch.Stop();
@@ -159,13 +120,5 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 
             return table.Columns.FirstOrDefault(c => c.PartitionKey)?.Name ?? CosmosDbConstants.DummyPartitionKeyName;
         }
-
-        private static PartitionKey CreatePartitionKey(object key) =>
-            key switch
-            {
-                bool boolKey => new PartitionKey(boolKey),
-                double doubleKey => new PartitionKey(doubleKey),
-                _ => new PartitionKey(key.ToString())
-            };
     }
 }

@@ -22,12 +22,12 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 
         public IPreparedQuery Prepare()
         {
-            throw new NotImplementedException();
+            var items = _insertBuilder.Build();
+            return items.Any()
+                ? new CosmosDbPreparedInsert(_container, items, _insertBuilder.PartitionKeyName)
+                : null;
         }
 
-        public void Dispose()
-        {
-            _client?.Dispose();
-        }
+        public void Dispose() => _client?.Dispose();
     }
 }
