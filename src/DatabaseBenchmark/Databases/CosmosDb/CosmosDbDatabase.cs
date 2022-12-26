@@ -139,6 +139,9 @@ namespace DatabaseBenchmark.Databases.CosmosDb
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new CosmosDbRawQueryExecutorFactory(_connectionString, _databaseName, query, _environment, _optionsProvider);
 
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
+            new CosmosDbInsertExecutorFactory(_connectionString, _databaseName, table, source);
+
         private static (string accountConnectionString, string databaseName) ParseConnectionString(string fullConnectionString)
         {
             var parts = fullConnectionString.Split(';');

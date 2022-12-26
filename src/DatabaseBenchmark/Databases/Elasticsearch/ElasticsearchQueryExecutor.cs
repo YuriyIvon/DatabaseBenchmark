@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Databases.Interfaces;
+﻿using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
+using DatabaseBenchmark.Databases.Interfaces;
 using Nest;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch

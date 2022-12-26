@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace DatabaseBenchmark.Databases.MongoDb
 {
-    public class MongoDbPreparedQuery : IPreparedQuery
+    public sealed class MongoDbPreparedQuery : IPreparedQuery
     {
         private const string RequestUnitsMetric = "RU";
 
@@ -12,17 +12,14 @@ namespace DatabaseBenchmark.Databases.MongoDb
         private readonly IEnumerable<BsonDocument> _request;
         private readonly MongoDbQueryOptions _options;
 
-        private IAsyncCursor<BsonDocument> _cursor;
-        private BsonDocument[] _batchItems;
-        private int _batchItemIndex = 0;
-        private double _requestCharge = 0;
-
-        public IEnumerable<string> ColumnNames => _batchItems[_batchItemIndex].Names;
+        private MongoDbQueryResults _results;
 
         public IDictionary<string, double> CustomMetrics =>
             _options.CollectCosmosDbRequestUnits 
-                ? new Dictionary<string, double> { [RequestUnitsMetric] = _requestCharge } 
+                ? new Dictionary<string, double> { [RequestUnitsMetric] = _results.RequestCharge } 
                 : null;
+
+        public IQueryResults Results => _results;
 
         public MongoDbPreparedQuery(
             IMongoCollection<BsonDocument> collection,
@@ -36,63 +33,18 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
         public void Execute()
         {
-            _cursor = _collection.Aggregate(PipelineDefinition<BsonDocument, BsonDocument>.Create(_request),
+            var cursor = _collection.Aggregate(PipelineDefinition<BsonDocument, BsonDocument>.Create(_request),
                 new AggregateOptions
                 {
                     BatchSize = _options.BatchSize
                 });
-        }
 
-        public object GetValue(string columnName) => ToStandardType(_batchItems[_batchItemIndex][columnName]);
-
-        public bool Read()
-        {
-            if (_batchItems != null && _batchItemIndex < _batchItems.Length)
-            {
-                _batchItemIndex++;
-            }
-
-            if (_batchItems == null || _batchItemIndex >= _batchItems.Length)
-            {
-                if (_cursor.MoveNext())
-                {
-                    _batchItems = _cursor.Current.ToArray();
-                    _batchItemIndex = 0;
-
-                    if (_options.CollectCosmosDbRequestUnits)
-                    {
-                        _requestCharge += _collection.GetLastCommandRequestCharge();
-                    }
-
-                    return _batchItems.Any();
-                }
-
-                return false;
-            }
-
-            return _batchItemIndex < _batchItems.Length;
+            _results = new MongoDbQueryResults(_collection, cursor, _options);
         }
 
         public void Dispose()
         {
-            if (_cursor != null)
-            {
-                _cursor.Dispose();
-            }
+            _results?.Dispose();
         }
-
-        private static object ToStandardType(object value) =>
-            value switch
-            {
-                BsonObjectId bsonObjectId => bsonObjectId.Value.ToString(),
-                BsonBoolean bsonBoolean => bsonBoolean.Value,
-                BsonInt32 bsonInt32 => bsonInt32.Value,
-                BsonInt64 bsonInt64 => bsonInt64.Value,
-                BsonDouble bsonDouble => bsonDouble.Value,
-                BsonString bsonString => bsonString.Value,
-                BsonDateTime bsonDateTime => bsonDateTime.ToNullableUniversalTime(),
-                BsonNull => null,
-                _ => value
-            };
     }
 }

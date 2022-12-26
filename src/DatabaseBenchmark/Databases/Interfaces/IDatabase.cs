@@ -13,5 +13,7 @@ namespace DatabaseBenchmark.Databases.Interfaces
         IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query);
 
         IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query);
+
+        IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource dataSource);
     }
 }

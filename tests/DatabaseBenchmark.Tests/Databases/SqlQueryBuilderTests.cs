@@ -14,7 +14,7 @@ namespace DatabaseBenchmark.Tests.Databases
         [Fact]
         public void BuildQueryNoArguments()
         {
-            var parametersBuilder = new SqlQueryParametersBuilder();
+            var parametersBuilder = new SqlParametersBuilder();
             var builder = new SqlQueryBuilder(SampleInputs.Table, SampleInputs.NoArgumentsQuery, parametersBuilder, null, null);
 
             var queryText = builder.Build();
@@ -27,7 +27,7 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryAllArguments()
         {
             var query = SampleInputs.AllArgumentsQuery;
-            var parametersBuilder = new SqlQueryParametersBuilder();
+            var parametersBuilder = new SqlParametersBuilder();
             var builder = new SqlQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null);
 
             var queryText = builder.Build();
@@ -56,7 +56,7 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
             mockRandomValueProvider.GetRandomBoolean().Returns(true);
-            var parametersBuilder = new SqlQueryParametersBuilder();
+            var parametersBuilder = new SqlParametersBuilder();
             var builder = new SqlQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomValueProvider);
 
             var queryText = builder.Build();
@@ -83,7 +83,7 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
             mockRandomValueProvider.GetRandomBoolean().Returns(true);
-            var parametersBuilder = new SqlQueryParametersBuilder();
+            var parametersBuilder = new SqlParametersBuilder();
             var builder = new SqlQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomValueProvider);
 
             var queryText = builder.Build();

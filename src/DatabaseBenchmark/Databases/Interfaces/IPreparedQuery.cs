@@ -2,14 +2,10 @@
 {
     public interface IPreparedQuery : IDisposable
     {
-        IEnumerable<string> ColumnNames { get; }
-
         IDictionary<string, double> CustomMetrics { get; }
 
+        IQueryResults Results { get; }
+
         void Execute();
-
-        object GetValue(string columnName);
-
-        bool Read();
     }
 }

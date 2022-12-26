@@ -1,5 +1,4 @@
-﻿using DatabaseBenchmark.Common;
-using DatabaseBenchmark.Core.Interfaces;
+﻿using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Model;
@@ -120,6 +119,9 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new MongoDbRawQueryExecutorFactory(_connectionString, query, _environment, _optionsProvider);
+
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
+            new MongoDbInsertExecutorFactory(_connectionString, table, source);
 
         private IMongoDatabase GetDatabase()
         {

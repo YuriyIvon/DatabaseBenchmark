@@ -1,32 +1,26 @@
-﻿using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.Sql;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
+using DatabaseBenchmark.DataSources.Interfaces;
+using DatabaseBenchmark.Model;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DatabaseBenchmark.Databases.Oracle
 {
-    public class OracleDataImporter : SqlDataImporter
+    public class OracleInsertBuilder : SqlInsertBuilder
     {
         private static readonly string Spacing = new(' ', 4);
 
-        public OracleDataImporter(IExecutionEnvironment environment,
-            IProgressReporter progressReporter,
-            SqlQueryParametersBuilder parametersBuilder,
-            int batchSize) : base(
-                  environment, 
-                  progressReporter,
-                  batchSize,
-                  parametersBuilder, 
-                  new OracleParameterAdapter())
+        public OracleInsertBuilder(
+            Table table,
+            IDataSource source,
+            ISqlParametersBuilder parametersBuilder)
+            : base(table, source, parametersBuilder)
         {
         }
 
         protected override string BuildCommandText(
-            string tableName, 
-            IEnumerable<string> columns, 
+            string tableName,
+            IEnumerable<string> columns,
             IEnumerable<IEnumerable<string>> rows)
         {
             var commandText = new StringBuilder("INSERT ALL");

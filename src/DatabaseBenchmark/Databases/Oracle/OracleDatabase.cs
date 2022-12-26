@@ -1,5 +1,4 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Model;
 using DatabaseBenchmark.Databases.Sql;
@@ -51,26 +50,18 @@ namespace DatabaseBenchmark.Databases.Oracle
             }
 
             using var connection = new OracleConnection(_connectionString);
-            connection.Open();
+            var parametersBuilder = new SqlParametersBuilder(':');
+            var insertBuilder = new OracleInsertBuilder(table, source, parametersBuilder) { BatchSize = batchSize };
+            var parameterAdapter = new OracleParameterAdapter();
+            var dataImporter = new SqlDataImporter(
+                connection,
+                insertBuilder,
+                parametersBuilder,
+                parameterAdapter,
+                _environment);
 
             var stopwatch = Stopwatch.StartNew();
-            var progressReporter = new ImportProgressReporter(_environment);
-            var parametersBuilder = new SqlQueryParametersBuilder(':');
-            var dataImporter = new OracleDataImporter(_environment, progressReporter, parametersBuilder, batchSize);
-
-            var transaction = connection.BeginTransaction();
-            try
-            {
-                dataImporter.Import(source, table, connection, transaction);
-
-                transaction.Commit();
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
-
+            dataImporter.Import();
             stopwatch.Stop();
 
             var rowCount = GetRowCount(connection, table.Name);
@@ -81,12 +72,18 @@ namespace DatabaseBenchmark.Databases.Oracle
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
             new SqlQueryExecutorFactory<OracleConnection>(_connectionString, table, query, _environment)
-                .Customize<SqlQueryParametersBuilder>(() => new SqlQueryParametersBuilder(':'))
+                .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
                 .Customize<ISqlParameterAdapter, OracleParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new SqlRawQueryExecutorFactory<OracleConnection>(_connectionString, query, _environment)
-                .Customize<SqlQueryParametersBuilder>(() => new SqlQueryParametersBuilder(':'))
+                .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
+                .Customize<ISqlParameterAdapter, OracleParameterAdapter>();
+
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
+            new SqlInsertExecutorFactory<OracleConnection>(_connectionString, table, source, _environment)
+                .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
+                .Customize<ISqlQueryBuilder, OracleInsertBuilder>()
                 .Customize<ISqlParameterAdapter, OracleParameterAdapter>();
 
         private static long GetRowCount(OracleConnection connection, string tableName)

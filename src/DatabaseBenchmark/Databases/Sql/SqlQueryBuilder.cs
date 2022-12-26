@@ -14,7 +14,7 @@ namespace DatabaseBenchmark.Databases.Sql
 
         protected Query Query { get; }
 
-        protected SqlQueryParametersBuilder ParametersBuilder { get; }
+        protected ISqlParametersBuilder ParametersBuilder { get; }
 
         protected IRandomValueProvider RandomValueProvider { get; }
 
@@ -23,7 +23,7 @@ namespace DatabaseBenchmark.Databases.Sql
         public SqlQueryBuilder(
             Table table,
             Query query,
-            SqlQueryParametersBuilder parametersBuilder,
+            ISqlParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
             IRandomGenerator randomGenerator)
         {

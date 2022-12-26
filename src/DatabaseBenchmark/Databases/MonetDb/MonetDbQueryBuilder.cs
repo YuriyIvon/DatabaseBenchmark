@@ -1,5 +1,6 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Text;
 
@@ -10,7 +11,7 @@ namespace DatabaseBenchmark.Databases.MonetDb
         public MonetDbQueryBuilder(
             Table table,
             Query query,
-            SqlQueryParametersBuilder parametersBuilder,
+            ISqlParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
             IRandomGenerator randomGenerator) 
             : base(table, query, parametersBuilder, randomValueProvider, randomGenerator)

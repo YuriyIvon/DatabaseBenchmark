@@ -3,15 +3,15 @@ using System.Data;
 
 namespace DatabaseBenchmark.Databases.Sql
 {
-    public class SqlPreparedQuery : IPreparedQuery
+    public sealed class SqlPreparedQuery : IPreparedQuery
     {
         private readonly IDbCommand _command;
-        private IDataReader _reader;
-        private Dictionary<string, int> _columnNames;
 
-        public IEnumerable<string> ColumnNames => _columnNames.Keys;
+        private SqlQueryResults _results;
 
         public IDictionary<string, double> CustomMetrics => null;
+
+        public IQueryResults Results => _results;
 
         public SqlPreparedQuery(IDbCommand command)
         {
@@ -20,25 +20,13 @@ namespace DatabaseBenchmark.Databases.Sql
 
         public void Execute()
         {
-            _reader = _command.ExecuteReader();
-            _columnNames = Enumerable.Range(0, _reader.FieldCount)
-                .ToDictionary(i => _reader.GetName(i), i => i, StringComparer.OrdinalIgnoreCase);
+            var reader = _command.ExecuteReader();
+            _results = new SqlQueryResults(reader);
         }
-
-        public object GetValue(string name)
-        {
-            var value = _reader.GetValue(_columnNames[name]);
-            return value != DBNull.Value ? value : null;
-        }
-
-        public bool Read() => _reader.Read();
 
         public void Dispose()
         {
-            if (_reader != null)
-            {
-                _reader.Dispose();
-            }
+            _results?.Dispose();
         }
     }
 }

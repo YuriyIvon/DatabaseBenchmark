@@ -11,7 +11,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
     {
         private readonly CosmosClient _client;
         private readonly Container _container;
-        private readonly SqlQueryParametersBuilder _parametersBuilder;
+        private readonly ISqlParametersBuilder _parametersBuilder;
         private readonly ISqlQueryBuilder _queryBuilder;
         private readonly IExecutionEnvironment _environment;
         private readonly IOptionsProvider _optionsProvider;
@@ -20,7 +20,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             CosmosClient client,
             Container container,
             ISqlQueryBuilder queryBuilder,
-            SqlQueryParametersBuilder parametersBuilder,
+            ISqlParametersBuilder parametersBuilder,
             IExecutionEnvironment environment,
             IOptionsProvider optionsProvider)
         {
@@ -50,10 +50,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 
         public void Dispose()
         {
-            if (_client != null)
-            {
-                _client.Dispose();
-            }
+            _client?.Dispose();
         }
 
         public void TraceCommand(string query, IEnumerable<SqlQueryParameter> parameters)

@@ -2,7 +2,6 @@
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Model;
-using DatabaseBenchmark.Databases.Oracle;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
@@ -57,25 +56,18 @@ namespace DatabaseBenchmark.Databases.MySql
             }
 
             using var connection = new MySqlConnection(_connectionString);
-            connection.Open();
+            var parametersBuilder = new SqlNoParametersBuilder();
+            var insertBuilder = new SqlInsertBuilder(table, source, parametersBuilder) { BatchSize = batchSize };
+            var parameterAdapter = new MySqlParameterAdapter();
+            var dataImporter = new SqlDataImporter(
+                connection,
+                insertBuilder,
+                parametersBuilder,
+                parameterAdapter,
+                _environment);
 
             var stopwatch = Stopwatch.StartNew();
-            var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new SqlDataImporter(_environment, progressReporter, batchSize);
-
-            var transaction = connection.BeginTransaction();
-            try
-            {
-                dataImporter.Import(source, table, connection, transaction);
-
-                transaction.Commit();
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
-
+            dataImporter.Import();
             stopwatch.Stop();
 
             var rowCount = GetRowCount(connection, table.Name);
@@ -93,6 +85,10 @@ namespace DatabaseBenchmark.Databases.MySql
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new SqlRawQueryExecutorFactory<MySqlConnection>(_connectionString, query, _environment)
+                .Customize<ISqlParameterAdapter, MySqlParameterAdapter>();
+
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
+            new SqlInsertExecutorFactory<MySqlConnection>(_connectionString, table, source, _environment)
                 .Customize<ISqlParameterAdapter, MySqlParameterAdapter>();
 
         private static long GetTableSize(MySqlConnection connection, string tableName)
