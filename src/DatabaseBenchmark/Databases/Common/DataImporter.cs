@@ -1,15 +1,17 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Interfaces;
 
-namespace DatabaseBenchmark.Databases.Sql
+namespace DatabaseBenchmark.Databases.Common
 {
-    public class SqlDataImporter
+    public class DataImporter
     {
         private readonly IQueryExecutor _insertExecutor;
         private readonly ITransactionProvider _transactionProvider;
         private readonly IProgressReporter _progressReporter;
 
-        public SqlDataImporter(
+        public IDictionary<string, double> CustomMetrics { get; private set; }
+
+        public DataImporter(
             IQueryExecutor insertExecutor,
             ITransactionProvider transactionProvider,
             IProgressReporter progressReporter)
@@ -36,6 +38,8 @@ namespace DatabaseBenchmark.Databases.Sql
 
                     var rowsInserted = preparedInsert.Execute();
                     _progressReporter.Increment(rowsInserted);
+
+                    CollectMetrics(preparedInsert);
                 }
 
                 transaction?.Commit();
@@ -44,6 +48,26 @@ namespace DatabaseBenchmark.Databases.Sql
             {
                 transaction?.Rollback();
                 throw;
+            }
+        }
+
+        private void CollectMetrics(IPreparedQuery preparedInsert)
+        {
+            if (preparedInsert.CustomMetrics != null)
+            {
+                CustomMetrics ??= new Dictionary<string, double>();
+
+                foreach (var metric in preparedInsert.CustomMetrics)
+                {
+                    if (!CustomMetrics.ContainsKey(metric.Key))
+                    {
+                        CustomMetrics.Add(metric.Key, metric.Value);
+                    }
+                    else
+                    {
+                        CustomMetrics[metric.Key] += metric.Value;
+                    }
+                }
             }
         }
     }

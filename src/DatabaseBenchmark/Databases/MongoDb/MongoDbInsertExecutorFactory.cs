@@ -1,4 +1,6 @@
-﻿using DatabaseBenchmark.Databases.Common;
+﻿using DatabaseBenchmark.Commands;
+using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.MongoDb.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
@@ -13,10 +15,12 @@ namespace DatabaseBenchmark.Databases.MongoDb
         public MongoDbInsertExecutorFactory(
             string connectionString,
             Table table,
-            IDataSource source)
+            IDataSource source,
+            IOptionsProvider optionsProvider)
         {
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<IDataSource>(source);
+            Container.RegisterInstance<IOptionsProvider>(optionsProvider);
 
             Container.RegisterSingleton<IDataSourceReader, DataSourceReader>();
 

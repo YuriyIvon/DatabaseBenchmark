@@ -68,7 +68,7 @@ namespace DatabaseBenchmark.Databases.ClickHouse
             var insertExecutor = new SqlInsertExecutor(connection, insertBuilder, parametersBuilder, parameterAdapter, _environment);
             var transactionProvider = new NoTransactionProvider();
             var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new SqlDataImporter(
+            var dataImporter = new DataImporter(
                 insertExecutor,
                 transactionProvider,
                 progressReporter);

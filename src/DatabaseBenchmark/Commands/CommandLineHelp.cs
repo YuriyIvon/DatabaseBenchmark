@@ -60,7 +60,7 @@ namespace DatabaseBenchmark.Commands
                             new ValueSpecificOptionsDescriptor
                             {
                                 Value = "MongoDb",
-                                OptionsContainerType = typeof(MongoDbImportOptions)
+                                OptionsContainerType = typeof(MongoDbInsertOptions)
                             }
                         }
                     },
