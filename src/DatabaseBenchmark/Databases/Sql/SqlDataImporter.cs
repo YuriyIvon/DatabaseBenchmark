@@ -1,96 +1,50 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.Databases.Sql.Interfaces;
-using System.Data;
+using DatabaseBenchmark.Databases.Interfaces;
 
 namespace DatabaseBenchmark.Databases.Sql
 {
     public class SqlDataImporter
     {
-        private readonly IDbConnection _connection;
-        private readonly ISqlInsertBuilder _insertBuilder;
-        private readonly ISqlParametersBuilder _parametersBuilder;
-        private readonly ISqlParameterAdapter _parameterAdapter;
-        private readonly IExecutionEnvironment _environment;
+        private readonly IQueryExecutor _insertExecutor;
+        private readonly ITransactionProvider _transactionProvider;
+        private readonly IProgressReporter _progressReporter;
 
         public SqlDataImporter(
-            IDbConnection connection,
-            ISqlInsertBuilder insertBuilder,
-            ISqlParametersBuilder parametersBuilder,
-            ISqlParameterAdapter parameterAdapter,
-            IExecutionEnvironment environment)
+            IQueryExecutor insertExecutor,
+            ITransactionProvider transactionProvider,
+            IProgressReporter progressReporter)
         {
-            _connection = connection;
-            _insertBuilder = insertBuilder;
-            _parametersBuilder = parametersBuilder;
-            _parameterAdapter = parameterAdapter;
-            _environment = environment;
+            _insertExecutor = insertExecutor;
+            _transactionProvider = transactionProvider;
+            _progressReporter = progressReporter;
         }
 
         public void Import()
         {
-            if (_connection.State != ConnectionState.Open)
-            {
-                _connection.Open();
-            }
+            using var transaction = _transactionProvider.Begin();
 
-            var progressReporter = new ImportProgressReporter(_environment);
-
-            var transaction = _connection.BeginTransaction();
             try
             {
-                int imported;
-                do
+                while (true)
                 {
-                    imported = ImportBatch(transaction);
+                    using var preparedInsert = _insertExecutor.Prepare(transaction);
 
-                    progressReporter.Increment(imported);
+                    if (preparedInsert == null)
+                    {
+                        break;
+                    }
+
+                    var rowsInserted = preparedInsert.Execute();
+                    _progressReporter.Increment(rowsInserted);
                 }
-                while (imported == _insertBuilder.BatchSize);
 
-                transaction.Commit();
+                transaction?.Commit();
             }
             catch
             {
-                transaction.Rollback();
+                transaction?.Rollback();
                 throw;
             }
-        }
-
-        private int ImportBatch(IDbTransaction transaction)
-        {
-            int rowCount = 0;
-
-            if (_parametersBuilder != null)
-            {
-                _parametersBuilder.Reset();
-            }
-
-            var queryText = _insertBuilder.Build();
-
-            if (queryText != null)
-            {
-                var command = _connection.CreateCommand();
-                command.CommandText = queryText;
-
-                if (transaction != null)
-                {
-                    command.Transaction = transaction;
-                }
-
-                foreach (var parameter in _parametersBuilder.Parameters)
-                {
-                    var dbParameter = command.CreateParameter();
-                    _parameterAdapter.Populate(parameter, dbParameter);
-                    command.Parameters.Add(dbParameter);
-                }
-
-                _environment.TraceCommand(command);
-
-                rowCount = command.ExecuteNonQuery();
-            }
-
-            return rowCount;
         }
     }
 }

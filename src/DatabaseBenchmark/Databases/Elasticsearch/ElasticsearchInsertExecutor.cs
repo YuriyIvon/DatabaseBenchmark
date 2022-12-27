@@ -29,6 +29,8 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                 : null;
         }
 
+        public IPreparedQuery Prepare(ITransaction transaction) => Prepare();
+
         public void Dispose()
         {
         }

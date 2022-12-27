@@ -1,6 +1,6 @@
-﻿using DatabaseBenchmark.Databases.Sql;
+﻿using DatabaseBenchmark.Databases.Interfaces;
+using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
-using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Text;
 
@@ -12,9 +12,9 @@ namespace DatabaseBenchmark.Databases.Oracle
 
         public OracleInsertBuilder(
             Table table,
-            IDataSource source,
+            IDataSourceReader sourceReader,
             ISqlParametersBuilder parametersBuilder)
-            : base(table, source, parametersBuilder)
+            : base(table, sourceReader, parametersBuilder)
         {
         }
 

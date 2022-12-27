@@ -1,4 +1,4 @@
-﻿using DatabaseBenchmark.Databases.Common;
+﻿using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.MongoDb.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
@@ -9,28 +9,22 @@ namespace DatabaseBenchmark.Databases.MongoDb
     public class MongoDbInsertBuilder : IMongoDbInsertBuilder
     {
         private readonly Table _table;
-        private readonly IDataSource _source;
+        private readonly IDataSourceReader _sourceReader;
 
         public int BatchSize { get; set; } = 1;
 
-        public MongoDbInsertBuilder(Table table, IDataSource source)
+        public MongoDbInsertBuilder(Table table, IDataSourceReader sourceReader)
         {
             _table = table;
-            _source = source;
+            _sourceReader = sourceReader;
         }
 
         public IEnumerable<BsonDocument> Build()
         {
             var documents = new List<BsonDocument>();
 
-            for (int i = 0; i < BatchSize && _source.Read(); i++)
+            for (int i = 0; i < BatchSize && _sourceReader.ReadDictionary(_table.Columns, out var document); i++)
             {
-                var document = _table.Columns
-                .Where(c => !c.DatabaseGenerated)
-                    .ToDictionary(
-                        c => c.Name,
-                        c => _source.GetValue(c.GetNativeType(), c.Name));
-
                 documents.Add(new BsonDocument(document));
             }
 

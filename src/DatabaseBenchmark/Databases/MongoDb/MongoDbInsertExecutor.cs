@@ -26,6 +26,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
                 : null;
         }
 
+        public IPreparedQuery Prepare(ITransaction transaction) => Prepare();
+
         public void Dispose()
         {
         }

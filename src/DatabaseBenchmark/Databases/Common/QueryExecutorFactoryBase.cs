@@ -51,6 +51,8 @@ namespace DatabaseBenchmark.Databases.Common
 
             public IPreparedQuery Prepare() => _executor.Prepare();
 
+            public IPreparedQuery Prepare(ITransaction transaction) => _executor.Prepare(transaction);
+
             public void Dispose()
             {
                 _executor.Dispose();

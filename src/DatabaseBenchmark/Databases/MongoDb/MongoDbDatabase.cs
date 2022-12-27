@@ -61,7 +61,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
             var collection = database.GetCollection<BsonDocument>(table.Name);
             var progressReporter = new ImportProgressReporter(_environment);
             var options = _optionsProvider.GetOptions<MongoDbImportOptions>();
-            var insertBuilder = new MongoDbInsertBuilder(table, source) { BatchSize = batchSize };
+            var sourceReader = new DataSourceReader(source);
+            var insertBuilder = new MongoDbInsertBuilder(table, sourceReader) { BatchSize = batchSize };
             var insertExecutor = new MongoDbInsertExecutor(collection, insertBuilder);
 
             double totalRequestCharge = 0;

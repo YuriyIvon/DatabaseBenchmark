@@ -27,7 +27,9 @@ namespace DatabaseBenchmark.Databases.Sql
             _environment = environment;
         }
 
-        public IPreparedQuery Prepare()
+        public IPreparedQuery Prepare() => Prepare(null);
+
+        public IPreparedQuery Prepare(ITransaction transaction)
         {
             if (_connection.State != ConnectionState.Open)
             {
@@ -38,6 +40,11 @@ namespace DatabaseBenchmark.Databases.Sql
 
             var command = _connection.CreateCommand();
             command.CommandText = queryText;
+
+            if (transaction != null)
+            {
+                command.Transaction = ((ISqlTransaction)transaction).Transaction;
+            }
 
             foreach (var parameter in _parametersBuilder.Parameters)
             {

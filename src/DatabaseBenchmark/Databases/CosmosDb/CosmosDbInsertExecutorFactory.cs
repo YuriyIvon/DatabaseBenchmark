@@ -18,6 +18,8 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<IDataSource>(source);
 
+            Container.RegisterSingleton<IDataSourceReader, DataSourceReader>();
+
             Container.Register<CosmosClient>(() => new CosmosClient(connectionString), Lifestyle);
             Container.Register<Database>(() => Container.GetInstance<CosmosClient>().GetDatabase(databaseName), Lifestyle);
             Container.Register<Container>(() => Container.GetInstance<Database>().GetContainer(table.Name), Lifestyle);

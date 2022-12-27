@@ -38,6 +38,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
             return new MongoDbPreparedQuery(_collection, request, options);
         }
 
+        public IPreparedQuery Prepare(ITransaction transaction) => Prepare();
+
         public void Dispose()
         {
         }

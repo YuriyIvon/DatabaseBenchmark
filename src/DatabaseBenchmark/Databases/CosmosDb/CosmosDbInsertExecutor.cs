@@ -28,6 +28,8 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 : null;
         }
 
+        public IPreparedQuery Prepare(ITransaction transaction) => Prepare();
+
         public void Dispose() => _client?.Dispose();
     }
 }

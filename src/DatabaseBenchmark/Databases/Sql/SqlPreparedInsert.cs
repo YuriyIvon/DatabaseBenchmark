@@ -18,8 +18,6 @@ namespace DatabaseBenchmark.Databases.Sql
 
         public int Execute() => _command.ExecuteNonQuery();
 
-        public void Dispose()
-        {
-        }
+        public void Dispose() => _command.Dispose();
     }
 }

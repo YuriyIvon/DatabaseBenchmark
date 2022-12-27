@@ -1,7 +1,6 @@
-﻿using DatabaseBenchmark.Databases.Common;
+﻿using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
-using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Text.Json;
 
@@ -10,9 +9,9 @@ namespace DatabaseBenchmark.Databases.PostgreSql
     public class PostgreSqlJsonbInsertBuilder : SqlInsertBuilder
     {
         public PostgreSqlJsonbInsertBuilder(Table table,
-            IDataSource dataSource,
+            IDataSourceReader sourceReader,
             ISqlParametersBuilder parametersBuilder)
-            : base(table, dataSource, parametersBuilder)
+            : base(table, sourceReader, parametersBuilder)
         {
         }
 
@@ -22,34 +21,18 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
             var columns = Table.Columns.Where(c => !c.DatabaseGenerated && !c.Queryable).ToArray();
             var columnNames = columns.Select(c => c.Name).ToList();
-            columnNames.Add(PostgreSqlJsonbConstants.JsonbColumnName);
 
-            int i = 0;
             var rows = new List<List<string>>();
 
-            while (i < BatchSize && Source.Read())
+            for (var i = 0; i < BatchSize && SourceReader.ReadDictionary(Table.Columns, out var sourceRow); i++)
             {
-                var values = new List<string>();
-
-                foreach (var column in columns)
-                {
-                    var value = Source.GetValue(column.GetNativeType(), column.Name);
-
-                    if (value is double doubleValue && double.IsNaN(doubleValue))
-                    {
-                        value = null;
-                    }
-
-                    var valueRepresentation = ParametersBuilder.Append(value, column.Type);
-
-                    values.Add(valueRepresentation);
-                }
+                var values = columns.Select((c, i) => ParametersBuilder.Append(sourceRow[c.Name], c.Type)).ToList();
 
                 var jsonbValues = Table.Columns
-                    .Where(c => c.Queryable)
+                    .Where(c => !c.DatabaseGenerated && c.Queryable)
                     .ToDictionary(
                         c => c.Name,
-                        c => Source.GetValue(c.GetNativeType(), c.Name));
+                        c => sourceRow[c.Name]);
 
                 var jsonbParameter = ParametersBuilder.Append(
                     JsonSerializer.Serialize(jsonbValues),
@@ -58,11 +41,11 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                 values.Add(jsonbParameter);
 
                 rows.Add(values);
-
-                i++;
             }
 
-            return i > 0 ? BuildCommandText(Table.Name, columnNames, rows) : null;
+            columnNames.Add(PostgreSqlJsonbConstants.JsonbColumnName);
+
+            return rows.Any() ? BuildCommandText(Table.Name, columnNames, rows) : null;
         }
     }
 }

@@ -70,7 +70,8 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             var container = database.GetContainer(table.Name);
 
             var progressReporter = new ImportProgressReporter(_environment);
-            var insertBuilder = new CosmosDbInsertBuilder(table, source) { BatchSize = batchSize };
+            var sourceReader = new DataSourceReader(source);
+            var insertBuilder = new CosmosDbInsertBuilder(table, sourceReader) { BatchSize = batchSize };
             var insertExecutor = new CosmosDbInsertExecutor(client, container, insertBuilder);
 
             double totalRequestCharge = 0;
