@@ -61,15 +61,17 @@ namespace DatabaseBenchmark.Databases.ClickHouse
             }
 
             using var connection = new ClickHouseConnection(_connectionString);
+            var sourceReader = new DataSourceReader(source);
             var parametersBuilder = new SqlNoParametersBuilder();
-            var insertBuilder = new SqlInsertBuilder(table, source, parametersBuilder) { BatchSize = batchSize };
+            var insertBuilder = new SqlInsertBuilder(table, sourceReader, parametersBuilder) { BatchSize = batchSize };
             var parameterAdapter = new ClickHouseParameterAdapter();
+            var insertExecutor = new SqlInsertExecutor(connection, insertBuilder, parametersBuilder, parameterAdapter, _environment);
+            var transactionProvider = new NoTransactionProvider();
+            var progressReporter = new ImportProgressReporter(_environment);
             var dataImporter = new SqlDataImporter(
-                connection,
-                insertBuilder,
-                parametersBuilder,
-                parameterAdapter,
-                _environment);
+                insertExecutor,
+                transactionProvider,
+                progressReporter);
 
             var stopwatch = Stopwatch.StartNew();
             dataImporter.Import();

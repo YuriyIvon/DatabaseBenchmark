@@ -27,7 +27,9 @@ namespace DatabaseBenchmark.Databases.Sql
             _environment = environment;
         }
 
-        public IPreparedQuery Prepare()
+        public IPreparedQuery Prepare() => Prepare(null);
+
+        public IPreparedQuery Prepare(ITransaction transaction)
         {
             if (_connection.State != ConnectionState.Open)
             {
@@ -36,21 +38,46 @@ namespace DatabaseBenchmark.Databases.Sql
 
             var queryText = _queryBuilder.Build();
 
-            var command = _connection.CreateCommand();
-            command.CommandText = queryText;
-
-            foreach (var parameter in _parametersBuilder.Parameters)
+            if (queryText != null)
             {
-                var dbParameter = command.CreateParameter();
-                _parameterAdapter.Populate(parameter, dbParameter);
-                command.Parameters.Add(dbParameter);
+                var command = _connection.CreateCommand();
+                command.CommandText = queryText;
+
+                foreach (var parameter in _parametersBuilder.Parameters)
+                {
+                    var dbParameter = command.CreateParameter();
+                    _parameterAdapter.Populate(parameter, dbParameter);
+                    command.Parameters.Add(dbParameter);
+                }
+
+                ApplyTransaction(transaction, command);
+
+                _environment.TraceCommand(command);
+
+                return new SqlPreparedInsert(command);
             }
 
-            _environment.TraceCommand(command);
-
-            return new SqlPreparedInsert(command);
+            return null;
         }
 
         public void Dispose() => _connection?.Dispose();
+
+        private void ApplyTransaction(ITransaction transaction, IDbCommand command)
+        {
+            if (transaction != null)
+            {
+                if (transaction is ISqlTransaction sqlTransaction)
+                {
+                    if (sqlTransaction.Transaction != null)
+                    {
+                        command.Transaction = sqlTransaction.Transaction;
+                    }
+                }
+                else
+                {
+                    _environment.WriteLine("WARNING: ignoring an incompatible transaction object");
+                }
+            }
+        }
     }
 }

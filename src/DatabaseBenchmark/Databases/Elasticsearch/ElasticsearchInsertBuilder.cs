@@ -1,5 +1,5 @@
-﻿using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
+﻿using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
+using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 
@@ -8,28 +8,22 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
     public class ElasticsearchInsertBuilder : IElasticsearchInsertBuilder
     {
         private readonly Table _table;
-        private readonly IDataSource _source;
+        private readonly IDataSourceReader _sourceReader;
 
         public int BatchSize { get; set; } = 1;
 
-        public ElasticsearchInsertBuilder(Table table, IDataSource source)
+        public ElasticsearchInsertBuilder(Table table, IDataSourceReader sourceReader)
         {
             _table = table;
-            _source = source;
+            _sourceReader = sourceReader;
         }
 
         public IEnumerable<object> Build()
         {
             var documents = new List<object>();
 
-            for (int i = 0; i < BatchSize && _source.Read(); i++)
+            for (int i = 0; i < BatchSize && _sourceReader.ReadDictionary(_table.Columns, out var document); i++)
             {
-                var document = _table.Columns
-                .Where(c => !c.DatabaseGenerated)
-                    .ToDictionary(
-                        c => c.Name,
-                        c => _source.GetValue(c.GetNativeType(), c.Name));
-
                 documents.Add(document);
             }
 

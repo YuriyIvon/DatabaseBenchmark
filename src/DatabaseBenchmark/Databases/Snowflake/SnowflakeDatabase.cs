@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Model;
 using DatabaseBenchmark.Databases.Sql;
@@ -63,14 +64,16 @@ namespace DatabaseBenchmark.Databases.Snowflake
             using var connection = new SnowflakeDbConnection();
             connection.ConnectionString = _connectionString;
             var parametersBuilder = new SqlNoParametersBuilder();
-            var insertBuilder = new SqlInsertBuilder(table, source, parametersBuilder) { BatchSize = batchSize };
+            var sourceReader = new DataSourceReader(source);
+            var insertBuilder = new SqlInsertBuilder(table, sourceReader, parametersBuilder) { BatchSize = batchSize };
             var parameterAdapter = new SnowflakeParameterAdapter();
+            var insertExecutor = new SqlInsertExecutor(connection, insertBuilder, parametersBuilder, parameterAdapter, _environment);
+            var transactionProvider = new SqlTransactionProvider(connection);
+            var progressReporter = new ImportProgressReporter(_environment);
             var dataImporter = new SqlDataImporter(
-                connection,
-                insertBuilder,
-                parametersBuilder,
-                parameterAdapter,
-                _environment);
+                insertExecutor,
+                transactionProvider,
+                progressReporter);
 
             var stopwatch = Stopwatch.StartNew();
             dataImporter.Import();

@@ -1,6 +1,5 @@
-﻿using DatabaseBenchmark.Databases.Common;
+﻿using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
-using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Text;
 
@@ -12,17 +11,17 @@ namespace DatabaseBenchmark.Databases.Sql
 
         protected Table Table { get; }
 
-        protected IDataSource Source { get; }
+        protected IDataSourceReader SourceReader { get; }
 
         protected ISqlParametersBuilder ParametersBuilder { get; }
 
         public SqlInsertBuilder(
             Table table,
-            IDataSource source,
+            IDataSourceReader sourceReader,
             ISqlParametersBuilder parametersBuilder)
         {
             Table = table;
-            Source = source;
+            SourceReader = sourceReader;
             ParametersBuilder = parametersBuilder;
         }
 
@@ -33,33 +32,15 @@ namespace DatabaseBenchmark.Databases.Sql
             var columns = Table.Columns.Where(c => !c.DatabaseGenerated).ToArray();
             var columnNames = columns.Select(c => c.Name).ToArray();
 
-            int i = 0;
-            var rows = new List<List<string>>();
+            var rows = new List<string[]>();
 
-            while (i < BatchSize && Source.Read())
+            for (var i = 0; i < BatchSize && SourceReader.ReadArray(columns, out var sourceRow); i++)
             {
-                var values = new List<string>();
-
-                foreach (var column in columns)
-                {
-                    var value = Source.GetValue(column.GetNativeType(), column.Name);
-
-                    if (value is double doubleValue && double.IsNaN(doubleValue))
-                    {
-                        value = null;
-                    }
-
-                    var valueRepresentation = ParametersBuilder.Append(value, column.Type);
-
-                    values.Add(valueRepresentation);
-                }
-
+                var values = columns.Select((c, i) => ParametersBuilder.Append(sourceRow[i], c.Type)).ToArray();
                 rows.Add(values);
-
-                i++;
             }
 
-            return i > 0 ? BuildCommandText(Table.Name, columnNames, rows) : null;
+            return rows.Any() ? BuildCommandText(Table.Name, columnNames, rows) : null;
         }
 
         protected virtual string BuildCommandText(

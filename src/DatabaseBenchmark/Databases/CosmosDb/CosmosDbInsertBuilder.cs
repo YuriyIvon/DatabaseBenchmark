@@ -1,7 +1,6 @@
 ﻿using DatabaseBenchmark.Common;
-using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.CosmosDb.Interfaces;
-using DatabaseBenchmark.DataSources.Interfaces;
+using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Databases.CosmosDb
@@ -9,31 +8,25 @@ namespace DatabaseBenchmark.Databases.CosmosDb
     public class CosmosDbInsertBuilder : ICosmosDbInsertBuilder
     {
         private readonly Table _table;
-        private readonly IDataSource _source;
-        private readonly Dictionary<object, List<Dictionary<string, object>>> _batches = new();
+        private readonly IDataSourceReader _sourceReader;
+        private readonly Dictionary<object, List<IDictionary<string, object>>> _batches = new();
 
         public int BatchSize { get; set; } = 1;
 
         public string PartitionKeyName { get; }
 
-        public CosmosDbInsertBuilder(Table table, IDataSource source)
+        public CosmosDbInsertBuilder(Table table, IDataSourceReader sourceReader)
         {
             _table = table;
-            _source = source;
+            _sourceReader = sourceReader;
 
             PartitionKeyName = GetPartitionKeyName(table);
         }
 
         public IEnumerable<IDictionary<string, object>> Build()
         {
-            while (_source.Read())
+            while (_sourceReader.ReadDictionary(_table.Columns, out var item))
             {
-                var item = _table.Columns
-                    .Where(c => !c.DatabaseGenerated)
-                    .ToDictionary(
-                        c => c.Name,
-                        c => _source.GetValue(c.GetNativeType(), c.Name));
-
                 item.Add("id", Guid.NewGuid().ToString("N"));
 
                 if (PartitionKeyName == CosmosDbConstants.DummyPartitionKeyName)
@@ -45,7 +38,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 
                 if (!_batches.TryGetValue(partitionKeyValue, out var batch))
                 {
-                    batch = new List<Dictionary<string, object>>();
+                    batch = new List<IDictionary<string, object>>();
                     _batches.Add(partitionKeyValue, batch);
                 }
 

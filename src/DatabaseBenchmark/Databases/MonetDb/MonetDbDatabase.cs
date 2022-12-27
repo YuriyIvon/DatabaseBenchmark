@@ -52,14 +52,16 @@ namespace DatabaseBenchmark.Databases.MonetDb
 
             using var connection = new MonetDbConnection(_connectionString);
             var parametersBuilder = new SqlNoParametersBuilder();
-            var insertBuilder = new SqlInsertBuilder(table, source, parametersBuilder) { BatchSize = batchSize };
+            var sourceReader = new DataSourceReader(source);
+            var insertBuilder = new SqlInsertBuilder(table, sourceReader, parametersBuilder) { BatchSize = batchSize };
             var parameterAdapter = new MonetDbParameterAdapter();
+            var insertExecutor = new SqlInsertExecutor(connection, insertBuilder, parametersBuilder, parameterAdapter, _environment);
+            var transactionProvider = new MonetDbTransactionProvider(connection);
+            var progressReporter = new ImportProgressReporter(_environment);
             var dataImporter = new SqlDataImporter(
-                connection,
-                insertBuilder,
-                parametersBuilder,
-                parameterAdapter,
-                _environment);
+                insertExecutor,
+                transactionProvider,
+                progressReporter);
 
             var stopwatch = Stopwatch.StartNew();
             dataImporter.Import();

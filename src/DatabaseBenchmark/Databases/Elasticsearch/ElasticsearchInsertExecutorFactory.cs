@@ -18,6 +18,8 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<IDataSource>(source);
 
+            Container.RegisterSingleton<IDataSourceReader, DataSourceReader>();
+
             Container.Register<IElasticClient>(createClient, Lifestyle);
             Container.Register<IElasticsearchInsertBuilder, ElasticsearchInsertBuilder>(Lifestyle);
             Container.Register<IQueryExecutor, ElasticsearchInsertExecutor>(Lifestyle);

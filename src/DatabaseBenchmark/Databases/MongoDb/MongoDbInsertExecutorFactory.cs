@@ -18,6 +18,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<IDataSource>(source);
 
+            Container.RegisterSingleton<IDataSourceReader, DataSourceReader>();
+
             Container.Register<IMongoDatabase>(() =>
                 {
                     var client = new MongoClient(connectionString);

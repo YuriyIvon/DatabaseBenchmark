@@ -56,7 +56,8 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
             var client = CreateClient();
             var progressReporter = new ImportProgressReporter(_environment);
-            var insertBuilder = new ElasticsearchInsertBuilder(table, source) { BatchSize = batchSize }; 
+            var sourceReader = new DataSourceReader(source);
+            var insertBuilder = new ElasticsearchInsertBuilder(table, sourceReader) { BatchSize = batchSize }; 
             var insertExecutor = new ElasticsearchInsertExecutor(client, table, insertBuilder);
 
             var stopwatch = Stopwatch.StartNew();

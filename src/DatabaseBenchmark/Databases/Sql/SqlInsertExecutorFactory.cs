@@ -22,6 +22,8 @@ namespace DatabaseBenchmark.Databases.Sql
             Container.RegisterInstance<IDataSource>(source);
             Container.RegisterInstance<IExecutionEnvironment>(environment);
 
+            Container.RegisterSingleton<IDataSourceReader, DataSourceReader>();
+
             Container.Register<IDbConnection>(() => new TConnection { ConnectionString = connectionString }, Lifestyle);
             Container.Register<ISqlQueryBuilder, SqlInsertBuilder>(Lifestyle);
             Container.Register<ISqlParametersBuilder>(() => new SqlParametersBuilder(), Lifestyle);

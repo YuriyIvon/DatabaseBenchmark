@@ -24,6 +24,8 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             return new ElasticsearchPreparedQuery(_client, request);
         }
 
+        public IPreparedQuery Prepare(ITransaction transaction) => Prepare();
+
         public void Dispose()
         {
         }

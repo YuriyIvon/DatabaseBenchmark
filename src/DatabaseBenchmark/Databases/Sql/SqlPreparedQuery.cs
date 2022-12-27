@@ -26,6 +26,10 @@ namespace DatabaseBenchmark.Databases.Sql
             return 0;
         }
 
-        public void Dispose() => _results?.Dispose();
+        public void Dispose()
+        {
+            _results?.Dispose();
+            _command.Dispose();
+        }
     }
 }
