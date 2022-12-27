@@ -70,7 +70,7 @@ namespace DatabaseBenchmark.Databases.Snowflake
             var insertExecutor = new SqlInsertExecutor(connection, insertBuilder, parametersBuilder, parameterAdapter, _environment);
             var transactionProvider = new SqlTransactionProvider(connection);
             var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new SqlDataImporter(
+            var dataImporter = new DataImporter(
                 insertExecutor,
                 transactionProvider,
                 progressReporter);

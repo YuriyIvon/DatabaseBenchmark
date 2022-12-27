@@ -69,28 +69,28 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             var database = client.GetDatabase(_databaseName);
             var container = database.GetContainer(table.Name);
 
-            var progressReporter = new ImportProgressReporter(_environment);
             var sourceReader = new DataSourceReader(source);
             var insertBuilder = new CosmosDbInsertBuilder(table, sourceReader) { BatchSize = batchSize };
             var insertExecutor = new CosmosDbInsertExecutor(client, container, insertBuilder);
+            var transactionProvider = new NoTransactionProvider();
+            var progressReporter = new ImportProgressReporter(_environment);
+            var dataImporter = new DataImporter(
+                insertExecutor,
+                transactionProvider,
+                progressReporter);
 
-            double totalRequestCharge = 0;
             var stopwatch = Stopwatch.StartNew();
-
-            //TODO: dispose correctly
-            var preparedInsert = insertExecutor.Prepare();
-            while (preparedInsert != null)
-            {
-                var rowsInserted = preparedInsert.Execute();
-                progressReporter.Increment(rowsInserted);
-                totalRequestCharge += preparedInsert.CustomMetrics[CosmosDbConstants.RequestUnitsMetric];
-                preparedInsert = insertExecutor.Prepare();
-            }
-
+            dataImporter.Import();
             stopwatch.Stop();
 
             var importResult = new ImportResult(container.Count(), stopwatch.ElapsedMilliseconds);
-            importResult.AddMetric(Metrics.TotalRequestCharge, totalRequestCharge);
+            if (dataImporter.CustomMetrics != null)
+            {
+                foreach (var metric in dataImporter.CustomMetrics)
+                {
+                    importResult.AddMetric(metric.Key, metric.Value);
+                }
+            }
 
             return importResult;
         }

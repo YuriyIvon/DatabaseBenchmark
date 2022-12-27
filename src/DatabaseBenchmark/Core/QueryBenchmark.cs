@@ -50,30 +50,44 @@ namespace DatabaseBenchmark.Core
             for (int i = 0; i < warmupQueryCount; i++)
             {
                 using var preparedQuery = executor.Prepare();
-                preparedQuery.Execute();
 
-                if (preparedQuery.Results != null)
+                if (preparedQuery == null)
                 {
-                    FetchResults(preparedQuery);
+                    PrintNoQueriesWarning();
+                    return;
                 }
+
+                ExecuteQuery(preparedQuery);
             }
 
             for (int i = 0; i < queryCount; i++)
             {
                 using var preparedQuery = executor.Prepare();
 
-                var startTimestamp = DateTime.UtcNow;
-                var rowCount = preparedQuery.Execute();
-
-                if (preparedQuery.Results != null)
+                if (preparedQuery == null)
                 {
-                    rowCount = FetchResults(preparedQuery);
+                    PrintNoQueriesWarning();
+                    return;
                 }
 
+                var startTimestamp = DateTime.UtcNow;
+                var rowCount = ExecuteQuery(preparedQuery);
                 var endTimestamp = DateTime.UtcNow;
 
                 _metricsCollector.AppendResult(startTimestamp, endTimestamp, rowCount, preparedQuery.CustomMetrics);
             }
+        }
+
+        private int ExecuteQuery(IPreparedQuery query)
+        {
+            var rowCount = query.Execute();
+
+            if (query.Results != null)
+            {
+                rowCount = FetchResults(query);
+            }
+
+            return rowCount;
         }
 
         private int FetchResults(IPreparedQuery query)
@@ -114,6 +128,11 @@ namespace DatabaseBenchmark.Core
             }
 
             return rowCount;
+        }
+
+        private void PrintNoQueriesWarning()
+        {
+            _environment.WriteLine("WARNING: No more queries left");
         }
     }
 }

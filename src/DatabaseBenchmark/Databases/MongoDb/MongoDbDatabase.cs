@@ -59,38 +59,28 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
             var database = GetDatabase();
             var collection = database.GetCollection<BsonDocument>(table.Name);
-            var progressReporter = new ImportProgressReporter(_environment);
-            var options = _optionsProvider.GetOptions<MongoDbImportOptions>();
             var sourceReader = new DataSourceReader(source);
             var insertBuilder = new MongoDbInsertBuilder(table, sourceReader) { BatchSize = batchSize };
-            var insertExecutor = new MongoDbInsertExecutor(collection, insertBuilder);
+            var insertExecutor = new MongoDbInsertExecutor(collection, insertBuilder, _optionsProvider);
+            var transactionProvider = new NoTransactionProvider();
+            var progressReporter = new ImportProgressReporter(_environment);
+            var dataImporter = new DataImporter(
+                insertExecutor,
+                transactionProvider,
+                progressReporter);
 
-            double totalRequestCharge = 0;
             var stopwatch = Stopwatch.StartNew();
-
-            //TODO: dispose correctly
-            var preparedInsert = insertExecutor.Prepare();
-            while (preparedInsert != null)
-            {
-                var rowsInserted = preparedInsert.Execute();
-                progressReporter.Increment(rowsInserted);
-
-                if (options.CollectCosmosDbRequestUnits)
-                {
-                    totalRequestCharge += preparedInsert.CustomMetrics[MongoDbConstants.RequestUnitsMetric];
-                }
-
-                preparedInsert = insertExecutor.Prepare();
-            }
-
+            dataImporter.Import();
             stopwatch.Stop();
 
             var rowCount = collection.CountDocuments(new BsonDocument());
             var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
-
-            if (options.CollectCosmosDbRequestUnits)
+            if (dataImporter.CustomMetrics != null)
             {
-                importResult.AddMetric(Metrics.TotalRequestCharge, totalRequestCharge);
+                foreach (var metric in dataImporter.CustomMetrics)
+                {
+                    importResult.AddMetric(metric.Key, metric.Value);
+                }
             }
 
             return importResult;
@@ -103,7 +93,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
             new MongoDbRawQueryExecutorFactory(_connectionString, query, _environment, _optionsProvider);
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
-            new MongoDbInsertExecutorFactory(_connectionString, table, source);
+            new MongoDbInsertExecutorFactory(_connectionString, table, source, _optionsProvider);
 
         private IMongoDatabase GetDatabase()
         {
