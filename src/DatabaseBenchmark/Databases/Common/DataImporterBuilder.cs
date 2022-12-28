@@ -16,13 +16,16 @@ namespace DatabaseBenchmark.Databases.Common
 
         public DataImporterBuilder(Table table, IDataSource source, int batchSize, int defaultBatchSize)
         {
+            Container.Options.AllowOverridingRegistrations = true;
+
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<IDataSource>(source);
 
-            if (batchSize <= 0)
+            var insertBuilderOptions = new InsertBuilderOptions
             {
-                batchSize = defaultBatchSize;
-            }
+                BatchSize = batchSize <= 0 ? defaultBatchSize : batchSize
+            };
+            Container.RegisterInstance<InsertBuilderOptions>(insertBuilderOptions);
 
             Container.Register<IDataSourceReader, DataSourceReader>(Lifestyle);
             Container.Register<IDataImporter, DataImporter>(Lifestyle);
@@ -67,6 +70,14 @@ namespace DatabaseBenchmark.Databases.Common
             where T: class, IDataMetricsProvider
         {
             Container.Register<IDataMetricsProvider, T>(Lifestyle);
+            return this;
+        }
+
+        public DataImporterBuilder DataMetricsProvider<T>(Action<T> initializer)
+            where T : class, IDataMetricsProvider
+        {
+            DataMetricsProvider<T>();
+            Container.RegisterInitializer<IDataMetricsProvider>(dmp => initializer((T)dmp));
             return this;
         }
 

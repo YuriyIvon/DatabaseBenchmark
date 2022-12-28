@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Databases.Common.Interfaces;
+﻿using DatabaseBenchmark.Databases.Common;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Text;
@@ -7,7 +8,7 @@ namespace DatabaseBenchmark.Databases.Sql
 {
     public class SqlInsertBuilder : ISqlInsertBuilder
     {
-        public int BatchSize { get; set; } = 1;
+        public int BatchSize => Options.BatchSize;
 
         protected Table Table { get; }
 
@@ -15,14 +16,18 @@ namespace DatabaseBenchmark.Databases.Sql
 
         protected ISqlParametersBuilder ParametersBuilder { get; }
 
+        protected InsertBuilderOptions Options { get; }
+
         public SqlInsertBuilder(
             Table table,
             IDataSourceReader sourceReader,
-            ISqlParametersBuilder parametersBuilder)
+            ISqlParametersBuilder parametersBuilder,
+            InsertBuilderOptions options)
         {
             Table = table;
             SourceReader = sourceReader;
             ParametersBuilder = parametersBuilder;
+            Options = options;
         }
 
         public virtual string Build()

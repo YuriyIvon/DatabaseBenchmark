@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Databases.Common.Interfaces;
+﻿using DatabaseBenchmark.Databases.Common;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
@@ -8,10 +9,12 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 {
     public class PostgreSqlJsonbInsertBuilder : SqlInsertBuilder
     {
-        public PostgreSqlJsonbInsertBuilder(Table table,
+        public PostgreSqlJsonbInsertBuilder(
+            Table table,
             IDataSourceReader sourceReader,
-            ISqlParametersBuilder parametersBuilder)
-            : base(table, sourceReader, parametersBuilder)
+            ISqlParametersBuilder parametersBuilder,
+            InsertBuilderOptions options)
+            : base(table, sourceReader, parametersBuilder, options)
         {
         }
 

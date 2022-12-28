@@ -60,6 +60,16 @@ namespace DatabaseBenchmark.Databases.Common
             stopwatch.Stop();
 
             var result = new ImportResult(_dataMetricsProvider.GetRowCount(), stopwatch.ElapsedMilliseconds);
+            var metrics = _dataMetricsProvider.GetMetrics();
+
+            if (metrics != null)
+            {
+                foreach (var metric in metrics)
+                {
+                    result.AddMetric(metric.Key, metric.Value);
+                }
+            }
+
             if (CustomMetrics != null)
             {
                 foreach (var metric in CustomMetrics)

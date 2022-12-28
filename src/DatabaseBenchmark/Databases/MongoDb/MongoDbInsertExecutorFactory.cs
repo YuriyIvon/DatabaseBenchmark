@@ -1,5 +1,4 @@
-﻿using DatabaseBenchmark.Commands;
-using DatabaseBenchmark.Core.Interfaces;
+﻿using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.MongoDb.Interfaces;
@@ -16,11 +15,17 @@ namespace DatabaseBenchmark.Databases.MongoDb
             string connectionString,
             Table table,
             IDataSource source,
+            int batchSize,
+            IExecutionEnvironment environment,
             IOptionsProvider optionsProvider)
         {
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<IDataSource>(source);
+            Container.RegisterInstance<IExecutionEnvironment>(environment);
             Container.RegisterInstance<IOptionsProvider>(optionsProvider);
+
+            var insertBuilderOptions = new InsertBuilderOptions { BatchSize = batchSize };
+            Container.RegisterInstance<InsertBuilderOptions>(insertBuilderOptions);
 
             Container.RegisterSingleton<IDataSourceReader, DataSourceReader>();
 

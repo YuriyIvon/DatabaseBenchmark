@@ -49,8 +49,8 @@ namespace DatabaseBenchmark.Databases.SqlServer
             new SqlRawQueryExecutorFactory<SqlConnection>(_connectionString, query, _environment)
                 .Customize<ISqlParameterAdapter, SqlServerParameterAdapter>();
 
-        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
-            new SqlInsertExecutorFactory<SqlConnection>(_connectionString, table, source, _environment)
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
+            new SqlInsertExecutorFactory<SqlConnection>(_connectionString, table, source, batchSize, _environment)
                 .Customize<ISqlParameterAdapter, SqlServerParameterAdapter>();
     }
 }

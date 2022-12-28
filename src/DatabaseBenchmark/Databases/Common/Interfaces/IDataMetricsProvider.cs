@@ -3,5 +3,7 @@
     public interface IDataMetricsProvider
     {
         long GetRowCount();
+
+        IDictionary<string, double> GetMetrics();
     }
 }

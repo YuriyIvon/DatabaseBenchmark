@@ -47,7 +47,8 @@ namespace DatabaseBenchmark.Databases.MonetDb
                 .ParametersBuilder<SqlNoParametersBuilder>()
                 .ParameterAdapter<MonetDbParameterAdapter>()
                 .TransactionProvider<MonetDbTransactionProvider>()
-                .DataMetricsProvider<SqlDataMetricsProvider>()
+                .DataMetricsProvider<SqlDataMetricsProvider>(dmp =>
+                    dmp.AddMetric(Metrics.TotalStorageBytes, $"SELECT SUM(columnsize) + SUM(heapsize) + SUM(hashes) + SUM(imprints) + SUM(orderidx) FROM storage() WHERE table = '{table.Name.ToLower()}'"))
                 .ProgressReporter<ImportProgressReporter>()
                 .Environment(_environment)
                 .Build();
@@ -61,14 +62,9 @@ namespace DatabaseBenchmark.Databases.MonetDb
             new SqlRawQueryExecutorFactory<MonetDbConnection>(_connectionString, query, _environment)
                 .Customize<ISqlParameterAdapter, MonetDbParameterAdapter>();
 
-        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
-            new SqlInsertExecutorFactory<MonetDbConnection>(_connectionString, table, source, _environment)
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
+            new SqlInsertExecutorFactory<MonetDbConnection>(_connectionString, table, source, batchSize, _environment)
+                .Customize<ISqlParametersBuilder, SqlNoParametersBuilder>()
                 .Customize<ISqlParameterAdapter, MonetDbParameterAdapter>();
-
-        /*private static long GetTableSize(MonetDbConnection connection, string tableName)
-        {
-            var command = new MonetDbCommand($"SELECT SUM(columnsize) + SUM(heapsize) + SUM(hashes) + SUM(imprints) + SUM(orderidx) FROM storage() WHERE table = '{tableName.ToLower()}'", connection);
-            return (long)command.ExecuteScalar();
-        }*/
     }
 }

@@ -13,10 +13,14 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         public ElasticsearchInsertExecutorFactory(
             Func<ElasticClient> createClient,
             Table table,
-            IDataSource source)
+            IDataSource source,
+            int batchSize)
         {
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<IDataSource>(source);
+
+            var insertBuilderOptions = new InsertBuilderOptions { BatchSize = batchSize };
+            Container.RegisterInstance<InsertBuilderOptions>(insertBuilderOptions);
 
             Container.RegisterSingleton<IDataSourceReader, DataSourceReader>();
 

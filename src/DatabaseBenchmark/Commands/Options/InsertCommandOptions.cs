@@ -40,5 +40,8 @@ namespace DatabaseBenchmark.Commands.Options
 
         [Option("Report custom metric columns to be shown for each custom metric")]
         public string[] ReportCustomMetricColumns { get; set; }
+
+        [Option("Number of records inserted into the database in one query")]
+        public int BatchSize { get; set; } = 1;
     }
 }

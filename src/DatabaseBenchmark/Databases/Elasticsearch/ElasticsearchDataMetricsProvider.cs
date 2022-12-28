@@ -9,6 +9,8 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         private readonly IElasticClient _client;
         private readonly Table _table;
 
+        private IndicesStatsResponse _stats;
+
         public ElasticsearchDataMetricsProvider(IElasticClient client, Table table)
         {
             _client = client;
@@ -17,8 +19,23 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
         public long GetRowCount()
         {
-            var stats = _client.Indices.Stats(_table.Name);
-            return stats.Stats.Primaries.Documents.Count;
+            EnsureStats();
+            return _stats.Stats.Primaries.Documents.Count;
+        }
+
+        public IDictionary<string, double> GetMetrics()
+        {
+            EnsureStats();
+            return new Dictionary<string, double>
+            {
+                [Common.Metrics.TotalStorageBytes] = _stats.Stats.Total.Store.SizeInBytes
+            };
+        }
+
+        private void EnsureStats()
+        {
+            _client.Indices.Refresh(_table.Name);
+            _stats ??= _client.Indices.Stats(_table.Name);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using DatabaseBenchmark.Databases.Model;
-using DatabaseBenchmark.DataSources.Interfaces;
+﻿using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Databases.Common.Interfaces
@@ -14,6 +13,6 @@ namespace DatabaseBenchmark.Databases.Common.Interfaces
 
         IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query);
 
-        IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource dataSource);
+        IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource dataSource, int batchSize);
     }
 }

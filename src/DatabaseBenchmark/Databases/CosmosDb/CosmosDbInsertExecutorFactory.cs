@@ -1,6 +1,7 @@
-﻿using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.Databases.CosmosDb.Interfaces;
+﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
+using DatabaseBenchmark.Databases.CosmosDb.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Microsoft.Azure.Cosmos;
@@ -13,10 +14,16 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             string connectionString,
             string databaseName,
             Table table,
-            IDataSource source)
+            IDataSource source,
+            int batchSize,
+            IExecutionEnvironment environment)
         {
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<IDataSource>(source);
+            Container.RegisterInstance<IExecutionEnvironment>(environment);
+
+            var insertBuilderOptions = new InsertBuilderOptions { BatchSize = batchSize };
+            Container.RegisterInstance<InsertBuilderOptions>(insertBuilderOptions);
 
             Container.RegisterSingleton<IDataSourceReader, DataSourceReader>();
 

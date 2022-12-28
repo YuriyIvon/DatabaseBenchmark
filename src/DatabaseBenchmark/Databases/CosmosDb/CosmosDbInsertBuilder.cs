@@ -1,6 +1,7 @@
 ﻿using DatabaseBenchmark.Common;
-using DatabaseBenchmark.Databases.CosmosDb.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
+using DatabaseBenchmark.Databases.CosmosDb.Interfaces;
 using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Databases.CosmosDb
@@ -9,16 +10,21 @@ namespace DatabaseBenchmark.Databases.CosmosDb
     {
         private readonly Table _table;
         private readonly IDataSourceReader _sourceReader;
+        private readonly InsertBuilderOptions _options;
         private readonly Dictionary<object, List<IDictionary<string, object>>> _batches = new();
 
-        public int BatchSize { get; set; } = 1;
+        public int BatchSize => _options.BatchSize;
 
         public string PartitionKeyName { get; }
 
-        public CosmosDbInsertBuilder(Table table, IDataSourceReader sourceReader)
+        public CosmosDbInsertBuilder(
+            Table table,
+            IDataSourceReader sourceReader,
+            InsertBuilderOptions options)
         {
             _table = table;
             _sourceReader = sourceReader;
+            _options = options;
 
             PartitionKeyName = GetPartitionKeyName(table);
         }

@@ -72,8 +72,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new MongoDbRawQueryExecutorFactory(_connectionString, query, _environment, _optionsProvider);
 
-        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
-            new MongoDbInsertExecutorFactory(_connectionString, table, source, _optionsProvider);
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
+            new MongoDbInsertExecutorFactory(_connectionString, table, source, batchSize, _environment, _optionsProvider);
 
         private IMongoDatabase GetDatabase()
         {

@@ -13,5 +13,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
         }
 
         public long GetRowCount() => _container.Count();
+
+        public IDictionary<string, double> GetMetrics() => null;
     }
 }
