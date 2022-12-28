@@ -46,7 +46,7 @@ namespace DatabaseBenchmark.Databases.Oracle
                 .Connection<OracleConnection>(_connectionString)
                 .ParametersBuilder(() => new SqlParametersBuilder(':'))
                 .ParameterAdapter<OracleParameterAdapter>()
-                .InsertBuilder<ISqlInsertBuilder, OracleInsertBuilder>()
+                .InsertBuilder<ISqlQueryBuilder, OracleInsertBuilder>()
                 .TransactionProvider<SqlTransactionProvider>()
                 .DataMetricsProvider<SqlDataMetricsProvider>()
                 .ProgressReporter<ImportProgressReporter>()
@@ -63,8 +63,8 @@ namespace DatabaseBenchmark.Databases.Oracle
                 .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
                 .Customize<ISqlParameterAdapter, OracleParameterAdapter>();
 
-        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
-            new SqlInsertExecutorFactory<OracleConnection>(_connectionString, table, source, _environment)
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
+            new SqlInsertExecutorFactory<OracleConnection>(_connectionString, table, source, batchSize, _environment)
                 .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
                 .Customize<ISqlQueryBuilder, OracleInsertBuilder>()
                 .Customize<ISqlParameterAdapter, OracleParameterAdapter>();

@@ -16,11 +16,15 @@ namespace DatabaseBenchmark.Databases.Sql
             string connectionString,
             Table table,
             IDataSource source,
+            int batchSize,
             IExecutionEnvironment environment)
         {
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<IDataSource>(source);
             Container.RegisterInstance<IExecutionEnvironment>(environment);
+
+            var insertBuilderOptions = new InsertBuilderOptions { BatchSize = batchSize };
+            Container.RegisterInstance<InsertBuilderOptions>(insertBuilderOptions);
 
             Container.RegisterSingleton<IDataSourceReader, DataSourceReader>();
 

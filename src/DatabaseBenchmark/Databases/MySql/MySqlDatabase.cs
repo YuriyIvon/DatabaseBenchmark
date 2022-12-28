@@ -52,7 +52,8 @@ namespace DatabaseBenchmark.Databases.MySql
                 .ParametersBuilder<SqlNoParametersBuilder>()
                 .ParameterAdapter<MySqlParameterAdapter>()
                 .TransactionProvider<SqlTransactionProvider>()
-                .DataMetricsProvider<SqlDataMetricsProvider>()
+                .DataMetricsProvider<SqlDataMetricsProvider>(dmp =>
+                    dmp.AddMetric(Metrics.TotalStorageBytes, $"SELECT data_length + index_length FROM information_schema.tables WHERE table_name = '{table.Name}'"))
                 .ProgressReporter<ImportProgressReporter>()
                 .OptionsProvider(_optionsProvider)
                 .Environment(_environment)
@@ -67,14 +68,8 @@ namespace DatabaseBenchmark.Databases.MySql
             new SqlRawQueryExecutorFactory<MySqlConnection>(_connectionString, query, _environment)
                 .Customize<ISqlParameterAdapter, MySqlParameterAdapter>();
 
-        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
-            new SqlInsertExecutorFactory<MySqlConnection>(_connectionString, table, source, _environment)
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
+            new SqlInsertExecutorFactory<MySqlConnection>(_connectionString, table, source, batchSize, _environment)
                 .Customize<ISqlParameterAdapter, MySqlParameterAdapter>();
-
-        /*private static long GetTableSize(MySqlConnection connection, string tableName)
-        {
-            var command = new MySqlCommand($"SELECT data_length + index_length FROM information_schema.tables WHERE table_name = '{tableName}'", connection);
-            return (long)(ulong)command.ExecuteScalar();
-        }*/
     }
 }

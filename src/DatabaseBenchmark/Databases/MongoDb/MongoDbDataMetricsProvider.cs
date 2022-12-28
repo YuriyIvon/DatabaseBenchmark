@@ -14,5 +14,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
         }
 
         public long GetRowCount() => _collection.CountDocuments(new BsonDocument());
+
+        public IDictionary<string, double> GetMetrics() => null;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Model;
+using Elasticsearch.Net;
 using Nest;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
@@ -26,7 +27,12 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
         public int Execute()
         {
-            var response = _client.IndexMany(_documents, _table.Name);
+            //TODO: make refresh parameter configurable
+            var response = _client.Bulk(b => b
+                .Index(_table.Name)
+                .IndexMany(_documents)
+                .Refresh(Refresh.False));
+
             return response.Items.Count;
         }
 

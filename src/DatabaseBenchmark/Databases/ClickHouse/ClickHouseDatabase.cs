@@ -59,7 +59,8 @@ namespace DatabaseBenchmark.Databases.ClickHouse
                 .OptionsProvider(_optionsProvider)
                 .Environment(_environment)
                 .TransactionProvider<NoTransactionProvider>()
-                .DataMetricsProvider<SqlDataMetricsProvider>()
+                .DataMetricsProvider<SqlDataMetricsProvider>(dmp => 
+                    dmp.AddMetric(Metrics.TotalStorageBytes, $"SELECT SUM(bytes) FROM system.parts WHERE active AND table = '{table.Name}'"))
                 .ProgressReporter<ImportProgressReporter>()
                 .Build();
 
@@ -72,15 +73,8 @@ namespace DatabaseBenchmark.Databases.ClickHouse
             new SqlRawQueryExecutorFactory<ClickHouseConnection>(_connectionString, query, _environment)
                 .Customize<ISqlParameterAdapter, ClickHouseParameterAdapter>();
 
-        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source) =>
-            new SqlInsertExecutorFactory<ClickHouseConnection>(_connectionString, table, source, _environment)
+        public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
+            new SqlInsertExecutorFactory<ClickHouseConnection>(_connectionString, table, source, batchSize, _environment)
                 .Customize<ISqlParameterAdapter, ClickHouseParameterAdapter>();
-
-        /*
-        private static long GetTableSize(ClickHouseConnection connection, string tableName)
-        {
-            var command = connection.CreateCommand($"SELECT SUM(bytes) FROM system.parts WHERE active AND table = '{tableName}'");
-            return (long)(ulong)command.ExecuteScalar();
-        }*/
     }
 }

@@ -47,7 +47,7 @@ namespace DatabaseBenchmark.Commands
                 ? new MappingDataSource(baseDataSource, JsonUtils.DeserializeFile<ColumnMappingCollection>(options.MappingFilePath))
                 : baseDataSource;
 
-            var executorFactory = database.CreateInsertExecutorFactory(table, dataSource);
+            var executorFactory = database.CreateInsertExecutorFactory(table, dataSource, options.BatchSize);
             benchmark.Benchmark(executorFactory, options);
 
             Report(resultsBuilder, metricsCollector, options);
