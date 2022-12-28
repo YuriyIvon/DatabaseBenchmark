@@ -1,10 +1,9 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.Interfaces;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.DataSources.Csv;
 using DatabaseBenchmark.DataSources.Database;
 using DatabaseBenchmark.DataSources.Interfaces;
-using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.DataSources
 {

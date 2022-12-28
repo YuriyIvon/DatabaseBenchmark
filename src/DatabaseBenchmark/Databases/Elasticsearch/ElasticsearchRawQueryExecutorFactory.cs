@@ -2,7 +2,7 @@
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
-using DatabaseBenchmark.Databases.Interfaces;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using Nest;
 using RawQuery = DatabaseBenchmark.Model.RawQuery;
 

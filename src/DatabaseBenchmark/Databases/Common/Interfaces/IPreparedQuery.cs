@@ -1,4 +1,4 @@
-﻿namespace DatabaseBenchmark.Databases.Interfaces
+﻿namespace DatabaseBenchmark.Databases.Common.Interfaces
 {
     public interface IPreparedQuery : IDisposable
     {

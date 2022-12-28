@@ -1,6 +1,6 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Databases.CosmosDb.Interfaces;
-using DatabaseBenchmark.Databases.Interfaces;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Databases.CosmosDb

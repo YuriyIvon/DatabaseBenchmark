@@ -1,7 +1,7 @@
 ﻿using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.Databases.Interfaces;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;

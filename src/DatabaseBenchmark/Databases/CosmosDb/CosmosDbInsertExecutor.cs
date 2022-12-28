@@ -1,5 +1,5 @@
 ﻿using DatabaseBenchmark.Databases.CosmosDb.Interfaces;
-using DatabaseBenchmark.Databases.Interfaces;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using Microsoft.Azure.Cosmos;
 
 namespace DatabaseBenchmark.Databases.CosmosDb

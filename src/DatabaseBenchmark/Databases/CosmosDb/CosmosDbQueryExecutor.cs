@@ -1,5 +1,5 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.Interfaces;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using Microsoft.Azure.Cosmos;

@@ -1,12 +1,11 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.Databases.Interfaces;
-using DatabaseBenchmark.Databases.Model;
+using DatabaseBenchmark.Databases.Common.Interfaces;
+using DatabaseBenchmark.Databases.MongoDb.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Diagnostics;
 
 namespace DatabaseBenchmark.Databases.MongoDb
 {
@@ -50,41 +49,22 @@ namespace DatabaseBenchmark.Databases.MongoDb
             database.CreateCollection(table.Name);
         }
 
-        public ImportResult ImportData(Table table, IDataSource source, int batchSize)
-        {
-            if (batchSize <= 0)
-            {
-                batchSize = DefaultImportBatchSize;
-            }
-
-            var database = GetDatabase();
-            var collection = database.GetCollection<BsonDocument>(table.Name);
-            var sourceReader = new DataSourceReader(source);
-            var insertBuilder = new MongoDbInsertBuilder(table, sourceReader) { BatchSize = batchSize };
-            var insertExecutor = new MongoDbInsertExecutor(collection, insertBuilder, _optionsProvider);
-            var transactionProvider = new NoTransactionProvider();
-            var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new DataImporter(
-                insertExecutor,
-                transactionProvider,
-                progressReporter);
-
-            var stopwatch = Stopwatch.StartNew();
-            dataImporter.Import();
-            stopwatch.Stop();
-
-            var rowCount = collection.CountDocuments(new BsonDocument());
-            var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
-            if (dataImporter.CustomMetrics != null)
-            {
-                foreach (var metric in dataImporter.CustomMetrics)
+        public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
+            new DataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
+                .OptionsProvider(_optionsProvider)
+                .Environment(_environment)
+                .TransactionProvider<NoTransactionProvider>()
+                .InsertBuilder<IMongoDbInsertBuilder, MongoDbInsertBuilder>()
+                .InsertExecutor<MongoDbInsertExecutor>()
+                .DataMetricsProvider<MongoDbDataMetricsProvider>()
+                .ProgressReporter<ImportProgressReporter>()
+                .Customize((container, lifestyle) =>
                 {
-                    importResult.AddMetric(metric.Key, metric.Value);
-                }
-            }
-
-            return importResult;
-        }
+                    container.Register<IMongoDatabase>(GetDatabase, lifestyle);
+                    container.Register<IMongoCollection<BsonDocument>>(() =>
+                        container.GetInstance<IMongoDatabase>().GetCollection<BsonDocument>(table.Name), lifestyle);
+                })
+                .Build();
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
             new MongoDbQueryExecutorFactory(_connectionString, table, query, _environment, _optionsProvider);

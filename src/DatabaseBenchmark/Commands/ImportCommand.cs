@@ -39,7 +39,9 @@ namespace DatabaseBenchmark.Commands
                 ? new MappingDataSource(baseDataSource, JsonUtils.DeserializeFile<ColumnMappingCollection>(options.MappingFilePath))
                 : baseDataSource;
 
-            var result = database.ImportData(table, dataSource, options.ImportBatchSize);
+            using var importer = database.CreateDataImporter(table, dataSource, options.ImportBatchSize);
+
+            var result = importer.Import();
 
             Console.WriteLine($"Imported {result.Count} rows in {result.Duration / 1000.0} sec");
 

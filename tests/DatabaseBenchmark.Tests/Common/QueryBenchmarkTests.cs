@@ -1,6 +1,6 @@
 ﻿using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.Interfaces;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Reporting;
 using NSubstitute;
 using Xunit;
