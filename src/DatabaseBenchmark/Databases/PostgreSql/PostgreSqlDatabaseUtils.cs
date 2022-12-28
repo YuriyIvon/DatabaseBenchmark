@@ -12,12 +12,6 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             return (long)command.ExecuteScalar();
         }
 
-        public static long GetRowCount(NpgsqlConnection connection, string tableName)
-        {
-            var command = new NpgsqlCommand($"SELECT COUNT(1) FROM {tableName}", connection);
-            return (long)command.ExecuteScalar();
-        }
-
         public static string BuildColumnType(Column column)
         {
             if (column.DatabaseGenerated && column.Nullable)

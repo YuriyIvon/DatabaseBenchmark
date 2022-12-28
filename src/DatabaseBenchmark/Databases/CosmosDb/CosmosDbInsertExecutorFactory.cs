@@ -1,6 +1,6 @@
 ﻿using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.CosmosDb.Interfaces;
-using DatabaseBenchmark.Databases.Interfaces;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Microsoft.Azure.Cosmos;

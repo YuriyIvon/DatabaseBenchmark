@@ -1,12 +1,15 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.Interfaces;
+using DatabaseBenchmark.Databases.Common.Interfaces;
+using DatabaseBenchmark.Databases.Model;
+using System.Diagnostics;
 
 namespace DatabaseBenchmark.Databases.Common
 {
-    public class DataImporter
+    public class DataImporter : IDataImporter
     {
         private readonly IQueryExecutor _insertExecutor;
         private readonly ITransactionProvider _transactionProvider;
+        private readonly IDataMetricsProvider _dataMetricsProvider;
         private readonly IProgressReporter _progressReporter;
 
         public IDictionary<string, double> CustomMetrics { get; private set; }
@@ -14,15 +17,19 @@ namespace DatabaseBenchmark.Databases.Common
         public DataImporter(
             IQueryExecutor insertExecutor,
             ITransactionProvider transactionProvider,
+            IDataMetricsProvider dataMetricsProvider,
             IProgressReporter progressReporter)
         {
             _insertExecutor = insertExecutor;
             _transactionProvider = transactionProvider;
+            _dataMetricsProvider = dataMetricsProvider;
             _progressReporter = progressReporter;
         }
 
-        public void Import()
+        public ImportResult Import()
         {
+            var stopwatch = Stopwatch.StartNew();
+
             using var transaction = _transactionProvider.Begin();
 
             try
@@ -49,6 +56,19 @@ namespace DatabaseBenchmark.Databases.Common
                 transaction?.Rollback();
                 throw;
             }
+
+            stopwatch.Stop();
+
+            var result = new ImportResult(_dataMetricsProvider.GetRowCount(), stopwatch.ElapsedMilliseconds);
+            if (CustomMetrics != null)
+            {
+                foreach (var metric in CustomMetrics)
+                {
+                    result.AddMetric(metric.Key, metric.Value);
+                }
+            }
+
+            return result;
         }
 
         private void CollectMetrics(IPreparedQuery preparedInsert)
@@ -69,6 +89,10 @@ namespace DatabaseBenchmark.Databases.Common
                     }
                 }
             }
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

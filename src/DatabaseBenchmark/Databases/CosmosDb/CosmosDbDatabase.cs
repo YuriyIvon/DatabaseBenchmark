@@ -1,13 +1,12 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.Databases.Interfaces;
-using DatabaseBenchmark.Databases.Model;
+using DatabaseBenchmark.Databases.Common.Interfaces;
+using DatabaseBenchmark.Databases.CosmosDb.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Microsoft.Azure.Cosmos;
 using System.Data;
-using System.Diagnostics;
 
 namespace DatabaseBenchmark.Databases.CosmosDb
 {
@@ -58,42 +57,22 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             database.CreateContainerIfNotExistsAsync(table.Name, "/" + partitionKeyName).Wait();             
         }
 
-        public ImportResult ImportData(Table table, IDataSource source, int batchSize)
-        {
-            if (batchSize == 0)
-            {
-                batchSize = DefaultImportBatchSize;
-            }
-
-            using var client = new CosmosClient(_connectionString);
-            var database = client.GetDatabase(_databaseName);
-            var container = database.GetContainer(table.Name);
-
-            var sourceReader = new DataSourceReader(source);
-            var insertBuilder = new CosmosDbInsertBuilder(table, sourceReader) { BatchSize = batchSize };
-            var insertExecutor = new CosmosDbInsertExecutor(client, container, insertBuilder);
-            var transactionProvider = new NoTransactionProvider();
-            var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new DataImporter(
-                insertExecutor,
-                transactionProvider,
-                progressReporter);
-
-            var stopwatch = Stopwatch.StartNew();
-            dataImporter.Import();
-            stopwatch.Stop();
-
-            var importResult = new ImportResult(container.Count(), stopwatch.ElapsedMilliseconds);
-            if (dataImporter.CustomMetrics != null)
-            {
-                foreach (var metric in dataImporter.CustomMetrics)
+        public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
+            new DataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
+                .TransactionProvider<NoTransactionProvider>()
+                .InsertBuilder<ICosmosDbInsertBuilder, CosmosDbInsertBuilder>()
+                .InsertExecutor<CosmosDbInsertExecutor>()
+                .DataMetricsProvider<CosmosDbDataMetricsProvider>()
+                .ProgressReporter<ImportProgressReporter>()
+                .OptionsProvider(_optionsProvider)
+                .Environment(_environment)
+                .Customize((container, lifestyle) =>
                 {
-                    importResult.AddMetric(metric.Key, metric.Value);
-                }
-            }
-
-            return importResult;
-        }
+                    container.Register<CosmosClient>(() => new CosmosClient(_connectionString), lifestyle);
+                    container.Register<Database>(() => container.GetInstance<CosmosClient>().GetDatabase(_databaseName), lifestyle);
+                    container.Register<Container>(() => container.GetInstance<Database>().GetContainer(table.Name), lifestyle);
+                })
+                .Build();
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
             new CosmosDbQueryExecutorFactory(_connectionString, _databaseName, table, query, _environment, _optionsProvider);

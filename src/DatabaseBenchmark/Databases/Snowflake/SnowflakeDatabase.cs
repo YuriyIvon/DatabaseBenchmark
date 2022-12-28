@@ -1,15 +1,11 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.Databases.Interfaces;
-using DatabaseBenchmark.Databases.Model;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
-using DatabaseBenchmark.Databases.SqlServer;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Snowflake.Data.Client;
-using System.Data.SqlClient;
-using System.Diagnostics;
 
 namespace DatabaseBenchmark.Databases.Snowflake
 {
@@ -54,36 +50,16 @@ namespace DatabaseBenchmark.Databases.Snowflake
             command.ExecuteNonQuery();
         }
 
-        public ImportResult ImportData(Table table, IDataSource source, int batchSize)
-        {
-            if (batchSize <= 0)
-            {
-                batchSize = DefaultImportBatchSize;
-            }
-
-            using var connection = new SnowflakeDbConnection();
-            connection.ConnectionString = _connectionString;
-            var parametersBuilder = new SqlNoParametersBuilder();
-            var sourceReader = new DataSourceReader(source);
-            var insertBuilder = new SqlInsertBuilder(table, sourceReader, parametersBuilder) { BatchSize = batchSize };
-            var parameterAdapter = new SnowflakeParameterAdapter();
-            var insertExecutor = new SqlInsertExecutor(connection, insertBuilder, parametersBuilder, parameterAdapter, _environment);
-            var transactionProvider = new SqlTransactionProvider(connection);
-            var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new DataImporter(
-                insertExecutor,
-                transactionProvider,
-                progressReporter);
-
-            var stopwatch = Stopwatch.StartNew();
-            dataImporter.Import();
-            stopwatch.Stop();
-
-            var rowCount = GetRowCount(connection, table.Name);
-            var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
-
-            return importResult;
-        }
+        public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
+            new SqlDataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
+                .Connection<SnowflakeDbConnection>(_connectionString)
+                .ParametersBuilder(() => new SqlParametersBuilder(':'))
+                .ParameterAdapter<SnowflakeParameterAdapter>()
+                .TransactionProvider<SqlTransactionProvider>()
+                .DataMetricsProvider<SqlDataMetricsProvider>()
+                .ProgressReporter<ImportProgressReporter>()
+                .Environment(_environment)
+                .Build();
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
              new SqlQueryExecutorFactory<SnowflakeDbConnection>(_connectionString, table, query, _environment)
@@ -100,15 +76,5 @@ namespace DatabaseBenchmark.Databases.Snowflake
             new SqlInsertExecutorFactory<SnowflakeDbConnection>(_connectionString, table, source, _environment)
                 .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
                 .Customize<ISqlParameterAdapter, SnowflakeParameterAdapter>();
-
-        private static long GetRowCount(SnowflakeDbConnection connection, string tableName)
-        {
-            var command = new SnowflakeDbCommand(connection)
-            {
-                CommandText = $"SELECT COUNT(1) FROM {tableName}"
-            };
-
-            return (long)command.ExecuteScalar();
-        }
     }
 }

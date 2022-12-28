@@ -1,12 +1,11 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.Databases.Interfaces;
-using DatabaseBenchmark.Databases.Model;
+using DatabaseBenchmark.Databases.Common.Interfaces;
+using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Nest;
-using System.Diagnostics;
 using System.Text;
 using RawQuery = DatabaseBenchmark.Model.RawQuery;
 
@@ -45,37 +44,22 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                     .Properties(pd => BuildProperties(table, pd)))).Wait();
         }
 
-        public ImportResult ImportData(Table table, IDataSource source, int batchSize)
+        public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize)
         {
             table = NormalizeNames(table);
 
-            if (batchSize <= 0)
-            {
-                batchSize = DefaultImportBatchSize;
-            }
-
-            var client = CreateClient();
-            var sourceReader = new DataSourceReader(source);
-            var insertBuilder = new ElasticsearchInsertBuilder(table, sourceReader) { BatchSize = batchSize }; 
-            var insertExecutor = new ElasticsearchInsertExecutor(client, table, insertBuilder);
-            var transactionProvider = new NoTransactionProvider();
-            var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new DataImporter(
-                insertExecutor,
-                transactionProvider,
-                progressReporter);
-
-            var stopwatch = Stopwatch.StartNew();
-            dataImporter.Import();
-            client.Indices.Refresh(table.Name);
-            stopwatch.Stop();
-
-            var stats = client.Indices.Stats(table.Name);
-
-            var importResult = new ImportResult(stats.Stats.Primaries.Documents.Count, stopwatch.ElapsedMilliseconds);
-            importResult.AddMetric(Common.Metrics.TotalStorageBytes, (long)stats.Stats.Total.Store.SizeInBytes);
-
-            return importResult;
+            return new DataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
+                .TransactionProvider<NoTransactionProvider>()
+                .InsertBuilder<IElasticsearchInsertBuilder, ElasticsearchInsertBuilder>()
+                .InsertExecutor<ElasticsearchInsertExecutor>()
+                .DataMetricsProvider<ElasticsearchDataMetricsProvider>()
+                .ProgressReporter<ImportProgressReporter>()
+                .Environment(_environment)
+                .Customize((container, lifestyle) =>
+                {
+                    container.Register<IElasticClient>(CreateClient, lifestyle);
+                })
+                .Build();
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>

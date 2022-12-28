@@ -1,13 +1,11 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.Databases.Interfaces;
-using DatabaseBenchmark.Databases.Model;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Oracle.ManagedDataAccess.Client;
-using System.Diagnostics;
 
 namespace DatabaseBenchmark.Databases.Oracle
 {
@@ -43,35 +41,17 @@ namespace DatabaseBenchmark.Databases.Oracle
             command.ExecuteNonQuery();
         }
 
-        public ImportResult ImportData(Table table, IDataSource source, int batchSize)
-        {
-            if (batchSize == 0)
-            {
-                batchSize = DefaultImportBatchSize;
-            }
-
-            using var connection = new OracleConnection(_connectionString);
-            var parametersBuilder = new SqlParametersBuilder(':');
-            var sourceReader = new DataSourceReader(source);
-            var insertBuilder = new OracleInsertBuilder(table, sourceReader, parametersBuilder) { BatchSize = batchSize };
-            var parameterAdapter = new OracleParameterAdapter();
-            var insertExecutor = new SqlInsertExecutor(connection, insertBuilder, parametersBuilder, parameterAdapter, _environment);
-            var transactionProvider = new SqlTransactionProvider(connection);
-            var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new DataImporter(
-                insertExecutor,
-                transactionProvider,
-                progressReporter);
-
-            var stopwatch = Stopwatch.StartNew();
-            dataImporter.Import();
-            stopwatch.Stop();
-
-            var rowCount = GetRowCount(connection, table.Name);
-            var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
-
-            return importResult;
-        }
+        public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
+            new SqlDataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
+                .Connection<OracleConnection>(_connectionString)
+                .ParametersBuilder(() => new SqlParametersBuilder(':'))
+                .ParameterAdapter<OracleParameterAdapter>()
+                .InsertBuilder<ISqlInsertBuilder, OracleInsertBuilder>()
+                .TransactionProvider<SqlTransactionProvider>()
+                .DataMetricsProvider<SqlDataMetricsProvider>()
+                .ProgressReporter<ImportProgressReporter>()
+                .Environment(_environment)
+                .Build();
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
             new SqlQueryExecutorFactory<OracleConnection>(_connectionString, table, query, _environment)
@@ -88,11 +68,5 @@ namespace DatabaseBenchmark.Databases.Oracle
                 .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
                 .Customize<ISqlQueryBuilder, OracleInsertBuilder>()
                 .Customize<ISqlParameterAdapter, OracleParameterAdapter>();
-
-        private static long GetRowCount(OracleConnection connection, string tableName)
-        {
-            var command = new OracleCommand($"SELECT COUNT(1) FROM {tableName}", connection);
-            return (long)(decimal)command.ExecuteScalar();
-        }
     }
 }

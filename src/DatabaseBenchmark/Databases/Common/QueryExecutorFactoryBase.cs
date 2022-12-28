@@ -1,4 +1,4 @@
-﻿using DatabaseBenchmark.Databases.Interfaces;
+﻿using DatabaseBenchmark.Databases.Common.Interfaces;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
 

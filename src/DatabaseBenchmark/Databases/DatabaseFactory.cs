@@ -1,9 +1,9 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.ClickHouse;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.CosmosDb;
 using DatabaseBenchmark.Databases.Elasticsearch;
-using DatabaseBenchmark.Databases.Interfaces;
 using DatabaseBenchmark.Databases.MonetDb;
 using DatabaseBenchmark.Databases.MongoDb;
 using DatabaseBenchmark.Databases.MySql;

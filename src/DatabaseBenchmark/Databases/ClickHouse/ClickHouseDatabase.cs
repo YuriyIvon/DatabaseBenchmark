@@ -1,13 +1,11 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.Databases.Interfaces;
-using DatabaseBenchmark.Databases.Model;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Octonica.ClickHouseClient;
-using System.Diagnostics;
 
 namespace DatabaseBenchmark.Databases.ClickHouse
 {
@@ -53,37 +51,17 @@ namespace DatabaseBenchmark.Databases.ClickHouse
             command.ExecuteNonQuery();
         }
 
-        public ImportResult ImportData(Table table, IDataSource source, int batchSize)
-        {
-            if (batchSize <= 0)
-            {
-                batchSize = DefaultImportBatchSize;
-            }
-
-            using var connection = new ClickHouseConnection(_connectionString);
-            var sourceReader = new DataSourceReader(source);
-            var parametersBuilder = new SqlNoParametersBuilder();
-            var insertBuilder = new SqlInsertBuilder(table, sourceReader, parametersBuilder) { BatchSize = batchSize };
-            var parameterAdapter = new ClickHouseParameterAdapter();
-            var insertExecutor = new SqlInsertExecutor(connection, insertBuilder, parametersBuilder, parameterAdapter, _environment);
-            var transactionProvider = new NoTransactionProvider();
-            var progressReporter = new ImportProgressReporter(_environment);
-            var dataImporter = new DataImporter(
-                insertExecutor,
-                transactionProvider,
-                progressReporter);
-
-            var stopwatch = Stopwatch.StartNew();
-            dataImporter.Import();
-            stopwatch.Stop();
-
-            var rowCount = GetRowCount(connection, table.Name);
-            var importResult = new ImportResult(rowCount, stopwatch.ElapsedMilliseconds);
-            var tableSize = GetTableSize(connection, table.Name);
-            importResult.AddMetric(Metrics.TotalStorageBytes, tableSize);
-
-            return importResult;
-        }
+        public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
+            new SqlDataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
+                .Connection<ClickHouseConnection>(_connectionString)
+                .ParametersBuilder<SqlNoParametersBuilder>()
+                .ParameterAdapter<ClickHouseParameterAdapter>()
+                .OptionsProvider(_optionsProvider)
+                .Environment(_environment)
+                .TransactionProvider<NoTransactionProvider>()
+                .DataMetricsProvider<SqlDataMetricsProvider>()
+                .ProgressReporter<ImportProgressReporter>()
+                .Build();
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
             new SqlQueryExecutorFactory<ClickHouseConnection>(_connectionString, table, query, _environment)
@@ -98,16 +76,11 @@ namespace DatabaseBenchmark.Databases.ClickHouse
             new SqlInsertExecutorFactory<ClickHouseConnection>(_connectionString, table, source, _environment)
                 .Customize<ISqlParameterAdapter, ClickHouseParameterAdapter>();
 
-        private static long GetRowCount(ClickHouseConnection connection, string tableName)
-        {
-            var command = connection.CreateCommand($"SELECT COUNT(1) FROM {tableName}");
-            return (long)(ulong)command.ExecuteScalar();
-        }
-
+        /*
         private static long GetTableSize(ClickHouseConnection connection, string tableName)
         {
             var command = connection.CreateCommand($"SELECT SUM(bytes) FROM system.parts WHERE active AND table = '{tableName}'");
             return (long)(ulong)command.ExecuteScalar();
-        }
+        }*/
     }
 }
