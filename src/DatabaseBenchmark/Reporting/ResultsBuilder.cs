@@ -1,5 +1,6 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Reporting.Interfaces;
+using DatabaseBenchmark.Reporting.Model;
 using DatabaseBenchmark.Utils;
 using Nest;
 using System.Data;

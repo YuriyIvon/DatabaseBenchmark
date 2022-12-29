@@ -5,14 +5,12 @@ using System.Diagnostics;
 
 namespace DatabaseBenchmark.Databases.Common
 {
-    public class DataImporter : IDataImporter
+    public sealed class DataImporter : IDataImporter
     {
         private readonly IQueryExecutor _insertExecutor;
         private readonly ITransactionProvider _transactionProvider;
         private readonly IDataMetricsProvider _dataMetricsProvider;
         private readonly IProgressReporter _progressReporter;
-
-        public IDictionary<string, double> CustomMetrics { get; private set; }
 
         public DataImporter(
             IQueryExecutor insertExecutor,
@@ -29,6 +27,7 @@ namespace DatabaseBenchmark.Databases.Common
         public ImportResult Import()
         {
             var stopwatch = Stopwatch.StartNew();
+            var metrics = new Dictionary<string, double>();
 
             using var transaction = _transactionProvider.Begin();
 
@@ -46,7 +45,7 @@ namespace DatabaseBenchmark.Databases.Common
                     var rowsInserted = preparedInsert.Execute();
                     _progressReporter.Increment(rowsInserted);
 
-                    CollectMetrics(preparedInsert);
+                    CollectMetrics(preparedInsert.CustomMetrics, metrics);
                 }
 
                 transaction?.Commit();
@@ -60,42 +59,25 @@ namespace DatabaseBenchmark.Databases.Common
             stopwatch.Stop();
 
             var result = new ImportResult(_dataMetricsProvider.GetRowCount(), stopwatch.ElapsedMilliseconds);
-            var metrics = _dataMetricsProvider.GetMetrics();
-
-            if (metrics != null)
-            {
-                foreach (var metric in metrics)
-                {
-                    result.AddMetric(metric.Key, metric.Value);
-                }
-            }
-
-            if (CustomMetrics != null)
-            {
-                foreach (var metric in CustomMetrics)
-                {
-                    result.AddMetric(metric.Key, metric.Value);
-                }
-            }
+            CollectMetrics(_dataMetricsProvider.GetMetrics(), metrics);
+            result.AddMetrics(metrics);
 
             return result;
         }
 
-        private void CollectMetrics(IPreparedQuery preparedInsert)
+        private static void CollectMetrics(IDictionary<string, double> from, IDictionary<string, double> to)
         {
-            if (preparedInsert.CustomMetrics != null)
+            if (from != null)
             {
-                CustomMetrics ??= new Dictionary<string, double>();
-
-                foreach (var metric in preparedInsert.CustomMetrics)
+                foreach (var metric in from)
                 {
-                    if (!CustomMetrics.ContainsKey(metric.Key))
+                    if (!to.ContainsKey(metric.Key))
                     {
-                        CustomMetrics.Add(metric.Key, metric.Value);
+                        to.Add(metric.Key, metric.Value);
                     }
                     else
                     {
-                        CustomMetrics[metric.Key] += metric.Value;
+                        to[metric.Key] += metric.Value;
                     }
                 }
             }

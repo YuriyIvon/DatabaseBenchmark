@@ -1,5 +1,6 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Reporting;
+using DatabaseBenchmark.Reporting.Model;
 using System;
 using System.Collections.Generic;
 using Xunit;

@@ -1,4 +1,6 @@
-﻿namespace DatabaseBenchmark.Reporting
+﻿using DatabaseBenchmark.Reporting.Model;
+
+namespace DatabaseBenchmark.Reporting
 {
     public class MetricsCollector
     {

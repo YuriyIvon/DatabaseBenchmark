@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using DatabaseBenchmark.Reporting.Model;
+using System.Data;
 
 namespace DatabaseBenchmark.Reporting.Interfaces
 {

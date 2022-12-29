@@ -3,7 +3,7 @@ using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Databases.Sql
 {
-    internal class SqlNoParametersBuilder : ISqlParametersBuilder
+    public class SqlNoParametersBuilder : ISqlParametersBuilder
     {
         public IEnumerable<SqlQueryParameter> Parameters { get; } = Enumerable.Empty<SqlQueryParameter>();
 

@@ -4,7 +4,7 @@ using Npgsql;
 
 namespace DatabaseBenchmark.Databases.PostgreSql
 {
-    public class PostgreSqlDatabaseUtils
+    public static class PostgreSqlDatabaseUtils
     {
         public static long GetTableSize(NpgsqlConnection connection, string tableName)
         {

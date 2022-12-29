@@ -31,7 +31,7 @@ namespace DatabaseBenchmark.Databases.Oracle
             {
                 var columnsText = string.Join(", ", columns);
                 var valuesText = string.Join(", ", values);
-                commandText.AppendLine($"{Spacing}INTO {tableName}({columnsText}) VALUES ({valuesText})");
+                commandText.AppendLine($"{Spacing}INTO {tableName} ({columnsText}) VALUES ({valuesText})");
             }
 
             commandText.AppendLine("SELECT 1 FROM DUAL");

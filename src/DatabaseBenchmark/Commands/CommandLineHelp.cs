@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace DatabaseBenchmark.Commands
 {
-    public class CommandLineHelp
+    public static class CommandLineHelp
     {
         private static readonly CommandDescriptor[] _commands = new CommandDescriptor[]
         {
@@ -293,7 +293,7 @@ namespace DatabaseBenchmark.Commands
             }
         }
 
-        protected static string FormatProperty(string prefix, string propertyName) =>
+        private static string FormatProperty(string prefix, string propertyName) =>
            prefix != null ? string.Join(".", prefix, propertyName) : propertyName;
 
         private class CommandDescriptor

@@ -26,7 +26,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             _sourceReader = sourceReader;
             _options = options;
 
-            PartitionKeyName = GetPartitionKeyName(table);
+            PartitionKeyName = table.GetPartitionKeyName();
         }
 
         public IEnumerable<IDictionary<string, object>> Build()
@@ -65,16 +65,6 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             }
 
             return Enumerable.Empty<IDictionary<string, object>>();
-        }
-
-        private static string GetPartitionKeyName(Table table)
-        {
-            if (table.Columns.Count(c => c.PartitionKey) > 1)
-            {
-                throw new InputArgumentException("A table can't have multiple partition keys");
-            }
-
-            return table.Columns.FirstOrDefault(c => c.PartitionKey)?.Name ?? CosmosDbConstants.DummyPartitionKeyName;
         }
     }
 }
