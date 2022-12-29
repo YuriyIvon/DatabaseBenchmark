@@ -1,4 +1,4 @@
-﻿namespace DatabaseBenchmark.Reporting
+﻿namespace DatabaseBenchmark.Reporting.Model
 {
     public class Metric
     {

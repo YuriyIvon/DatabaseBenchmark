@@ -16,12 +16,17 @@
 
         public void AddMetric(string name, double value)
         {
-            if (CustomMetrics == null)
-            {
-                CustomMetrics = new Dictionary<string, double>();
-            }
+            CustomMetrics ??= new Dictionary<string, double>();
 
             CustomMetrics.Add(name, value);
+        }
+
+        public void AddMetrics(IDictionary<string, double> metrics)
+        {
+            foreach (var metric in metrics)
+            {
+                AddMetric(metric.Key, metric.Value);
+            }
         }
     }
 }

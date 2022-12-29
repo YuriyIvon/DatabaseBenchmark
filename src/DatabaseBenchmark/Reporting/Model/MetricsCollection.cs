@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace DatabaseBenchmark.Reporting
+namespace DatabaseBenchmark.Reporting.Model
 {
     public class MetricsCollection
     {

@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace DatabaseBenchmark.Databases.MongoDb
 {
-    class GetLastRequestStatisticsCommand : Command<Dictionary<string, object>>
+    public class GetLastRequestStatisticsCommand : Command<Dictionary<string, object>>
     {
         public override RenderedCommand<Dictionary<string, object>> Render(IBsonSerializerRegistry serializerRegistry)
         {

@@ -7,9 +7,7 @@ using DatabaseBenchmark.DataSources;
 using DatabaseBenchmark.DataSources.Mapping;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Reporting;
-using DatabaseBenchmark.Reporting.Interfaces;
 using DatabaseBenchmark.Utils;
-using System;
 
 namespace DatabaseBenchmark.Commands
 {

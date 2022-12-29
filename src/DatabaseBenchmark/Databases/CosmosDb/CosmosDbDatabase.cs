@@ -53,7 +53,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 }
             }
 
-            var partitionKeyName = GetPartitionKeyName(table);
+            var partitionKeyName = table.GetPartitionKeyName();
             database.CreateContainerIfNotExistsAsync(table.Name, "/" + partitionKeyName).Wait();             
         }
 
@@ -89,16 +89,6 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             var databasePart = parts.First(p => p.StartsWith(DatabaseConnectionStringProperty));
             var databaseName = databasePart.Split('=', StringSplitOptions.TrimEntries).Last();
             return (string.Join(";", parts.Where(p => !p.StartsWith(DatabaseConnectionStringProperty))), databaseName);
-        }
-
-        private static string GetPartitionKeyName(Table table)
-        {
-            if (table.Columns.Count(c => c.PartitionKey) > 1)
-            {
-                throw new InputArgumentException("A table can't have multiple partition keys");
-            }
-
-            return table.Columns.FirstOrDefault(c => c.PartitionKey)?.Name ?? CosmosDbConstants.DummyPartitionKeyName;
         }
     }
 }

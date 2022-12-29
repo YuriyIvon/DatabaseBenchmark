@@ -5,7 +5,7 @@ namespace DatabaseBenchmark.Databases.MonetDb
 {
     public sealed class MonetDbTransaction : ISqlTransaction
     {
-        private IDbTransaction _transaction;
+        private readonly IDbTransaction _transaction;
 
         //Since MonetDB driver doesn't support transaction assignment to ADO .NET commands
         public IDbTransaction Transaction => null;

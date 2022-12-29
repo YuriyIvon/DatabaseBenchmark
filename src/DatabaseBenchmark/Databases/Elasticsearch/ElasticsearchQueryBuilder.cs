@@ -224,7 +224,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                 });
         }
 
-        private AggregationContainer BuildAggregation(QueryAggregateColumn resultColumn) =>
+        private static AggregationContainer BuildAggregation(QueryAggregateColumn resultColumn) =>
             resultColumn.Function switch
             {
                 QueryAggregateFunction.Average => new AverageAggregation(resultColumn.ResultColumnName, resultColumn.SourceColumnName),

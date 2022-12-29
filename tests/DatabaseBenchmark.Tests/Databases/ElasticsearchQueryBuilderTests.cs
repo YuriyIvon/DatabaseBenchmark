@@ -77,7 +77,7 @@ namespace DatabaseBenchmark.Tests.Databases
                 rawQuery);
         }
 
-        private string SerializeSearchRequest(SearchRequest searchRequest)
+        private static string SerializeSearchRequest(SearchRequest searchRequest)
         {
             var elasticClient = new ElasticClient();
             using var stream = new MemoryStream();
