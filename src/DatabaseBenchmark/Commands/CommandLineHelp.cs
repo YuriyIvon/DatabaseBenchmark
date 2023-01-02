@@ -39,6 +39,11 @@ namespace DatabaseBenchmark.Commands
                             {
                                 Value = "MySql",
                                 OptionsContainerType = typeof(MySqlTableOptions)
+                            },
+                            new ValueSpecificOptionsDescriptor
+                            {
+                                Value = "PostgresJsonb",
+                                OptionsContainerType = typeof(PostgreSqlJsonbTableOptions)
                             }
                         }
                     }
