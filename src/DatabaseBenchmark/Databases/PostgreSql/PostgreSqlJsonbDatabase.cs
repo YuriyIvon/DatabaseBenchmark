@@ -34,7 +34,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                 connection.DropTableIfExists(table.Name);
             }
 
-            var tableBuilder = new PostgreSqlJsonbTableBuilder();
+            var tableBuilder = new PostgreSqlJsonbTableBuilder(_optionsProvider);
             var commandText = tableBuilder.BuildCreateTableCommandText(table);
             var command = new NpgsqlCommand(commandText, connection);
 
