@@ -39,7 +39,7 @@ namespace DatabaseBenchmark.Commands
                 ? new MappingDataSource(baseDataSource, JsonUtils.DeserializeFile<ColumnMappingCollection>(options.MappingFilePath))
                 : baseDataSource;
 
-            using var importer = database.CreateDataImporter(table, dataSource, options.ImportBatchSize);
+            using var importer = database.CreateDataImporter(table, dataSource, options.BatchSize);
 
             var result = importer.Import();
 

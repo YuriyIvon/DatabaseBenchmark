@@ -16,7 +16,7 @@ namespace DatabaseBenchmark.Core
             _metricsCollector = metricsCollector;
         }
 
-        public void Benchmark(IQueryExecutorFactory executorFactory, QueryExecutionOptions options)
+        public void Benchmark(IQueryExecutorFactory executorFactory, IQueryExecutionOptions options)
         {
             _environment.Write("Running query benchmark");
 

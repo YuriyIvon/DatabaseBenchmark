@@ -1,11 +1,6 @@
 ﻿using DatabaseBenchmark.Commands;
 using DatabaseBenchmark.Common;
-using MongoDB.Bson.Serialization.Attributes;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Commands
@@ -64,12 +59,19 @@ namespace DatabaseBenchmark.Tests.Commands
             Assert.Equal("string1", options.StringProperty);
         }
 
-        private class Options
+        private interface IOptions
         {
             [Option("")]
             public bool? BooleanProperty { get; set; }
 
             [Option("")]
+            public int? IntegerProperty { get; set; }
+        }
+
+        private class Options : IOptions
+        {
+            public bool? BooleanProperty { get; set; }
+
             public int? IntegerProperty { get; set; }
 
             [Option("")]

@@ -25,12 +25,10 @@ namespace DatabaseBenchmark.Tests.Common
             var queryExecutorFactory = Substitute.For<IQueryExecutorFactory>();
             queryExecutorFactory.Create().Returns(queryExecutor);
 
-            var options = new QueryExecutionOptions
-            {
-                QueryCount = 5,
-                QueryParallelism = 2,
-                WarmupQueryCount = 2
-            };
+            var options = Substitute.For<IQueryExecutionOptions>();
+            options.QueryCount = 5;
+            options.QueryParallelism = 2;
+            options.WarmupQueryCount = 2;
 
             queryBenchmark.Benchmark(queryExecutorFactory, options);
 

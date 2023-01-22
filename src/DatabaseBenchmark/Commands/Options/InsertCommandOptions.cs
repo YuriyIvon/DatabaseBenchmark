@@ -1,45 +1,47 @@
-﻿using DatabaseBenchmark.Common;
-using DatabaseBenchmark.Core;
+﻿using DatabaseBenchmark.Commands.Options.Interfaces;
+using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core.Interfaces;
 
 namespace DatabaseBenchmark.Commands.Options
 {
-    internal class InsertCommandOptions : QueryExecutionOptions
+    internal class InsertCommandOptions :
+        IStructuredTargetOptions,
+        IDataSourceOptions,
+        IQueryExecutionOptions,
+        IReportOptions,
+        IQueryTraceOptions
     {
-        [Option("Database type", true)]
         public string DatabaseType { get; set; }
 
-        [Option("Connection string", true)]
         public string ConnectionString { get; set; }
 
-        [Option("Path to a JSON file describing the table structure", true)]
         public string TableFilePath { get; set; }
 
-        [Option("Target physical table name")]
         public string TableName { get; set; }
 
-        [Option("Data source type", true)]
         public string DataSourceType { get; set; }
 
-        [Option("Path to a data file in case of a file-based data source or to a data source definition file otherwise", true)]
         public string DataSourceFilePath { get; set; }
 
-        [Option("Path to a JSON file describing the mapping between the data source and the table")]
         public string MappingFilePath { get; set; }
 
-        [Option("Trace queries text and parameters")]
-        public bool TraceQueries { get; set; } = false;
+        public string BenchmarkName { get; set; }
 
-        [Option("Output report formatter type")]
+        public int QueryParallelism { get; set; } = 1;
+
+        public int QueryCount { get; set; } = 100;
+
+        public int WarmupQueryCount { get; set; } = 3;
+
         public string ReportFormatterType { get; set; } = "Text";
 
-        [Option("Path to output report file")]
         public string ReportFilePath { get; set; }
 
-        [Option("Report columns to be shown")]
         public string[] ReportColumns { get; set; }
 
-        [Option("Report custom metric columns to be shown for each custom metric")]
         public string[] ReportCustomMetricColumns { get; set; }
+
+        public bool TraceQueries { get; set; } = false;
 
         [Option("Number of records inserted into the database in one query")]
         public int BatchSize { get; set; } = 1;

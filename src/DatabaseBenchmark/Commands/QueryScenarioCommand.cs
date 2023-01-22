@@ -7,7 +7,6 @@ using DatabaseBenchmark.Databases;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Reporting;
 using DatabaseBenchmark.Utils;
-using System.Text.Json;
 
 namespace DatabaseBenchmark.Commands
 {
@@ -66,24 +65,15 @@ namespace DatabaseBenchmark.Commands
                     benchmark.Benchmark(executorFactory, scenarioStep);
                 }
 
-                Report(resultsBuilder, metricsCollector, options);
+                ReportUtils.PrintReport(resultsBuilder, metricsCollector, options, _environment);
             }
             catch
             {
                 metricsCollector.Abort();
-                Report(resultsBuilder, metricsCollector, options);
+                ReportUtils.PrintReport(resultsBuilder, metricsCollector, options, _environment);
 
                 throw;
             }
-        }
-
-        private void Report(ResultsBuilder resultsBuilder, MetricsCollector metricsCollector, QueryScenarioCommandOptions options)
-        {
-            var reportFormatterFactory = new ReportFormatterFactory();
-            var reportFormatter = reportFormatterFactory.Create(options.ReportFormatterType);
-
-            var reporter = new BenchmarkReporter(resultsBuilder, reportFormatter, _environment, options.ReportFilePath);
-            reporter.Report(metricsCollector);
         }
     }
 }

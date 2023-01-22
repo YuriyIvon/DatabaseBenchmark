@@ -48,16 +48,7 @@ namespace DatabaseBenchmark.Commands
             var executorFactory = database.CreateInsertExecutorFactory(table, dataSource, options.BatchSize);
             benchmark.Benchmark(executorFactory, options);
 
-            Report(resultsBuilder, metricsCollector, options);
-        }
-
-        private void Report(ResultsBuilder resultsBuilder, MetricsCollector metricsCollector, InsertCommandOptions options)
-        {
-            var reportFormatterFactory = new ReportFormatterFactory();
-            var reportFormatter = reportFormatterFactory.Create(options.ReportFormatterType);
-
-            var reporter = new BenchmarkReporter(resultsBuilder, reportFormatter, _environment, options.ReportFilePath);
-            reporter.Report(metricsCollector);
+            ReportUtils.PrintReport(resultsBuilder, metricsCollector, options, _environment);
         }
     }
 }

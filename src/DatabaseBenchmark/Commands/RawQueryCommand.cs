@@ -1,5 +1,6 @@
 ﻿using DatabaseBenchmark.Commands.Interfaces;
 using DatabaseBenchmark.Commands.Options;
+using DatabaseBenchmark.Commands.Options.Interfaces;
 using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
@@ -45,16 +46,7 @@ namespace DatabaseBenchmark.Commands
             var executorFactory = database.CreateRawQueryExecutorFactory(query);
             benchmark.Benchmark(executorFactory, options);
 
-            Report(resultsBuilder, metricsCollector, options);
-        }
-
-        private void Report(ResultsBuilder resultsBuilder, MetricsCollector metricsCollector, RawQueryCommandOptions options)
-        {
-            var reportFormatterFactory = new ReportFormatterFactory();
-            var reportFormatter = reportFormatterFactory.Create(options.ReportFormatterType);
-
-            var reporter = new BenchmarkReporter(resultsBuilder, reportFormatter, _environment, options.ReportFilePath);
-            reporter.Report(metricsCollector);
+            ReportUtils.PrintReport(resultsBuilder, metricsCollector, options, _environment);
         }
     }
 }

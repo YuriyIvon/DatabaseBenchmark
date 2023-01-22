@@ -1,19 +1,26 @@
-﻿using DatabaseBenchmark.Common;
-using DatabaseBenchmark.Core;
-using DatabaseBenchmark.Databases;
+﻿using DatabaseBenchmark.Commands.Options.Interfaces;
+using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core.Interfaces;
 
 namespace DatabaseBenchmark.Commands.Options
 {
-    public class RawQueryBenchmarkOptions : QueryExecutionOptions
+    public class RawQueryBenchmarkOptions :
+        ITargetOptions,
+        IQueryExecutionOptions
     {
-        [Option("Database type", true)]
         public string DatabaseType { get; set; }
 
-        [Option("Connection string", true)]
         public string ConnectionString { get; set; }
 
-        [Option("Table to be queried")]
         public string TableName { get; set; }
+
+        public string BenchmarkName { get; set; }
+
+        public int QueryParallelism { get; set; } = 1;
+
+        public int QueryCount { get; set; } = 100;
+
+        public int WarmupQueryCount { get; set; } = 3;
 
         [Option("Path to a text file with a raw query pattern to be executed", true)]
         public string QueryFilePath { get; set; }
