@@ -33,6 +33,8 @@ namespace DatabaseBenchmark.Commands.Options
 
         public int WarmupQueryCount { get; set; } = 3;
 
+        public int QueryDelay { get; set; } = 0;
+
         public string ReportFormatterType { get; set; } = "Text";
 
         public string ReportFilePath { get; set; }

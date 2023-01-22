@@ -24,6 +24,8 @@ namespace DatabaseBenchmark.Commands.Options
 
         public int WarmupQueryCount { get; set; } = 3;
 
+        public int QueryDelay { get; set; } = 0;
+
         [Option("Path to a JSON file describing the query to be executed", true)]
         public string QueryFilePath { get; set; }
     }
