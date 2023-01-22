@@ -86,6 +86,40 @@ namespace DatabaseBenchmark.Commands
             },
             new CommandDescriptor
             {
+                Name = "insert",
+                OptionsContainerType = typeof(InsertCommandOptions),
+                RestrictedValueOptions = new RestrictedValueOptionDescriptor[]
+                {
+                    new RestrictedValueOptionDescriptor
+                    {
+                        Name = nameof(InsertCommandOptions.DatabaseType),
+                        AllowedValuesProvider = new DatabaseFactory(null, null),
+                        ValueSpecificOptions = new ValueSpecificOptionsDescriptor[]
+                        {
+                            new ValueSpecificOptionsDescriptor
+                            {
+                                Value = "MongoDb",
+                                OptionsContainerType = typeof(MongoDbInsertOptions)
+                            }
+                        }
+                    },
+                    new RestrictedValueOptionDescriptor
+                    {
+                        Name = nameof(InsertCommandOptions.DataSourceType),
+                        AllowedValuesProvider = new DataSourceFactory(null, null),
+                        ValueSpecificOptions = new ValueSpecificOptionsDescriptor[]
+                        {
+                            new ValueSpecificOptionsDescriptor
+                            {
+                                Value = "Csv",
+                                OptionsContainerType = typeof(CsvDataSourceOptions)
+                            }
+                        }
+                    }
+                }
+            },
+            new CommandDescriptor
+            {
                 Name = "query",
                 OptionsContainerType = typeof(QueryCommandOptions),
                 RestrictedValueOptions = new RestrictedValueOptionDescriptor[]
@@ -229,8 +263,8 @@ namespace DatabaseBenchmark.Commands
         {
             var prefix = optionsContainerType.GetCustomAttribute<OptionPrefixAttribute>()?.Prefix;
 
-            var commandOptions = optionsContainerType
-                    .GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy)
+            var commandOptions = optionsContainerType.GetInterfaces().Concat(new[] { optionsContainerType })
+                    .SelectMany(t => t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy))
                     .Select(p => new OptionDescriptor(p, p.GetCustomAttribute<OptionAttribute>()))
                     .Where(p => p.PropertyAttribute != null)
                     .OrderBy(p => p.Property.Name);

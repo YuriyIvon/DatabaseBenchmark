@@ -17,8 +17,8 @@ namespace DatabaseBenchmark.Commands
 
             var prefix = typeof(T).GetCustomAttribute<OptionPrefixAttribute>()?.Prefix;
 
-            var commandParameters = typeof(T)
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy)
+            var commandParameters = typeof(T).GetInterfaces().Concat(new[] { typeof(T) })
+                .SelectMany(t => t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy))
                 .Select(p => new OptionDescriptor(p, p.GetCustomAttribute<OptionAttribute>()))
                 .Where(p => p.PropertyAttribute != null)
                 .ToDictionary(p => FormatProperty(prefix, p.Property.Name));
@@ -72,6 +72,7 @@ namespace DatabaseBenchmark.Commands
             {
                 array.SetValue(Convert.ChangeType(rawElements[i], elementType), i);
             }
+
             return array;
         }
     }
