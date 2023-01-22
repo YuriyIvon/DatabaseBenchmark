@@ -15,5 +15,8 @@ namespace DatabaseBenchmark.Core.Interfaces
 
         [Option("Number of warm-up executions on each thread")]
         int WarmupQueryCount { get; set; }
+
+        [Option("Delay in milliseconds between query executions")]
+        int QueryDelay { get; set; }
     }
 }

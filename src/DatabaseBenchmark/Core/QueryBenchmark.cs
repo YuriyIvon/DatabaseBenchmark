@@ -34,7 +34,7 @@ namespace DatabaseBenchmark.Core
                     Task.Factory.StartNew(() =>
                     {
                         using var executor = executorFactory.Create();
-                        BenchmarkInternal(executor, options.WarmupQueryCount, options.QueryCount);
+                        BenchmarkInternal(executor, options);
                     },
                     TaskCreationOptions.LongRunning))
                 .ToArray();
@@ -44,10 +44,9 @@ namespace DatabaseBenchmark.Core
 
         private void BenchmarkInternal(
             IQueryExecutor executor,
-            int warmupQueryCount,
-            int queryCount)
+            IQueryExecutionOptions options)
         {
-            for (int i = 0; i < warmupQueryCount; i++)
+            for (int i = 0; i < options.WarmupQueryCount; i++)
             {
                 using var preparedQuery = executor.Prepare();
 
@@ -58,9 +57,14 @@ namespace DatabaseBenchmark.Core
                 }
 
                 ExecuteQuery(preparedQuery);
+
+                if (options.QueryDelay > 0)
+                {
+                    Thread.Sleep(options.QueryDelay);
+                }
             }
 
-            for (int i = 0; i < queryCount; i++)
+            for (int i = 0; i < options.QueryCount; i++)
             {
                 using var preparedQuery = executor.Prepare();
 
@@ -75,6 +79,11 @@ namespace DatabaseBenchmark.Core
                 var endTimestamp = DateTime.UtcNow;
 
                 _metricsCollector.AppendResult(startTimestamp, endTimestamp, rowCount, preparedQuery.CustomMetrics);
+
+                if (options.QueryDelay > 0)
+                {
+                    Thread.Sleep(options.QueryDelay);
+                }
             }
         }
 
