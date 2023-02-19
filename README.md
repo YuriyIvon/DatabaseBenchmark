@@ -22,6 +22,7 @@ This tool addresses the issues from above by introducing a data import and query
   * [Query benchmark scenarios](#query_benchmark_scenarios)
   * [Raw query benchmark](#raw_query_benchmark)
   * [Raw query benchmark scenarios](#raw_query_benchmark_scenarios)
+  * [Insert benchmark](#insert_benchmark)
   * [Table definition](#table_definition)
   * [Query definition](#query_definition)
   * [Value randomization rules](#value_randomization_rules)
@@ -122,6 +123,7 @@ There are some parameters specific to the `query` command:
 * `QueryParallelism` - number of parallel threads to be run.
 * `QueryCount` - number of query executions on each thread.
 * `WarmupQueryCount` - number of warm-up query executions on each thread.
+* `QueryDelay` - delay between query executions (in milliseconds).
 * `ReportFormatterType` - benchmark result report output format, currently can be either `Text` or `Csv`.
 * `ReportFilePath` - path to the result report output file. If not specified, the report is written to the console.
 * `ReportColumns` - a comma-separated list of report columns to be shown. For the list of supported values refer to [report columns](#report_columns).
@@ -207,6 +209,13 @@ Raw query benchmark scenarios are very similar to [regular scenarios](#query_ben
 ```
 DatabaseBenchmark raw-query-scenario --QueryScenarioFilePath=SalesAggregateRawQueryScenario.json
 ```
+### Insert benchmark<a name="insert_benchmark"></a>
+An insert benchmark is a combination of a query benchmark and import procedure: it sequentially reads rows from a data source and inserts them into the target database according to the query execution parameters. Therefore, the "insert" command combines the parameters of "query" and "import" except for the reference to a query definition:
+
+```
+DatabaseBenchmark insert --DatabaseType=SqlServer --ConnectionString="Data Source=.;Initial Catalog=benchmark;Integrated Security=True;" --TableFilePath=SalesTable.json --DataSourceType=Csv --DataSourceFilePath="1000000 Sales Records.csv" --QueryParallelism=10 --QueryCount=10000 --WarmupQueryCount=100 --BatchSize=10 
+```
+
 ### Table definition<a name="table_definition"></a>
 A table definition has the following top-level properties:
 
