@@ -73,6 +73,7 @@ This command also has a few database-specific parameters:
 * `ClickHouse.Engine` - table engine. Default is `MergeTree()`.
 * `ClickHouse.OrderBy` - table sort order. Default is `tuple()`.
 * `MySql.Engine` - table engine. Default is `InnoDB`.
+* `PostgresJsonb.CreateGinIndex` - specifies whether to create a default GIN index on the jsonb field (with `jsonb_path_ops` operator class). True by default.
 
 ### Data import<a name="data_import"></a>
 
