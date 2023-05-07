@@ -34,16 +34,17 @@ namespace DatabaseBenchmark.Tests.Databases
             //Please note than in fact in CosmosDB GROUP BY and ORDER BY are mutually exclusive
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Sample.Category, Sample.SubCategory, SUM(Sample.Price) TotalPrice FROM Sample"
-                + " WHERE (Sample.Category = @p0 AND IS_NULL(Sample.SubCategory))"
+                + " WHERE (Sample.Category = @p0 AND IS_NULL(Sample.SubCategory) AND Sample.Rating >= @p1)"
                 + " GROUP BY Sample.Category, Sample.SubCategory"
                 + " ORDER BY Sample.Category ASC, Sample.SubCategory ASC"
-                + " OFFSET @p1 LIMIT @p2", normalizedQueryText);
+                + " OFFSET @p2 LIMIT @p3", normalizedQueryText);
 
             var reference = new SqlQueryParameter[]
             {
                 new ('@', "p0", "ABC", ColumnType.String),
-                new ('@', "p1", 10, ColumnType.Integer),
-                new ('@', "p2", 100, ColumnType.Integer)
+                new ('@', "p1", 5.0, ColumnType.Double),
+                new ('@', "p2", 10, ColumnType.Integer),
+                new ('@', "p3", 100, ColumnType.Integer)
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);

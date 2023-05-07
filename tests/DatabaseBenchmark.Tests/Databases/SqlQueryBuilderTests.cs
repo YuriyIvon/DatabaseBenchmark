@@ -34,16 +34,17 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Category, SubCategory, SUM(Price) TotalPrice FROM Sample"
-                + " WHERE (Category = @p0 AND SubCategory IS NULL)"
+                + " WHERE (Category = @p0 AND SubCategory IS NULL AND Rating >= @p1)"
                 + " GROUP BY Category, SubCategory"
                 + " ORDER BY Category ASC, SubCategory ASC"
-                + " OFFSET @p1 ROWS FETCH NEXT @p2 ROWS ONLY", normalizedQueryText);
+                + " OFFSET @p2 ROWS FETCH NEXT @p3 ROWS ONLY", normalizedQueryText);
 
             var reference = new SqlQueryParameter[]
             {
                 new ('@', "p0", "ABC", ColumnType.String),
-                new ('@', "p1", query.Skip, ColumnType.Integer),
-                new ('@', "p2", query.Take, ColumnType.Integer)
+                new ('@', "p1", 5.0, ColumnType.Double),
+                new ('@', "p2", query.Skip, ColumnType.Integer),
+                new ('@', "p3", query.Take, ColumnType.Integer)
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);
@@ -90,15 +91,16 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Category, SubCategory, SUM(Price) TotalPrice FROM Sample"
-                + " WHERE (SubCategory IS NULL)"
+                + " WHERE (SubCategory IS NULL AND Rating >= @p0)"
                 + " GROUP BY Category, SubCategory"
                 + " ORDER BY Category ASC, SubCategory ASC"
-                + " OFFSET @p0 ROWS FETCH NEXT @p1 ROWS ONLY", normalizedQueryText);
+                + " OFFSET @p1 ROWS FETCH NEXT @p2 ROWS ONLY", normalizedQueryText);
 
             var reference = new SqlQueryParameter[]
             {
-                new ('@', "p0", query.Skip, ColumnType.Integer),
-                new ('@', "p1", query.Take, ColumnType.Integer),
+                new ('@', "p0", 5.0, ColumnType.Double),
+                new ('@', "p1", query.Skip, ColumnType.Integer),
+                new ('@', "p2", query.Take, ColumnType.Integer),
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);

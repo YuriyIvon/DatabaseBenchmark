@@ -32,16 +32,17 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Category, SubCategory, SUM(Price) TotalPrice FROM Sample"
-                + " WHERE (Category = @p0 AND SubCategory IS NULL)"
+                + " WHERE (Category = @p0 AND SubCategory IS NULL AND Rating >= @p1)"
                 + " GROUP BY Category, SubCategory"
                 + " ORDER BY Category ASC, SubCategory ASC"
-                + " LIMIT @p1 OFFSET @p2", normalizedQueryText);
+                + " LIMIT @p2 OFFSET @p3", normalizedQueryText);
 
             var reference = new SqlQueryParameter[]
             {
                 new ('@', "p0", "ABC", ColumnType.String),
-                new ('@', "p1", 100, ColumnType.Integer),
-                new ('@', "p2", 10, ColumnType.Integer)
+                new ('@', "p1", 5.0, ColumnType.Double),
+                new ('@', "p2", 100, ColumnType.Integer),
+                new ('@', "p3", 10, ColumnType.Integer)
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);

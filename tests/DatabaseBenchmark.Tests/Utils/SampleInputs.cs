@@ -103,6 +103,12 @@ namespace DatabaseBenchmark.Tests.Utils
                         ColumnName = "SubCategory",
                         Operator = QueryPrimitiveOperator.Equals,
                         Value = null
+                    },
+                    new QueryPrimitiveCondition
+                    {
+                        ColumnName = "Rating",
+                        Operator = QueryPrimitiveOperator.GreaterEquals,
+                        Value = 5.0
                     }
                 }
             },
