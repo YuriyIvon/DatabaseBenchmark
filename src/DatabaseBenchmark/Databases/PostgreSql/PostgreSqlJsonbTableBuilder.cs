@@ -7,8 +7,6 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 {
     public class PostgreSqlJsonbTableBuilder
     {
-        private const string JsonbColumnName = "attributes";
-
         private readonly IOptionsProvider _optionsProvider;
 
         public PostgreSqlJsonbTableBuilder(IOptionsProvider optionsProvider)
@@ -20,7 +18,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
         {
             var options = _optionsProvider.GetOptions<PostgreSqlJsonbTableOptions>();
 
-            var columns = new List<string> { $"{JsonbColumnName} jsonb" };
+            var columns = new List<string> { $"{PostgreSqlJsonbConstants.JsonbColumnName} jsonb" };
 
             if (table.Columns.Any(c => c.Queryable && c.DatabaseGenerated))
             {
@@ -40,7 +38,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
             if (options.CreateGinIndex)
             {
-                commandText.AppendLine($"CREATE INDEX {table.Name}_{JsonbColumnName}_idx ON {table.Name} USING GIN ({JsonbColumnName} jsonb_path_ops);");
+                commandText.AppendLine($"CREATE INDEX {table.Name}_{PostgreSqlJsonbConstants.JsonbColumnName}_idx ON {table.Name} USING GIN ({PostgreSqlJsonbConstants.JsonbColumnName} jsonb_path_ops);");
             }
 
             return commandText.ToString();

@@ -43,8 +43,8 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                 };
 
                 return castType != null
-                    ? $"(attributes->>'{columnName}')::{castType}"
-                    : $"attributes->>'{columnName}'";
+                    ? $"({PostgreSqlJsonbConstants.JsonbColumnName}->>'{columnName}')::{castType}"
+                    : $"{PostgreSqlJsonbConstants.JsonbColumnName}->>'{columnName}'";
             }
             else
             {
@@ -105,7 +105,8 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                 }
                 else if (condition.Operator == QueryPrimitiveOperator.Equals)
                 {
-                    var predicateExpression = new StringBuilder("attributes @>");
+                    var predicateExpression = new StringBuilder(PostgreSqlJsonbConstants.JsonbColumnName);
+                    predicateExpression.Append(" @>");
 
                     var rawValue = condition.RandomizeValue
                         ? RandomValueProvider.GetRandomValue(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
@@ -118,6 +119,39 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                             : rawValue.ToString();
 
                     predicateExpression.Append($" '{{\"{column.Name}\": {value}}}'::jsonb");
+
+                    return predicateExpression.ToString();
+                }
+                else
+                {
+                    var predicateExpression = new StringBuilder(PostgreSqlJsonbConstants.JsonbColumnName);
+                    predicateExpression.Append(" @@ '$.");
+                    predicateExpression.Append(condition.ColumnName);
+                    predicateExpression.Append(' ');
+                    predicateExpression.Append(condition.Operator switch
+                    {
+                        QueryPrimitiveOperator.Equals => "==",
+                        QueryPrimitiveOperator.NotEquals => "!=",
+                        QueryPrimitiveOperator.Greater => ">",
+                        QueryPrimitiveOperator.GreaterEquals => ">=",
+                        QueryPrimitiveOperator.Lower => "<",
+                        QueryPrimitiveOperator.LowerEquals => "<=",
+                        _ => throw new InputArgumentException($"Unknown primitive operator \"{condition.Operator}\"")
+                    });
+                    predicateExpression.Append(' ');
+
+                    var rawValue = condition.RandomizeValue
+                        ? RandomValueProvider.GetRandomValue(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                        : condition.Value;
+
+                    var value = rawValue == null
+                        ? "null"
+                        : rawValue is string s
+                            ? $"\"{EscapeString(s)}\""
+                            : rawValue.ToString();
+
+                    predicateExpression.Append(value);
+                    predicateExpression.Append('\'');
 
                     return predicateExpression.ToString();
                 }

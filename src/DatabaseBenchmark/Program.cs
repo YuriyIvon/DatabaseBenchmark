@@ -28,7 +28,7 @@ if (args.Length > 0)
             }
             else
             {
-                throw iex;
+                throw;
             }
         }
     }
