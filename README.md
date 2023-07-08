@@ -1,3 +1,4 @@
+
 # Database Benchmark
 ![Application Status](https://github.com/YuriyIvon/DatabaseBenchmark/actions/workflows/build.yml/badge.svg)
 
@@ -96,7 +97,7 @@ DatabaseBenchmark import --DatabaseType=Postgres --ConnectionString="Host=localh
 
 Here file [SalesSqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesSqlServerDataSource.json) defines where and how to get source data. With relational databases, a raw query stored in a file referenced by `QueryFilePath` parameter must return all columns declared in the target table definition. Extra columns are ignored. For those databases where the container name doesn't appear in a query, there is an optional data source parameter `TableName`.
 
-CSV data source has an optional parameter `DataSource.Csv.Delimiter`, which allows you to override the default column delimiter.
+CSV data source has an optional parameter `DataSource.Csv.Delimiter`, which allows you to override the default column delimiter, and `DataSource.Csv.Culture` to override the default system culture used for parsing the input CSV file.
 
 If column names in the data source don't match table columns (for example, when CSV headers contain space characters), a mapping can be applied by specifying `MappingFilePath` parameter pointing to a JSON file with column mappings. An object in this file must have `Columns` array where each item consists of two fields - `SourceColumnName` and `TableColumnName`.
 
