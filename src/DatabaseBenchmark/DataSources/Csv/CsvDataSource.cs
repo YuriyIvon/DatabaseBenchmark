@@ -45,7 +45,12 @@ namespace DatabaseBenchmark.DataSources.Csv
         private void Open()
         {
             var options = _optionsProvider.GetOptions<CsvDataSourceOptions>();
-            var configuration = new CsvConfiguration(CultureInfo.InvariantCulture);
+
+            var culture = options.Culture != null 
+                ? CultureInfo.GetCultureInfo(options.Culture) 
+                : CultureInfo.CurrentCulture;
+
+            var configuration = new CsvConfiguration(culture);
 
             if (options.Delimiter != null)
             {

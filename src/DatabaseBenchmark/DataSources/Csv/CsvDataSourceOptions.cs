@@ -7,5 +7,8 @@ namespace DatabaseBenchmark.DataSources.Csv
     {
         [Option("Column delimiter")]
         public string Delimiter { get; set; }
+
+        [Option("Culture identifier used for parsing (the current system culture is used by default)")]
+        public string Culture { get; set; }
     }
 }
