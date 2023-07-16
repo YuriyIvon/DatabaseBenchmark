@@ -1,10 +1,8 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.MongoDb;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
 using NSubstitute;
-using System.Linq;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Databases
@@ -34,17 +32,19 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Category, SubCategory, SUM(Price) TotalPrice FROM Sample"
-                + " WHERE (Category = @p0 AND SubCategory IS NULL AND Rating >= @p1)"
+                + " WHERE (Category = @p0 AND SubCategory IS NULL AND Rating >= @p1 AND (Name LIKE @p2 OR Name LIKE @p3))"
                 + " GROUP BY Category, SubCategory"
                 + " ORDER BY Category ASC, SubCategory ASC"
-                + " OFFSET @p2 ROWS FETCH NEXT @p3 ROWS ONLY", normalizedQueryText);
+                + " OFFSET @p4 ROWS FETCH NEXT @p5 ROWS ONLY", normalizedQueryText);
 
             var reference = new SqlQueryParameter[]
             {
                 new ('@', "p0", "ABC", ColumnType.String),
                 new ('@', "p1", 5.0, ColumnType.Double),
-                new ('@', "p2", query.Skip, ColumnType.Integer),
-                new ('@', "p3", query.Take, ColumnType.Integer)
+                new ('@', "p2", "A%", ColumnType.String),
+                new ('@', "p3", "%B%", ColumnType.String),
+                new ('@', "p4", query.Skip, ColumnType.Integer),
+                new ('@', "p5", query.Take, ColumnType.Integer)
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);
@@ -91,16 +91,18 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Category, SubCategory, SUM(Price) TotalPrice FROM Sample"
-                + " WHERE (SubCategory IS NULL AND Rating >= @p0)"
+                + " WHERE (SubCategory IS NULL AND Rating >= @p0 AND (Name LIKE @p1 OR Name LIKE @p2))"
                 + " GROUP BY Category, SubCategory"
                 + " ORDER BY Category ASC, SubCategory ASC"
-                + " OFFSET @p1 ROWS FETCH NEXT @p2 ROWS ONLY", normalizedQueryText);
+                + " OFFSET @p3 ROWS FETCH NEXT @p4 ROWS ONLY", normalizedQueryText);
 
             var reference = new SqlQueryParameter[]
             {
                 new ('@', "p0", 5.0, ColumnType.Double),
-                new ('@', "p1", query.Skip, ColumnType.Integer),
-                new ('@', "p2", query.Take, ColumnType.Integer),
+                new ('@', "p1", "A%", ColumnType.String),
+                new ('@', "p2", "%B%", ColumnType.String),
+                new ('@', "p3", query.Skip, ColumnType.Integer),
+                new ('@', "p4", query.Take, ColumnType.Integer),
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);

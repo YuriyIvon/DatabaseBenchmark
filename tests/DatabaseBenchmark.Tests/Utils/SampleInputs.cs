@@ -109,6 +109,25 @@ namespace DatabaseBenchmark.Tests.Utils
                         ColumnName = "Rating",
                         Operator = QueryPrimitiveOperator.GreaterEquals,
                         Value = 5.0
+                    },
+                    new QueryGroupCondition
+                    {
+                        Operator = QueryGroupOperator.Or,
+                        Conditions = new QueryPrimitiveCondition[]
+                        {
+                            new QueryPrimitiveCondition
+                            {
+                                ColumnName = "Name",
+                                Operator = QueryPrimitiveOperator.StartsWith,
+                                Value = "A"
+                            },
+                            new QueryPrimitiveCondition
+                            {
+                                ColumnName = "Name",
+                                Operator = QueryPrimitiveOperator.Contains,
+                                Value = "B"
+                            }
+                        }
                     }
                 }
             },
@@ -148,9 +167,18 @@ namespace DatabaseBenchmark.Tests.Utils
             {
                 var query = AllArgumentsQuery;
                 var topCondition = (QueryGroupCondition)query.Condition;
-                foreach (QueryPrimitiveCondition condition in topCondition.Conditions)
+                foreach (var condition in topCondition.Conditions)
                 {
-                    condition.RandomizeInclusion = true;
+                    //Don't want to have the setter in the interface
+                    switch (condition)
+                    {
+                        case QueryGroupCondition group:
+                            group.RandomizeInclusion = true;
+                            break;
+                        case QueryPrimitiveCondition primitive:
+                            primitive.RandomizeInclusion = true;
+                            break;
+                    }
                 }
 
                 return query;

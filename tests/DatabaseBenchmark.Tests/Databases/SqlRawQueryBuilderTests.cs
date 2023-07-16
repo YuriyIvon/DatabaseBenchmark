@@ -1,7 +1,6 @@
 ﻿using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
-using System.Linq;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Databases

@@ -75,52 +75,48 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             }
         }
 
-        protected override string BuildPrimitiveCondition(QueryPrimitiveCondition condition)
+        protected override string BuildInCondition(QueryPrimitiveCondition condition)
         {
-            var column = Table.Columns.FirstOrDefault(c => c.Name == condition.ColumnName);
+            var column = GetColumn(condition.ColumnName);
 
             if (_queryOptions.UseGinOperators && column.Queryable)
             {
-                if (condition.Operator == QueryPrimitiveOperator.In)
+                var rawCollection = condition.RandomizeValue
+                    ? RandomValueProvider.GetRandomValueCollection(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                    : (IEnumerable<object>)condition.Value;
+
+                //Rewrite IN operator as a set of OR expressions
+                var orCondition = new QueryGroupCondition
                 {
-                    var rawCollection = condition.RandomizeValue
-                        ? RandomValueProvider.GetRandomValueCollection(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
-                        : (IEnumerable<object>)condition.Value;
+                    Operator = QueryGroupOperator.Or,
+                    Conditions = rawCollection.Select(v =>
+                        new QueryPrimitiveCondition
+                        {
+                            ColumnName = condition.ColumnName,
+                            Operator = QueryPrimitiveOperator.Equals,
+                            Value = v
+                        })
+                        .ToArray()
+                };
 
-                    //Rewrite IN operator as a set of OR expressions
-                    var orCondition = new QueryGroupCondition
-                    {
-                        Operator = QueryGroupOperator.Or,
-                        Conditions = rawCollection.Select(v =>
-                            new QueryPrimitiveCondition
-                            {
-                                ColumnName = condition.ColumnName,
-                                Operator = QueryPrimitiveOperator.Equals,
-                                Value = v
-                            })
-                            .ToArray()
-                    };
+                return BuildGroupCondition(orCondition);
+            }
+            else
+            {
+                return base.BuildInCondition(condition);
+            }
+        }
 
-                    return BuildGroupCondition(orCondition);
-                }
-                else if (condition.Operator == QueryPrimitiveOperator.Equals)
+        protected override string BuildComparisonCondition(QueryPrimitiveCondition condition, object value)
+        {
+            var column = GetColumn(condition.ColumnName);
+
+            if (_queryOptions.UseGinOperators && column.Queryable)
+            {
+                if (condition.Operator == QueryPrimitiveOperator.Equals)
                 {
-                    var predicateExpression = new StringBuilder(PostgreSqlJsonbConstants.JsonbColumnName);
-                    predicateExpression.Append(" @>");
-
-                    var rawValue = condition.RandomizeValue
-                        ? RandomValueProvider.GetRandomValue(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
-                        : condition.Value;
-
-                    var value = rawValue == null
-                        ? "null"
-                        : rawValue is string s
-                            ? $"\"{EscapeString(s)}\""
-                            : rawValue.ToString();
-
-                    predicateExpression.Append($" '{{\"{column.Name}\": {value}}}'::jsonb");
-
-                    return predicateExpression.ToString();
+                    var formattedValue = FormatValue(value);
+                    return $"{PostgreSqlJsonbConstants.JsonbColumnName} @> '{{\"{column.Name}\": {formattedValue}}}'::jsonb";
                 }
                 else
                 {
@@ -139,25 +135,51 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                         _ => throw new InputArgumentException($"Unknown primitive operator \"{condition.Operator}\"")
                     });
                     predicateExpression.Append(' ');
-
-                    var rawValue = condition.RandomizeValue
-                        ? RandomValueProvider.GetRandomValue(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
-                        : condition.Value;
-
-                    var value = rawValue == null
-                        ? "null"
-                        : rawValue is string s
-                            ? $"\"{EscapeString(s)}\""
-                            : rawValue.ToString();
-
-                    predicateExpression.Append(value);
+                    predicateExpression.Append(FormatValue(value));
                     predicateExpression.Append('\'');
 
                     return predicateExpression.ToString();
                 }
             }
+            else
+            {
+                return base.BuildComparisonCondition(condition, value);
+            }
+        }
 
-            return base.BuildPrimitiveCondition(condition);
+        protected override string BuildStringCondition(QueryPrimitiveCondition condition, object value)
+        {
+            var column = GetColumn(condition.ColumnName);
+
+            if (_queryOptions.UseGinOperators && column.Queryable)
+            {
+                throw new InputArgumentException("PostgreSQL jsonb operators don't support string functions");
+            }
+            else
+            {
+                return base.BuildStringCondition(condition, value);
+            }
+        }
+
+        protected override string BuildNullCondition(QueryPrimitiveCondition condition)
+        {
+            var column = GetColumn(condition.ColumnName);
+
+            if (_queryOptions.UseGinOperators && column.Queryable)
+            {
+                var basicExpression = $"{PostgreSqlJsonbConstants.JsonbColumnName} @> '{{\"{column.Name}\": null}}'::jsonb";
+
+                return condition.Operator switch
+                {
+                    QueryPrimitiveOperator.Equals => basicExpression,
+                    QueryPrimitiveOperator.NotEquals => BuildNotCondition(new string[] { basicExpression }),
+                    _ => throw new InputArgumentException($"Primitive operator \"{condition.Operator}\" can't be used with NULL operand")
+                };
+            }
+            else
+            {
+                return base.BuildNullCondition(condition);
+            }
         }
 
         private static string BuildUnaryCondition(string @operator, string[] inputConditions)
@@ -170,6 +192,9 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             return $"{@operator}({inputConditions.First()})";
         }
 
-        private static string EscapeString(string s) => s.Replace("'", "''");
+        private static string FormatValue(object value) =>
+            value is string s
+                ? $"\"{s.Replace("'", "''")}\""
+                : value.ToString();
     }
 }
