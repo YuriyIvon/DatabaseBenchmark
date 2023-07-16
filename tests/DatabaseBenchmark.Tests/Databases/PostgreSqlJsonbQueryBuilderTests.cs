@@ -1,9 +1,12 @@
-﻿using DatabaseBenchmark.Core.Interfaces;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.PostgreSql;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
+using MongoDB.Driver.Linq;
 using NSubstitute;
+using System;
 using System.Linq;
 using Xunit;
 
@@ -56,6 +59,20 @@ namespace DatabaseBenchmark.Tests.Databases
             var parametersBuilder = new SqlParametersBuilder();
             var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null, _optionsProvider);
 
+            Assert.Throws<InputArgumentException>(() => builder.Build());
+        }
+
+        [Fact]
+        public void BuildQueryAllArgumentsGinOperatorsNoStringConditions()
+        {
+            var query = SampleInputs.AllArgumentsQuery;
+            //Exclude string conditions
+            var groupConditions = (QueryGroupCondition)query.Condition;
+            groupConditions.Conditions = groupConditions.Conditions.Where(c => c is QueryPrimitiveCondition).ToArray();
+
+            var parametersBuilder = new SqlParametersBuilder();
+            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null, _optionsProvider);
+
             var queryText = builder.Build();
 
             var normalizedQueryText = queryText.NormalizeSpaces();
@@ -86,17 +103,19 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT attributes->>'Category' Category, attributes->>'SubCategory' SubCategory, SUM(Price) TotalPrice FROM Sample"
-                + " WHERE (attributes->>'Category' = @p0 AND attributes->>'SubCategory' IS NULL AND (attributes->>'Rating')::double >= @p1)"
+                + " WHERE (attributes->>'Category' = @p0 AND attributes->>'SubCategory' IS NULL AND (attributes->>'Rating')::double >= @p1 AND (attributes->>'Name' LIKE @p2 OR attributes->>'Name' LIKE @p3))"
                 + " GROUP BY attributes->>'Category', attributes->>'SubCategory'"
                 + " ORDER BY attributes->>'Category' ASC, attributes->>'SubCategory' ASC"
-                + " OFFSET @p2 ROWS FETCH NEXT @p3 ROWS ONLY", normalizedQueryText);
+                + " OFFSET @p4 ROWS FETCH NEXT @p5 ROWS ONLY", normalizedQueryText);
 
             var reference = new SqlQueryParameter[]
             {
                 new ('@', "p0", "ABC", ColumnType.String),
                 new ('@', "p1", 5.0, ColumnType.Double),
-                new ('@', "p2", query.Skip, ColumnType.Integer),
-                new ('@', "p3", query.Take, ColumnType.Integer),
+                new ('@', "p2", "A%", ColumnType.String),
+                new ('@', "p3", "%B%", ColumnType.String),
+                new ('@', "p4", query.Skip, ColumnType.Integer),
+                new ('@', "p5", query.Take, ColumnType.Integer),
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);
@@ -130,9 +149,12 @@ namespace DatabaseBenchmark.Tests.Databases
         }
 
         [Fact]
-        public void BuildQueryAllArgumentsIncludePartial()
+        public void BuildQueryAllArgumentsIncludePartialNoStringConditions()
         {
             var query = SampleInputs.AllArgumentsQueryRandomizeInclusionPartial;
+            //Exclude string conditions
+            var groupConditions = (QueryGroupCondition)query.Condition;
+            groupConditions.Conditions = groupConditions.Conditions.Where(c => c is QueryPrimitiveCondition).ToArray();
 
             var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
             mockRandomValueProvider.GetRandomBoolean().Returns(true);

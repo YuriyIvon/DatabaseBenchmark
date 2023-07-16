@@ -2,7 +2,6 @@
 using DatabaseBenchmark.Core.Interfaces;
 using NSubstitute;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 

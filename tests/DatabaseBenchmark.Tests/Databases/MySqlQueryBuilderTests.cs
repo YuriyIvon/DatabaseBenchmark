@@ -2,7 +2,6 @@
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
-using System.Linq;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Databases
@@ -32,7 +31,7 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Category, SubCategory, SUM(Price) TotalPrice FROM Sample"
-                + " WHERE (Category = @p0 AND SubCategory IS NULL AND Rating >= @p1)"
+                + " WHERE (Category = @p0 AND SubCategory IS NULL AND Rating >= @p1 AND (Name LIKE @p2 OR Name LIKE @p3))"
                 + " GROUP BY Category, SubCategory"
                 + " ORDER BY Category ASC, SubCategory ASC"
                 + " LIMIT 10, 100", normalizedQueryText);
@@ -40,7 +39,9 @@ namespace DatabaseBenchmark.Tests.Databases
             var reference = new SqlQueryParameter[]
             {
                 new ('@', "p0", "ABC", ColumnType.String),
-                new ('@', "p1", 5.0, ColumnType.Double)
+                new ('@', "p1", 5.0, ColumnType.Double),
+                new ('@', "p2", "A%", ColumnType.String),
+                new ('@', "p3", "%B%", ColumnType.String)
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);

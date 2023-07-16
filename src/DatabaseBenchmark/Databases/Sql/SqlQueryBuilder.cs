@@ -199,69 +199,95 @@ namespace DatabaseBenchmark.Databases.Sql
 
         protected virtual string BuildPrimitiveCondition(QueryPrimitiveCondition condition)
         {
-            var column = Table.Columns.FirstOrDefault(c => c.Name == condition.ColumnName);
-
             if (condition.Operator == QueryPrimitiveOperator.In)
             {
-                var conditionExpression = new StringBuilder(BuildRegularColumnReference(condition.ColumnName));
-                conditionExpression.Append(' ');
-
-                var rawCollection = condition.RandomizeValue
-                    ? RandomValueProvider.GetRandomValueCollection(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
-                    : (IEnumerable<object>)condition.Value;
-
-                if (rawCollection == null)
-                {
-                    throw new InputArgumentException($"Primitive operator \"{condition.Operator}\" can't be used with NULL operand");
-                }
-
-                conditionExpression.Append("IN (");
-                conditionExpression.Append(string.Join(", ", rawCollection.Select(v => ParametersBuilder.Append(v, column.Type))));
-                conditionExpression.Append(')');
-
-                return conditionExpression.ToString();
+                return BuildInCondition(condition);
             }
             else
             {
-                var conditionExpression = new StringBuilder(BuildRegularColumnReference(condition.ColumnName));
-                conditionExpression.Append(' ');
-
-                var rawValue = condition.RandomizeValue
+                var value = condition.RandomizeValue
                     ? RandomValueProvider.GetRandomValue(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
                     : condition.Value;
 
-                if (rawValue != null)
+                if (value != null)
                 {
-                    conditionExpression.Append(condition.Operator switch
+                    if (condition.Operator == QueryPrimitiveOperator.Contains || condition.Operator == QueryPrimitiveOperator.StartsWith)
                     {
-                        QueryPrimitiveOperator.Equals => "=",
-                        QueryPrimitiveOperator.NotEquals => "<>",
-                        QueryPrimitiveOperator.Greater => ">",
-                        QueryPrimitiveOperator.GreaterEquals => ">=",
-                        QueryPrimitiveOperator.Lower => "<",
-                        QueryPrimitiveOperator.LowerEquals => "<=",
-                        QueryPrimitiveOperator.Contains => "LIKE",
-                        QueryPrimitiveOperator.StartsWith => "LIKE",
-                        _ => throw new InputArgumentException($"Unknown primitive operator \"{condition.Operator}\"")
-                    });
-
-                    var value = condition.Operator switch
+                        return BuildStringCondition(condition, value);
+                    }
+                    else
                     {
-                        QueryPrimitiveOperator.Contains => $"%{rawValue}%",
-                        QueryPrimitiveOperator.StartsWith => $"{rawValue}%",
-                        _ => rawValue
-                    };
-
-                    conditionExpression.Append(' ');
-                    conditionExpression.Append(ParametersBuilder.Append(value, column.Type));
-
-                    return conditionExpression.ToString();
+                        return BuildComparisonCondition(condition, value);
+                    }
                 }
                 else
                 {
                     return BuildNullCondition(condition);
                 }
             }
+        }
+
+        protected virtual string BuildInCondition(QueryPrimitiveCondition condition)
+        {
+            var column = GetColumn(condition.ColumnName);
+
+            var conditionExpression = new StringBuilder(BuildRegularColumnReference(condition.ColumnName));
+            conditionExpression.Append(' ');
+
+            var rawCollection = condition.RandomizeValue
+                ? RandomValueProvider.GetRandomValueCollection(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                : (IEnumerable<object>)condition.Value;
+
+            if (rawCollection == null)
+            {
+                throw new InputArgumentException($"Primitive operator \"{condition.Operator}\" can't be used with NULL operand");
+            }
+
+            conditionExpression.Append("IN (");
+            conditionExpression.Append(string.Join(", ", rawCollection.Select(v => ParametersBuilder.Append(v, column.Type))));
+            conditionExpression.Append(')');
+
+            return conditionExpression.ToString();
+        }
+
+        protected virtual string BuildStringCondition(QueryPrimitiveCondition condition, object value)
+        {
+            var column = GetColumn(condition.ColumnName);
+            var columnReference = BuildRegularColumnReference(condition.ColumnName);
+
+            var pattern = condition.Operator switch
+            {
+                QueryPrimitiveOperator.Contains => $"%{value}%",
+                QueryPrimitiveOperator.StartsWith => $"{value}%",
+                _ => throw new InputArgumentException($"Unknown string operator \"{condition.Operator}\"")
+            };
+
+            return $"{columnReference} LIKE {ParametersBuilder.Append(pattern, column.Type)}";
+        }
+
+        protected virtual string BuildComparisonCondition(QueryPrimitiveCondition condition, object value)
+        {
+            var column = GetColumn(condition.ColumnName);
+            var columnReference = BuildRegularColumnReference(condition.ColumnName);
+
+            var conditionExpression = new StringBuilder(columnReference);
+            conditionExpression.Append(' ');
+
+            conditionExpression.Append(condition.Operator switch
+            {
+                QueryPrimitiveOperator.Equals => "=",
+                QueryPrimitiveOperator.NotEquals => "<>",
+                QueryPrimitiveOperator.Greater => ">",
+                QueryPrimitiveOperator.GreaterEquals => ">=",
+                QueryPrimitiveOperator.Lower => "<",
+                QueryPrimitiveOperator.LowerEquals => "<=",
+                _ => throw new InputArgumentException($"Unknown comparison operator \"{condition.Operator}\"")
+            });
+
+            conditionExpression.Append(' ');
+            conditionExpression.Append(ParametersBuilder.Append(value, column.Type));
+
+            return conditionExpression.ToString();
         }
 
         protected virtual string BuildLimit()
