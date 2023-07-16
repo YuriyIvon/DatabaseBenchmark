@@ -12,6 +12,8 @@
 
         public bool PartitionKey { get; set; } = false;
 
+        public bool SortKey { get; set; } = false;
+
         public bool DatabaseGenerated { get; set; } = false;
     }
 }

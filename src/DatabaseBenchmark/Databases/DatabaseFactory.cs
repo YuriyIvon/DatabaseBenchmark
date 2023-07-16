@@ -3,6 +3,7 @@ using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.ClickHouse;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.CosmosDb;
+using DatabaseBenchmark.Databases.DynamoDb;
 using DatabaseBenchmark.Databases.Elasticsearch;
 using DatabaseBenchmark.Databases.MonetDb;
 using DatabaseBenchmark.Databases.MongoDb;
@@ -34,7 +35,8 @@ namespace DatabaseBenchmark.Databases
                 ["CosmosDb"] = (connectionString) => new CosmosDbDatabase(connectionString, environment, optionsProvider),
                 ["ClickHouse"] = (connectionString) => new ClickHouseDatabase(connectionString, environment, optionsProvider),
                 ["Oracle"] = (connectionString) => new OracleDatabase(connectionString, environment),
-                ["Snowflake"] = (connectionString) => new SnowflakeDatabase(connectionString, environment)
+                ["Snowflake"] = (connectionString) => new SnowflakeDatabase(connectionString, environment),
+                ["DynamoDb"] = (connectionString) => new DynamoDbDatabase(connectionString, environment)
             };
         }
 

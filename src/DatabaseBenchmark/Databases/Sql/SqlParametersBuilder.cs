@@ -5,17 +5,18 @@ namespace DatabaseBenchmark.Databases.Sql
 {
     public class SqlParametersBuilder : ISqlParametersBuilder
     {
+        private readonly char _prefix;
+        private readonly bool _isOrdinal;
         private readonly List<SqlQueryParameter> _parameters = new();
 
         private int _counter = 0;
 
-        public char Prefix { get; }
-
         public IEnumerable<SqlQueryParameter> Parameters => _parameters;
 
-        public SqlParametersBuilder(char prefix = '@')
+        public SqlParametersBuilder(char prefix = '@', bool isOrdinal = false)
         {
-            Prefix = prefix;
+            _prefix = prefix;
+            _isOrdinal = isOrdinal;
         }
 
         public string Append(object value, ColumnType type)
@@ -23,10 +24,10 @@ namespace DatabaseBenchmark.Databases.Sql
             string name = $"p{_counter}";
             _counter++;
 
-            var parameter = new SqlQueryParameter(Prefix, name, value, type);
+            var parameter = new SqlQueryParameter(_prefix, name, value, type);
             _parameters.Add(parameter);
 
-            return Prefix + name;
+            return _isOrdinal ? new string(_prefix, 1) : _prefix + name;
         }
 
         public void Reset()
