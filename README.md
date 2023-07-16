@@ -61,7 +61,7 @@ Supported values for `DatabaseType` parameter are:
 * `MongoDb`
 * `Oracle`
 * `Postgres`
-* `PostgresJsonb` - stores all queryable "logical" columns in a single JSONB column indexed with GIN index of  jsonb_path_ops type. Supports only `Equals` and `In` primitive operators. 
+* `PostgresJsonb` - stores all queryable "logical" columns in a single JSONB column indexed with GIN index of jsonb_path_ops type.
 * `Snowflake`
 * `SqlServer`
 
