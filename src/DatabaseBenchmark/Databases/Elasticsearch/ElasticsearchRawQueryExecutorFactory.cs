@@ -1,8 +1,9 @@
 ﻿using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
 using DatabaseBenchmark.Databases.Common.Interfaces;
+using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
+using Elasticsearch.Net;
 using Nest;
 using RawQuery = DatabaseBenchmark.Model.RawQuery;
 
@@ -21,6 +22,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);
 
             Container.Register<ElasticClient>(createClient, Lifestyle);
+            Container.Register<IElasticsearchSerializer>(() => Container.GetInstance<ElasticClient>().RequestResponseSerializer, Lifestyle);
             Container.Register<IDistinctValuesProvider, ElasticsearchDistinctValuesProvider>(Lifestyle);
             Container.Register<IRandomValueProvider, RandomValueProvider>(Lifestyle);
             Container.Register<IElasticsearchQueryBuilder, ElasticsearchRawQueryBuilder>(Lifestyle);
