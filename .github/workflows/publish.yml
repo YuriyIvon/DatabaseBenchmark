@@ -1,6 +1,10 @@
 name: publish
 
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        required: true
 
 jobs:
   build:
@@ -45,6 +49,7 @@ jobs:
         with:
           tag_name: ${{ env.APP_VERSION }}
           release_name: ${{ env.APP_VERSION }}
+          body: ${{ github.event.inputs.release_notes }}
           draft: true
           prerelease: false
       - name: Upload Windows Artifact
