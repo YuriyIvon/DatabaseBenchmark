@@ -16,5 +16,9 @@ namespace DatabaseBenchmark.Model
         public bool RandomizeValue { get; set; } = false;
 
         public ValueRandomizationRule ValueRandomizationRule { get; set; } = new ValueRandomizationRule();
+
+        public bool Inline { get; set; } = false;
+
+        public string InlineFormat { get; set; }
     }
 }

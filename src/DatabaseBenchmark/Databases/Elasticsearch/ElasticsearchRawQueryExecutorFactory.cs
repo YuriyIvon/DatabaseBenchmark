@@ -22,6 +22,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);
 
             Container.Register<ElasticClient>(createClient, Lifestyle);
+            //TODO: Find a better way to instantiate the default serializer
             Container.Register<IElasticsearchSerializer>(() => Container.GetInstance<ElasticClient>().RequestResponseSerializer, Lifestyle);
             Container.Register<IDistinctValuesProvider, ElasticsearchDistinctValuesProvider>(Lifestyle);
             Container.Register<IRandomValueProvider, RandomValueProvider>(Lifestyle);

@@ -1,7 +1,9 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.MongoDb.Interfaces;
 using DatabaseBenchmark.Model;
 using MongoDB.Bson;
+using System.Text.Json;
 
 namespace DatabaseBenchmark.Databases.MongoDb
 {
@@ -47,12 +49,12 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
                 if (rawValue is IEnumerable<object> rawCollection)
                 {
-                    var aliases = rawCollection.Select(v => FormatValue(v)).ToArray();
+                    var aliases = rawCollection.Select(v => FormatParameter(parameter, v)).ToArray();
                     parameterString = string.Join(", ", aliases);
                 }
                 else
                 {
-                    parameterString = FormatValue(rawValue);
+                    parameterString = FormatParameter(parameter, rawValue);
                 }
 
                 queryText = queryText.Replace($"${{{parameter.Name}}}", parameterString);
@@ -61,17 +63,9 @@ namespace DatabaseBenchmark.Databases.MongoDb
             return queryText;
         }
 
-        private static string FormatValue(object value)
-        {
-            if (value != null)
-            {
-                var stringValue = value.ToString();
-
-                return (value is bool || value is int || value is long || value is double)
-                    ? stringValue : $"\"{stringValue.Replace("\"", "\\\"")}\"";
-            }
-
-            return "null";
-        }
+        private static string FormatParameter(RawQueryParameter parameter, object value) =>
+            parameter.Inline
+                ? InlineParameterFormatter.Format(parameter.InlineFormat, value)
+                : JsonSerializer.Serialize(value);
     }
 }
