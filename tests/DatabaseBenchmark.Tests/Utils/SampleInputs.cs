@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Model;
+using System;
 using System.Linq;
 
 namespace DatabaseBenchmark.Tests.Utils
@@ -199,15 +200,97 @@ namespace DatabaseBenchmark.Tests.Utils
 
         public static RawQuery RawSqlQuery => new()
         {
-            Text = "SELECT * FROM Sample WHERE Category = ${category}",
-            Parameters = new RawQueryParameter[]
+            Text = "SELECT * FROM Sample WHERE Category = ${category} AND CreatedDate >= ${minDate} AND Price <= ${maxPrice} AND Available = ${available}",
+            Parameters = RawQueryParameters
+        };
+
+        public static RawQuery RawSqlInlineQuery => new()
+        {
+            Text = "SELECT * FROM Sample WHERE Category = '${category}' AND CreatedDate >= '${minDate}' AND Price <= ${maxPrice}",
+            Parameters = RawQueryInlineParameters
+        };
+
+        public static RawQuery RawElasticsearchQuery => new()
+        {
+            Text = @"{""query"":{""bool"":{""must"":[{""term"":{""category"":{""value"":${category}}}},{""range"":{""createdDate"":{""gte"":${minDate}}}},{""range"":{""price"":{""lte"":${maxPrice}}}},{""term"":{""available"":{""value"":${available}}}}]}}}",
+            Parameters = RawQueryParameters
+        };
+
+        public static RawQuery RawElasticsearchInlineQuery => new()
+        {
+            Text = @"{""query"":{""bool"":{""must"":[{""term"":{""category"":{""value"":""${category}""}}},{""range"":{""createdDate"":{""gte"":""${minDate}""}}},{""range"":{""price"":{""lte"":${maxPrice}}}},{""term"":{""available"":{""value"":${available}}}}]}}}",
+            Parameters = RawQueryInlineParameters
+        };
+
+        public static RawQuery RawMongoDbQuery => new()
+        {
+            Text = @"[{ ""$match"" : { ""$and"" : [{ ""category"" : ${category} }, { ""createdDate"" : { ""$gte"" : ${minDate} } }, { ""price"" : { ""$lte"" : ${maxPrice} } }, { ""available"" : ${available} }] } }]",
+            Parameters = RawQueryParameters
+        };
+
+        public static RawQuery RawMongoDbInlineQuery => new()
+        {
+            Text = @"[{ ""$match"" : { ""$and"" : [{ ""category"" : ""${category}"" }, { ""createdDate"" : { ""$gte"" : ""${minDate}"" } }, { ""price"" : { ""$lte"" : ${maxPrice} } }, { ""available"" : ${available} }] } }]",
+            Parameters = RawQueryInlineParameters
+        };
+
+        public static RawQueryParameter[] RawQueryParameters => new[]
+        {
+            new RawQueryParameter
             {
-                new RawQueryParameter
-                {
-                    Name = "category",
-                    Type = ColumnType.String,
-                    Value = "ABC"
-                }
+                Name = "category",
+                Type = ColumnType.String,
+                Value = "ABC"
+            },
+            new RawQueryParameter
+            {
+                Name = "minDate",
+                Type = ColumnType.DateTime,
+                Value = new DateTime(2020, 1, 2, 3, 4, 5)
+            },
+            new RawQueryParameter
+            {
+                Name = "maxPrice",
+                Type = ColumnType.Double,
+                Value = 25.5
+            },
+            new RawQueryParameter
+            {
+                Name = "available",
+                Type = ColumnType.Boolean,
+                Value = true
+            }
+        };
+
+        public static RawQueryParameter[] RawQueryInlineParameters => new[]
+        {
+            new RawQueryParameter
+            {
+                Name = "category",
+                Type = ColumnType.String,
+                Value = "ABC",
+                Inline = true
+            },
+            new RawQueryParameter
+            {
+                Name = "minDate",
+                Type = ColumnType.DateTime,
+                Value = new DateTime(2020, 1, 2, 3, 4, 5),
+                Inline = true
+            },
+            new RawQueryParameter
+            {
+                Name = "maxPrice",
+                Type = ColumnType.Double,
+                Value = 25.5,
+                Inline = true
+            },
+            new RawQueryParameter
+            {
+                Name = "available",
+                Type = ColumnType.Boolean,
+                Value = true,
+                Inline = true
             }
         };
     }

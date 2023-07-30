@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 
@@ -48,12 +49,12 @@ namespace DatabaseBenchmark.Databases.Sql
 
                 if (rawValue is IEnumerable<object> rawCollection)
                 {
-                    var aliases = rawCollection.Select(v => _parametersBuilder.Append(v, parameter.Type)).ToArray();
+                    var aliases = rawCollection.Select(v => BuildParameter(parameter, v)).ToArray();
                     parameterString = string.Join(", ", aliases);
                 }
                 else
                 {
-                    parameterString = _parametersBuilder.Append(rawValue, parameter.Type);
+                    parameterString = BuildParameter(parameter, rawValue);
                 }
 
                 queryText = queryText.Replace($"${{{parameter.Name}}}", parameterString);
@@ -61,5 +62,10 @@ namespace DatabaseBenchmark.Databases.Sql
 
             return queryText;
         }
+
+        private string BuildParameter(RawQueryParameter parameter, object value) =>
+            parameter.Inline
+                ? InlineParameterFormatter.Format(parameter.InlineFormat, value)
+                : _parametersBuilder.Append(value, parameter.Type);
     }
 }

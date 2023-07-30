@@ -1,9 +1,12 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
+using DatabaseBenchmark.Model;
 using Elasticsearch.Net;
 using Nest;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using RawQuery = DatabaseBenchmark.Model.RawQuery;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
@@ -58,31 +61,18 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
                 if (rawValue is IEnumerable<object> rawCollection)
                 {
-                    var aliases = rawCollection.Select(v => FormatValue(v)).ToArray();
+                    var aliases = rawCollection.Select(v => FormatParameter(parameter, v)).ToArray();
                     parameterString = string.Join(", ", aliases);
                 }
                 else
                 {
-                    parameterString = FormatValue(rawValue);
+                    parameterString = FormatParameter(parameter, rawValue);
                 }
 
                 queryText = queryText.Replace($"${{{parameter.Name}}}", parameterString);
             }
 
             return queryText;
-        }
-
-        private static string FormatValue(object value)
-        {
-            if (value != null)
-            {
-                var stringValue = value.ToString();
-
-                return (value is bool || value is int || value is long || value is double)
-                    ? stringValue : $"\"{stringValue.Replace("\"", "\\\"")}\"";
-            }
-
-            return "null";
         }
 
         private static void CopyPublicProperties<T>(T source, T destination)
@@ -97,5 +87,10 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                 }
             }
         }
+
+        private static string FormatParameter(RawQueryParameter parameter, object value) =>
+            parameter.Inline 
+                ? InlineParameterFormatter.Format(parameter.InlineFormat, value)
+                : JsonSerializer.Serialize(value);
     }
 }
