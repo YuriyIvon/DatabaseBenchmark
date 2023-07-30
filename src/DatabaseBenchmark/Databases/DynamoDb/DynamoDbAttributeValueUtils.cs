@@ -6,25 +6,14 @@ namespace DatabaseBenchmark.Databases.DynamoDb
 {
     public static class DynamoDbAttributeValueUtils
     {
-        public static object FromAttributeValue(AttributeValue attributeValue)
-        {
-            if (attributeValue.NULL)
+        public static object FromAttributeValue(AttributeValue attributeValue) =>
+            attributeValue switch
             {
-                return null;
-            }
-            else if (attributeValue.IsBOOLSet)
-            {
-                return attributeValue.BOOL;
-            }
-            else if (attributeValue.N != null)
-            {
-                return attributeValue.N;
-            }
-            else
-            {
-                return attributeValue.S;
-            }
-        }
+                { NULL: true } => null,
+                { IsBOOLSet: true } => attributeValue.BOOL,
+                { N: var n } when n != null => n,
+                _ => attributeValue.S,
+            };
 
         public static AttributeValue ToAttributeValue(ColumnType type, object value)
         {
