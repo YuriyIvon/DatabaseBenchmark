@@ -55,6 +55,7 @@ DatabaseBenchmark create --DatabaseType=MongoDb --ConnectionString="mongodb://lo
 Supported values for `DatabaseType` parameter are:
 * `ClickHouse`
 * `CosmosDb` - SQL API only, connection string must contain a non-standard property specifying a database name to be used - `Database=database_name`.
+* `DynamoDB` - the connection string format is specific to the tool, an example can be found in the [Connection strings](#connection_strings) section.
 * `Elasticsearch`
 * `MySql` - any database engine compatible with MySQL: MySQL, MariaDB, SingleStore, etc.
 * `MonetDb`
@@ -231,7 +232,8 @@ Where each column definition has the following properties:
 * `Nullable` - specifies if the column is nullable.
 * `Queryable` - gives a hint if the column is going to participate in query conditions. Based on this information some table builders may generate more optimal definitions.
 * `DatabaseGenerated` - specifies if the column is auto-generated. Databases that don't support auto-generated columns will report a warning.
-* `PartitionKey` - specifies if the table should be partitioned by this column. Is currently supported for Cosmos DB only (if there is no partition key column in the table definition, a dummy constant-value partition key is created).
+* `PartitionKey` - specifies if the table should be partitioned by this column. Is currently supported for Cosmos DB and DynamoDB only (if there is no partition key column in the table definition, a dummy constant-value partition key is created). Other database plugins ignore this flag.
+* `SortKey` - specifies if the column should be assigned as the sort key for the table. Is supported for DynamoDB only. Other database plugins ignore this flag.
 
 ### Query definition<a name="query_definition"></a>
 
@@ -327,6 +329,12 @@ The list below shows only basic examples. For more advanced connection settings 
 
 `AccountEndpoint=myendpoint;AccountKey=myaccountkey;Database=mydb`
 
+**Dynamo DB**
+
+`AccessKeyId=myaccountkeyid;SecretAccessKey=myaccountsecret;RegionEndpoint=myregionendpointcode`
+
+All available region endpoint codes can be found in the [official DynamoDB documentation](https://docs.aws.amazon.com/general/latest/gr/rande.html).
+
 **Elasticsearch**
 
 `http://localhost:9200`
@@ -365,5 +373,5 @@ There are some limitations that are going to be addressed in the future:
 
 * Query definitions don't support joins. A workaround is using the raw queries approach.
 * Random inclusion of condition parts is currently not supported for raw queries.
-* Configurable partitioning is supported for Cosmos DB only.
-* Importing from Elasticsearch database doesn't support unlimited number of rows.
+* Configurable partitioning is supported for Cosmos DB and DynamoDB only.
+* Importing from Elasticsearch database doesn't support an unlimited number of rows.
