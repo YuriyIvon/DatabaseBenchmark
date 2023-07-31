@@ -29,6 +29,8 @@ namespace DatabaseBenchmark.Databases.DynamoDb
 
             Container.Register<AmazonDynamoDBClient>(createClient, Lifestyle);
             Container.Register<IDynamoDbInsertBuilder, DynamoDbInsertBuilder>(Lifestyle);
+            //No need to collect row count during an insert benchmark
+            Container.Register<IDynamoDbMetricsReporter, DynamoDbDummyMetricsReporter>(Lifestyle);
             Container.Register<IQueryExecutor, DynamoDbInsertExecutor>(Lifestyle);
         }
     }

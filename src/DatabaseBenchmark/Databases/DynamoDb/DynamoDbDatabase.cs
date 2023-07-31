@@ -58,6 +58,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
                 .Environment(_environment)
                 .Customize((container, lifestyle) =>
                 {
+                    container.Register<IDynamoDbMetricsReporter>(() => (IDynamoDbMetricsReporter)container.GetInstance<IDataMetricsProvider>());
                     container.Register<AmazonDynamoDBClient>(CreateClient, lifestyle);
                 })
                 .Build();

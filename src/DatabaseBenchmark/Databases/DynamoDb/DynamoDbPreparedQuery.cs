@@ -4,7 +4,7 @@ using DatabaseBenchmark.Databases.Common.Interfaces;
 
 namespace DatabaseBenchmark.Databases.DynamoDb
 {
-    public class DynamoDbPreparedQuery : IPreparedQuery
+    public sealed class DynamoDbPreparedQuery : IPreparedQuery
     {
         private readonly AmazonDynamoDBClient _client;
         private readonly ExecuteStatementRequest _request;
