@@ -13,17 +13,20 @@ namespace DatabaseBenchmark.Databases.DynamoDb
         private readonly AmazonDynamoDBClient _client;
         private readonly Table _table;
         private readonly IDynamoDbInsertBuilder _insertBuilder;
+        private readonly IDynamoDbMetricsReporter _metricsReporter;
         private readonly IExecutionEnvironment _environment;
 
         public DynamoDbInsertExecutor(
             AmazonDynamoDBClient client,
             Table table,
             IDynamoDbInsertBuilder insertBuilder,
+            IDynamoDbMetricsReporter metricsReporter,
             IExecutionEnvironment environment)
         {
             _client = client;
             _table = table;
             _insertBuilder = insertBuilder;
+            _metricsReporter = metricsReporter;
             _environment = environment;
         }
 
@@ -50,7 +53,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
             };
 
             return items.Any()
-                ? new DynamoDbPreparedInsert(_client, batchRequest)
+                ? new DynamoDbPreparedInsert(_client, batchRequest, _metricsReporter)
                 : null;
         }
 
