@@ -4,6 +4,7 @@ using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Text;
+using System.Text.Json;
 
 namespace DatabaseBenchmark.Databases.PostgreSql
 {
@@ -193,8 +194,6 @@ namespace DatabaseBenchmark.Databases.PostgreSql
         }
 
         private static string FormatValue(object value) =>
-            value is string s
-                ? $"\"{s.Replace("'", "''")}\""
-                : value.ToString();
+            JsonSerializer.Serialize(value).Replace("'", "''");
     }
 }
