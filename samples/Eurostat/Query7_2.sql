@@ -1,0 +1,1 @@
+SELECT DISTINCT PartnerCountry FROM bop_compositeidx

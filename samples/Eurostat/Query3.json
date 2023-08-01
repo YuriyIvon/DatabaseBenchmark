@@ -1,0 +1,26 @@
+{
+  "Columns": [ "Id", "Country", "PartnerCountry", "Indicator", "Frequency", "TimePeriod", "LastUpdate", "Flow", "Sector", "SectorPart", "Value" ],
+  "Condition": {
+    "Operator": "And",
+    "Conditions": [
+      {
+        "ColumnName": "PartnerCountry",
+        "Operator": "Equals",
+        "RandomizeValue": true
+      },
+      {
+        "ColumnName": "TimePeriod",
+        "Operator": "GreaterEquals",
+        "RandomizeValue": true
+      },
+      {
+        "ColumnName": "TimePeriod",
+        "Operator": "LowerEquals",
+        "Value": "2022-10"
+      }
+    ]
+  },
+  "Sort": [ { "ColumnName": "TimePeriod", "Direction": "Descending" } ],
+  "Skip": 0,
+  "Take": 100    
+}

@@ -1,0 +1,52 @@
+{
+  "Columns": [
+    {
+      "SourceColumnName": "geo",
+      "TableColumnName": "Country"
+    },
+    {
+      "SourceColumnName": "partner",
+      "TableColumnName": "PartnerCountry"
+    },
+    {
+      "SourceColumnName": "bop_item",
+      "TableColumnName": "Indicator"
+    },
+    {
+      "SourceColumnName": "freq",
+      "TableColumnName": "Frequency"
+    },
+    {
+      "SourceColumnName": "currency",
+      "TableColumnName": "Currency"
+    },
+    {
+      "SourceColumnName": "sector10",
+      "TableColumnName": "Sector"
+    },
+    {
+      "SourceColumnName": "sectpart",
+      "TableColumnName": "SectorPart"
+    },
+    {
+      "SourceColumnName": "stk_flow",
+      "TableColumnName": "Flow"
+    },
+    {
+      "SourceColumnName": "TIME_PERIOD",
+      "TableColumnName": "TimePeriod"
+    },
+    {
+      "SourceColumnName": "LAST UPDATE",
+      "TableColumnName": "LastUpdate"
+    },
+    {
+      "SourceColumnName": "OBS_VALUE",
+      "TableColumnName": "Value"
+    },
+    {
+      "SourceColumnName": "OBS_FLAG",
+      "TableColumnName": "ValueFlag"
+    }
+  ]
+}

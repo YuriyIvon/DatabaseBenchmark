@@ -1,0 +1,23 @@
+{
+  "Columns": [ "Id", "Country", "PartnerCountry", "Indicator", "Frequency", "TimePeriod", "LastUpdate", "Flow", "Sector", "SectorPart", "Value" ],
+  "Condition": {
+    "Operator": "And",
+    "Conditions": [
+      {
+        "ColumnName": "PartnerCountry",
+        "Operator": "Equals",
+        "RandomizeValue": true
+      },
+      {
+        "ColumnName": "Indicator",
+        "Operator": "Equals",
+        "RandomizeValue": true
+      },
+      {
+        "ColumnName": "TimePeriod",
+        "Operator": "Equals",
+        "RandomizeValue": true
+      }
+    ]
+  }
+}

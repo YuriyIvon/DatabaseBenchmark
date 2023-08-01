@@ -1,0 +1,7 @@
+{
+  "MongoDbConnectionString": "",
+  "PostgreSqlConnectionString": "",
+  "WarmupQueryCount": 10,
+  "QueryCount": 100,
+  "QueryParallelism": 1
+}

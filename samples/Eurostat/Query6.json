@@ -1,0 +1,25 @@
+{
+  "Columns": [ "PartnerCountry" ],
+  "Condition": {
+    "Operator": "And",
+    "Conditions": [
+      {
+        "ColumnName": "TimePeriod",
+        "Operator": "GreaterEquals",
+        "RandomizeValue": true
+      },
+      {
+        "ColumnName": "TimePeriod",
+        "Operator": "LowerEquals",
+        "Value": "2022-10"
+      }
+    ]
+  },
+  "Aggregate": {
+    "GroupColumnNames": ["PartnerCountry"],
+    "ResultColumns": [
+      { "SourceColumnName": "Value", "Function": "Max", "ResultColumnName": "MaxValue" }
+    ]
+  },
+  "Sort": [ { "ColumnName": "PartnerCountry", "Direction": "Ascending" } ]
+}

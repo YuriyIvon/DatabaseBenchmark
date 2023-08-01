@@ -1,0 +1,9 @@
+{
+  "MongoDbConnectionString": "",
+  "PostgreSqlConnectionString": "",
+  "TableFilePath": "Table.json",
+  "QueryFilePath": "Query5.json",
+  "WarmupQueryCount": 100,
+  "QueryCount": 1000,
+  "QueryParallelism": 1
+}

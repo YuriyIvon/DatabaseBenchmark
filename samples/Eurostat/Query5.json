@@ -1,0 +1,6 @@
+{
+  "Columns": [ "Id", "Country", "PartnerCountry", "Indicator", "Frequency", "TimePeriod", "LastUpdate", "Flow", "Sector", "SectorPart", "Value" ],
+  "Sort": [ { "ColumnName": "TimePeriod", "Direction": "Descending" } ],
+  "Skip": 0,
+  "Take": 100    
+}

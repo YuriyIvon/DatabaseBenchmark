@@ -1,0 +1,1 @@
+SELECT DISTINCT attributes->>'PartnerCountry' FROM bop_jsonb_compositeidx

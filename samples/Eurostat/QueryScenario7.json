@@ -1,0 +1,43 @@
+{
+  "Name": "Eurostat scenario",
+  "Items": [
+    {
+      "BenchmarkName": "Mongo DB Composite Index",
+      "DatabaseType": "MongoDb",
+      "ConnectionString": "${MongoDbConnectionString}",
+      "TableName": "BOP_CompositeIdx",
+      "QueryFilePath": "Query7_1.json"
+    },
+    {
+      "BenchmarkName": "Mongo DB Separate Indexes",
+      "DatabaseType": "MongoDb",
+      "ConnectionString": "${MongoDbConnectionString}",
+      "TableName": "BOP_SeparateIdx",
+      "QueryFilePath": "Query7_1.json"
+    },
+    {
+      "BenchmarkName": "PostgreSQL Composite Index",
+      "DatabaseType": "Postgres",
+      "ConnectionString": "${PostgreSqlConnectionString}",
+      "QueryFilePath": "Query7_2.sql"
+    },
+    {
+      "BenchmarkName": "PostgreSQL Separate Indexes",
+      "DatabaseType": "Postgres",
+      "ConnectionString": "${PostgreSqlConnectionString}",
+      "QueryFilePath": "Query7_3.sql"
+    },
+    {
+      "BenchmarkName": "PostgreSQL JSONB Composite Index",
+      "DatabaseType": "Postgres",
+      "ConnectionString": "${PostgreSqlConnectionString}",
+      "QueryFilePath": "Query7_4.sql"
+    },
+    {
+      "BenchmarkName": "PostgreSQL JSONB GIN",
+      "DatabaseType": "Postgres",
+      "ConnectionString": "${PostgreSqlConnectionString}",
+      "QueryFilePath": "Query7_5.sql"
+    }
+  ]
+}

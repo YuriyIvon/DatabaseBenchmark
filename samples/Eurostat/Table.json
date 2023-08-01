@@ -1,0 +1,18 @@
+{
+  "Name": "BOP",
+  "Columns": [
+    { "Name": "Id", "Type": "Integer", "Nullable": false, "DatabaseGenerated": true, "Queryable": false },
+    { "Name": "Country", "Type": "String", "Queryable": true, "PartitionKey": true },
+    { "Name": "PartnerCountry", "Type": "String", "Queryable": true },
+    { "Name": "Indicator", "Type": "String", "Queryable": true },
+    { "Name": "Frequency", "Type": "String", "Queryable": true },
+    { "Name": "Currency", "Type": "String", "Queryable": true },
+    { "Name": "Sector", "Type": "String", "Queryable": true },
+    { "Name": "SectorPart", "Type": "String", "Queryable": true },
+    { "Name": "Flow", "Type": "String", "Queryable": true },
+    { "Name": "TimePeriod", "Type": "String", "Queryable": true },
+    { "Name": "LastUpdate", "Type": "DateTime", "Queryable": true },
+    { "Name": "ValueFlag", "Type": "String", "Queryable": true },
+    { "Name": "Value", "Type": "Double", "Queryable": false }
+  ]
+}
