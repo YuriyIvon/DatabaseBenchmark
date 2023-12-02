@@ -22,6 +22,9 @@ namespace DatabaseBenchmark.Commands.Options
 
         public string MappingFilePath { get; set; }
 
+        [Option("A database script to be executed after the source data has been imported")]
+        public string PostScriptFilePath { get; set; }
+
         public bool TraceQueries { get; set; } = false;
 
         [Option("Number of records in a batch inserted into the database during import (each database type has its own default)")]

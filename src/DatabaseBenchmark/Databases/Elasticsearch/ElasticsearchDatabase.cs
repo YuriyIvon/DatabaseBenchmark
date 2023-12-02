@@ -71,6 +71,8 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
             new ElasticsearchInsertExecutorFactory(CreateClient, table, source, batchSize);
 
+        public void ExecuteScript(string script) => throw new InputArgumentException("Custom scripts are not supported for Elasticsearch");
+
         private ElasticClient CreateClient()
         {
             var connectionSettings = new ConnectionSettings(new Uri(_connectionString))

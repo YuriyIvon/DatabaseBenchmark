@@ -40,8 +40,13 @@ namespace DatabaseBenchmark.Commands
                 : baseDataSource;
 
             using var importer = database.CreateDataImporter(table, dataSource, options.BatchSize);
-
             var result = importer.Import();
+
+            if (!string.IsNullOrEmpty(options.PostScriptFilePath))
+            {
+                var script = File.ReadAllText(options.PostScriptFilePath);
+                database.ExecuteScript(script);
+            }
 
             Console.WriteLine($"Imported {result.Count} rows in {result.Duration / 1000.0} sec");
 

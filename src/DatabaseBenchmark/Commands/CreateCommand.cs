@@ -32,6 +32,12 @@ namespace DatabaseBenchmark.Commands
             }
 
             database.CreateTable(table, options.DropExisting);
+
+            if (!string.IsNullOrEmpty(options.PostScriptFilePath))
+            {
+                var script = File.ReadAllText(options.PostScriptFilePath);
+                database.ExecuteScript(script);
+            }
         }
     }
 }

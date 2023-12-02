@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Core.Interfaces;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.MongoDb.Interfaces;
@@ -74,6 +75,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
             new MongoDbInsertExecutorFactory(_connectionString, table, source, batchSize, _environment, _optionsProvider);
+
+        public void ExecuteScript(string script) => throw new InputArgumentException("Custom scripts are not supported for MongoDB");
 
         private IMongoDatabase GetDatabase()
         {

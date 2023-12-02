@@ -14,5 +14,7 @@ namespace DatabaseBenchmark.Databases.Common.Interfaces
         IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query);
 
         IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource dataSource, int batchSize);
+
+        void ExecuteScript(string script);
     }
 }

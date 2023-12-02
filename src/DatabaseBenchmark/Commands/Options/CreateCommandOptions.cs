@@ -15,6 +15,9 @@ namespace DatabaseBenchmark.Commands.Options
 
         public string TableName { get; set; }
 
+        [Option("A database script to be executed after the table has been created")]
+        public string PostScriptFilePath { get; set; }
+
         public bool TraceQueries { get; set; } = false;
 
         [Option("Drop table if already exists")]

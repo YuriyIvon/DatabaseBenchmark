@@ -52,5 +52,11 @@ namespace DatabaseBenchmark.Databases.SqlServer
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
             new SqlInsertExecutorFactory<SqlConnection>(_connectionString, table, source, batchSize, _environment)
                 .Customize<ISqlParameterAdapter, SqlServerParameterAdapter>();
+
+        public void ExecuteScript(string script)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            connection.ExecuteScript(script);
+        }
     }
 }

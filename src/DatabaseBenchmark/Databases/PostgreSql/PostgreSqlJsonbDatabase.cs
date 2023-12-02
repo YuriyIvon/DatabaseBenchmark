@@ -67,5 +67,11 @@ namespace DatabaseBenchmark.Databases.PostgreSql
              new SqlInsertExecutorFactory<NpgsqlConnection>(_connectionString, table, source, batchSize, _environment)
                 .Customize<ISqlQueryBuilder, PostgreSqlJsonbInsertBuilder>()
                 .Customize<ISqlParameterAdapter, PostgreSqlJsonbParameterAdapter>();
+
+        public void ExecuteScript(string script)
+        {
+            using var connection = new NpgsqlConnection(_connectionString);
+            connection.ExecuteScript(script);
+        }
     }
 }

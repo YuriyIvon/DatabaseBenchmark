@@ -71,5 +71,11 @@ namespace DatabaseBenchmark.Databases.MySql
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
             new SqlInsertExecutorFactory<MySqlConnection>(_connectionString, table, source, batchSize, _environment)
                 .Customize<ISqlParameterAdapter, MySqlParameterAdapter>();
+
+        public void ExecuteScript(string script)
+        {
+            using var connection = new MySqlConnection(_connectionString);
+            connection.ExecuteScript(script);
+        }
     }
 }

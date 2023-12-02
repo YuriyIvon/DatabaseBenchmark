@@ -68,5 +68,11 @@ namespace DatabaseBenchmark.Databases.Oracle
                 .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
                 .Customize<ISqlQueryBuilder, OracleInsertBuilder>()
                 .Customize<ISqlParameterAdapter, OracleParameterAdapter>();
+
+        public void ExecuteScript(string script)
+        {
+            using var connection = new OracleConnection(_connectionString);
+            connection.ExecuteScript(script);
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Core.Interfaces;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.CosmosDb.Interfaces;
@@ -49,6 +50,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 }
                 catch
                 {
+                    //TODO: put a specific exception into catch statement
                 }
             }
 
@@ -81,6 +83,8 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
             new CosmosDbInsertExecutorFactory(_connectionString, _databaseName, table, source, batchSize, _environment);
+
+        public void ExecuteScript(string script) => throw new InputArgumentException("Custom scripts are not supported for CosmosDB");
 
         private static (string accountConnectionString, string databaseName) ParseConnectionString(string fullConnectionString)
         {

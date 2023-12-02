@@ -66,5 +66,11 @@ namespace DatabaseBenchmark.Databases.MonetDb
             new SqlInsertExecutorFactory<MonetDbConnection>(_connectionString, table, source, batchSize, _environment)
                 .Customize<ISqlParametersBuilder, SqlNoParametersBuilder>()
                 .Customize<ISqlParameterAdapter, MonetDbParameterAdapter>();
+
+        public void ExecuteScript(string script)
+        {
+            using var connection = new MonetDbConnection(_connectionString);
+            connection.ExecuteScript(script);
+        }
     }
 }

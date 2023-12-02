@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Data.SqlClient;
 
 namespace DatabaseBenchmark.Databases.Sql
 {
@@ -20,6 +21,18 @@ namespace DatabaseBenchmark.Databases.Sql
                     connection.Open();
                 }
             }
+        }
+
+        public static void ExecuteScript(this IDbConnection connection, string script)
+        {
+            if (connection.State != ConnectionState.Open)
+            {
+                connection.Open();
+            }
+
+            var command = connection.CreateCommand();
+            command.CommandText = script;
+            command.ExecuteNonQuery();
         }
     }
 }

@@ -76,5 +76,11 @@ namespace DatabaseBenchmark.Databases.Snowflake
             new SqlInsertExecutorFactory<SnowflakeDbConnection>(_connectionString, table, source, batchSize, _environment)
                 .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
                 .Customize<ISqlParameterAdapter, SnowflakeParameterAdapter>();
+
+        public void ExecuteScript(string script)
+        {
+            using var connection = new SnowflakeDbConnection(_connectionString);
+            connection.ExecuteScript(script);
+        }
     }
 }

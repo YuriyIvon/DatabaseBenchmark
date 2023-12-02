@@ -72,6 +72,8 @@ namespace DatabaseBenchmark.Databases.DynamoDb
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource dataSource, int batchSize) =>
         new DynamoDbInsertExecutorFactory(CreateClient, table, dataSource, batchSize, _environment);
 
+        public void ExecuteScript(string script) => throw new InputArgumentException("Custom scripts are not supported for DynamoDB");
+
         private AmazonDynamoDBClient CreateClient()
         {
             var connectionParameters = ConnectionStringParser.Parse(
