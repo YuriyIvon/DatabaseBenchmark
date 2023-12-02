@@ -35,6 +35,7 @@ if (args.Length > 0)
     catch (Exception ex)
     {
         Console.Error.WriteLine(ex);
+        Environment.ExitCode = -1;
     }
 }
 else
