@@ -3,6 +3,8 @@ using DatabaseBenchmark.Common;
 
 if (args.Length > 0)
 {
+    Environment.ExitCode = -1;
+
     try
     {
         var commandName = args.First();
@@ -11,6 +13,8 @@ if (args.Length > 0)
         var command = commandFactory.Create(commandName);
 
         command.Execute();
+
+        Environment.ExitCode = 0;
     }
     catch (InputArgumentException ex)
     {
@@ -35,7 +39,6 @@ if (args.Length > 0)
     catch (Exception ex)
     {
         Console.Error.WriteLine(ex);
-        Environment.ExitCode = -1;
     }
 }
 else
