@@ -23,6 +23,8 @@ namespace DatabaseBenchmark.Commands.Options
 
         public string DataSourceFilePath { get; set; }
 
+        public int DataSourceMaxRows { get; set; } = 0;
+
         public string MappingFilePath { get; set; }
 
         public string BenchmarkName { get; set; }

@@ -1,4 +1,4 @@
-﻿namespace DatabaseBenchmark.DataSources.Mapping
+﻿namespace DatabaseBenchmark.DataSources.Decorators
 {
     public class ColumnMappingCollection
     {

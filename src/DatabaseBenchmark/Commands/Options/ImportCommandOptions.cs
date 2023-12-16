@@ -20,6 +20,8 @@ namespace DatabaseBenchmark.Commands.Options
 
         public string DataSourceFilePath { get; set; }
 
+        public int DataSourceMaxRows { get; set; } = 0;
+
         public string MappingFilePath { get; set; }
 
         [Option("A database script to be executed after the source data has been imported")]

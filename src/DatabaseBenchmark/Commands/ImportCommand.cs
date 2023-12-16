@@ -4,7 +4,7 @@ using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
 using DatabaseBenchmark.DataSources;
-using DatabaseBenchmark.DataSources.Mapping;
+using DatabaseBenchmark.DataSources.Decorators;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Utils;
 
@@ -34,10 +34,20 @@ namespace DatabaseBenchmark.Commands
             }
 
             var dataSourceFactory = new DataSourceFactory(databaseFactory, _optionsProvider);
-            var baseDataSource = dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath);
-            using var dataSource = !string.IsNullOrEmpty(options.MappingFilePath)
-                ? new MappingDataSource(baseDataSource, JsonUtils.DeserializeFile<ColumnMappingCollection>(options.MappingFilePath))
-                : baseDataSource;
+            var dataSource = dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath);
+
+            if (options.DataSourceMaxRows > 0)
+            {
+                dataSource = new DataSourceMaxRowsDecorator(dataSource, options.DataSourceMaxRows);
+            }
+
+            if (!string.IsNullOrEmpty(options.MappingFilePath))
+            {
+                dataSource = new DataSourceMappingDecorator(dataSource, JsonUtils.DeserializeFile<ColumnMappingCollection>(options.MappingFilePath));
+            }
+
+            //Is needed to guarantee the disposal of the data source
+            using var dataSourceHolder = dataSource;
 
             using var importer = database.CreateDataImporter(table, dataSource, options.BatchSize);
             var result = importer.Import();
