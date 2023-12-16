@@ -20,7 +20,10 @@ namespace DatabaseBenchmark.Tests.DataSources
             int count = 0;
             for (; count < maxCount && decorator.Read(); count++) { }
 
+            decorator.Dispose();
+
             Assert.Equal(referenceCount, count);
+            dataSource.Received().Dispose();
         }
     }
 }

@@ -26,8 +26,10 @@ namespace DatabaseBenchmark.Tests.DataSources
 
             decorator.Read();
             decorator.GetValue(typeof(string), "Table");
+            decorator.Dispose();
 
             dataSource.Received().GetValue(typeof(string), "Source");
+            dataSource.Received().Dispose();
         }
     }
 }
