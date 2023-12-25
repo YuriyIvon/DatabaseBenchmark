@@ -1,6 +1,7 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using Nest;
 
@@ -11,18 +12,18 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         private readonly Table _table;
         private readonly Query _query;
         private readonly IRandomValueProvider _randomValueProvider;
-        private readonly IRandomGenerator _randomGenerator;
+        private readonly IRandomPrimitives _randomPrimitives;
 
         public ElasticsearchQueryBuilder(
             Table table,
             Query query,
             IRandomValueProvider randomValueProvider,
-            IRandomGenerator randomGenerator)
+            IRandomPrimitives randomPrimitives)
         {
             _table = table;
             _query = query;
             _randomValueProvider = randomValueProvider;
-            _randomGenerator = randomGenerator;
+            _randomPrimitives = randomPrimitives;
         }
 
         public SearchRequest Build()
@@ -74,7 +75,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
         private QueryContainer BuildCondition(IQueryCondition predicate)
         {
-            if (predicate.RandomizeInclusion && _randomGenerator.GetRandomBoolean())
+            if (predicate.RandomizeInclusion && _randomPrimitives.GetRandomBoolean())
             {
                 return null;
             }

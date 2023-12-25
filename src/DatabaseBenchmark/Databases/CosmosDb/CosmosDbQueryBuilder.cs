@@ -2,6 +2,7 @@
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Text;
 
@@ -14,8 +15,8 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             Query query,
             ISqlParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
-            IRandomGenerator randomGenerator) 
-            : base(table, query, parametersBuilder, randomValueProvider, randomGenerator)
+            IRandomPrimitives randomPrimitives) 
+            : base(table, query, parametersBuilder, randomValueProvider, randomPrimitives)
         {
         }
 

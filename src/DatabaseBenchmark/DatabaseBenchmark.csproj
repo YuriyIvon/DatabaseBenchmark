@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
@@ -18,18 +18,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.203.12" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.300.25" />
+    <PackageReference Include="Bogus" Version="35.0.1" />
     <PackageReference Include="CsvHelper" Version="30.0.1" />
-    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.36.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.37.0" />
     <PackageReference Include="MonetDB" Version="2.1.2" />
-    <PackageReference Include="MongoDB.Driver" Version="2.22.0" />
-    <PackageReference Include="MySqlConnector" Version="2.2.7" />
+    <PackageReference Include="MongoDB.Driver" Version="2.23.1" />
+    <PackageReference Include="MySqlConnector" Version="2.3.3" />
     <PackageReference Include="NEST" Version="7.17.5" />
-    <PackageReference Include="Npgsql" Version="7.0.6" />
+    <PackageReference Include="Npgsql" Version="8.0.1" />
     <PackageReference Include="Octonica.ClickHouseClient" Version="2.2.11" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.120" />
-    <PackageReference Include="SimpleInjector" Version="5.4.1" />
-    <PackageReference Include="Snowflake.Data" Version="2.1.2" />
+    <PackageReference Include="SimpleInjector" Version="5.4.3" />
+    <PackageReference Include="Snowflake.Data" Version="2.1.5" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
   </ItemGroup>
 

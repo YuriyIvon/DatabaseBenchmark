@@ -16,17 +16,19 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 
         private const string DatabaseConnectionStringProperty = "Database";
 
-        private readonly string _connectionString;
-        private readonly string _databaseName;
         private readonly IExecutionEnvironment _environment;
         private readonly IOptionsProvider _optionsProvider;
+
+        public string ConnectionString { get; }
+
+        public string DatabaseName { get; }
 
         public CosmosDbDatabase(
             string connectionString,
             IExecutionEnvironment environment,
             IOptionsProvider optionsProvider)
         {
-            (_connectionString, _databaseName) = ParseConnectionString(connectionString);
+            (ConnectionString, DatabaseName) = ParseConnectionString(connectionString);
             _environment = environment;
             _optionsProvider = optionsProvider;
         }
@@ -38,8 +40,8 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 _environment.WriteLine("WARNING: Cosmos DB doesn't support database-generated columns");
             }
 
-            using var client = new CosmosClient(_connectionString);
-            var database = client.GetDatabase(_databaseName);
+            using var client = new CosmosClient(ConnectionString);
+            var database = client.GetDatabase(DatabaseName);
 
             if (dropExisting)
             {
@@ -69,20 +71,20 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 .Environment(_environment)
                 .Customize((container, lifestyle) =>
                 {
-                    container.Register<CosmosClient>(() => new CosmosClient(_connectionString), lifestyle);
-                    container.Register<Database>(() => container.GetInstance<CosmosClient>().GetDatabase(_databaseName), lifestyle);
+                    container.Register<CosmosClient>(() => new CosmosClient(ConnectionString), lifestyle);
+                    container.Register<Database>(() => container.GetInstance<CosmosClient>().GetDatabase(DatabaseName), lifestyle);
                     container.Register<Container>(() => container.GetInstance<Database>().GetContainer(table.Name), lifestyle);
                 })
                 .Build();
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new CosmosDbQueryExecutorFactory(_connectionString, _databaseName, table, query, _environment, _optionsProvider);
+            new CosmosDbQueryExecutorFactory(this, DatabaseName, table, query, _environment, _optionsProvider);
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new CosmosDbRawQueryExecutorFactory(_connectionString, _databaseName, query, _environment, _optionsProvider);
+            new CosmosDbRawQueryExecutorFactory(this, DatabaseName, query, _environment, _optionsProvider);
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
-            new CosmosDbInsertExecutorFactory(_connectionString, _databaseName, table, source, batchSize, _environment);
+            new CosmosDbInsertExecutorFactory(this, DatabaseName, table, source, batchSize, _environment);
 
         public void ExecuteScript(string script) => throw new InputArgumentException("Custom scripts are not supported for CosmosDB");
 

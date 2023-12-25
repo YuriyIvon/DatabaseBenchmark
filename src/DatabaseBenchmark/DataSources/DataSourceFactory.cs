@@ -3,6 +3,7 @@ using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.DataSources.Csv;
 using DatabaseBenchmark.DataSources.Database;
+using DatabaseBenchmark.DataSources.Generator;
 using DatabaseBenchmark.DataSources.Interfaces;
 
 namespace DatabaseBenchmark.DataSources
@@ -13,12 +14,13 @@ namespace DatabaseBenchmark.DataSources
         public IEnumerable<string> Options => _factories.Keys;
 
         //TODO: find a way to avoid the direct database project dependency
-        public DataSourceFactory(IDatabaseFactory databaseFactory, IOptionsProvider optionsProvider)
+        public DataSourceFactory(IDatabase currentDatabase, IDatabaseFactory databaseFactory, IOptionsProvider optionsProvider)
         {
             _factories = new()
             {
                 ["Csv"] = filePath => new CsvDataSource(filePath, optionsProvider),
-                ["Database"] = filePath => new DatabaseDataSource(filePath, databaseFactory)
+                ["Database"] = filePath => new DatabaseDataSource(filePath, databaseFactory),
+                ["Generator"] = filePath => new GeneratorDataSource(filePath, currentDatabase)
             };
         }
 

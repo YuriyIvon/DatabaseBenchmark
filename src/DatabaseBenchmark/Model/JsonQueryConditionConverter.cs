@@ -9,21 +9,16 @@ namespace DatabaseBenchmark.Model
         {
             if (reader.TokenType == JsonTokenType.StartObject)
             {
-                var predicateJson = JsonDocument.ParseValue(ref reader);
-                var operatorString = predicateJson.RootElement.GetProperty("Operator").GetString();
+                using var predicateJson = JsonDocument.ParseValue(ref reader);
+
+                var operatorString = predicateJson.RootElement.GetProperty(nameof(QueryPrimitiveCondition.Operator)).GetString();
                 if (Enum.IsDefined(typeof(QueryPrimitiveOperator), operatorString))
                 {
-                    return (QueryPrimitiveCondition)JsonSerializer.Deserialize(
-                        predicateJson.RootElement.ToString(),
-                        typeof(QueryPrimitiveCondition),
-                        options);
+                    return predicateJson.RootElement.Deserialize<QueryPrimitiveCondition>(options);
                 }
                 else if (Enum.IsDefined(typeof(QueryGroupOperator), operatorString))
                 {
-                    return (QueryGroupCondition)JsonSerializer.Deserialize(
-                        predicateJson.RootElement.ToString(),
-                        typeof(QueryGroupCondition),
-                        options);
+                    return predicateJson.RootElement.Deserialize<QueryGroupCondition>(options);
                 }
                 else
                 {

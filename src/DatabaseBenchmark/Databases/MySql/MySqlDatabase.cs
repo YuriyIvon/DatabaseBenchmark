@@ -13,23 +13,24 @@ namespace DatabaseBenchmark.Databases.MySql
     {
         private const int DefaultImportBatchSize = 1000;
 
-        private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
         private readonly IOptionsProvider _optionsProvider;
+
+        public string ConnectionString { get; }
 
         public MySqlDatabase(
             string connectionString,
             IExecutionEnvironment environment,
             IOptionsProvider optionsProvider)
         {
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
             _environment = environment;
             _optionsProvider = optionsProvider;
         }
 
         public void CreateTable(Table table, bool dropExisting)
         {
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = new MySqlConnection(ConnectionString);
             connection.Open();
 
             if (dropExisting)
@@ -48,7 +49,7 @@ namespace DatabaseBenchmark.Databases.MySql
 
         public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
             new SqlDataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
-                .Connection<MySqlConnection>(_connectionString)
+                .Connection<MySqlConnection>(ConnectionString)
                 .ParametersBuilder<SqlNoParametersBuilder>()
                 .ParameterAdapter<MySqlParameterAdapter>()
                 .TransactionProvider<SqlTransactionProvider>()
@@ -60,21 +61,21 @@ namespace DatabaseBenchmark.Databases.MySql
                 .Build();
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new SqlQueryExecutorFactory<MySqlConnection>(_connectionString, table, query, _environment)
+            new SqlQueryExecutorFactory<MySqlConnection>(this, table, query, _environment)
                 .Customize<ISqlQueryBuilder, MySqlQueryBuilder>()
                 .Customize<ISqlParameterAdapter, MySqlParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new SqlRawQueryExecutorFactory<MySqlConnection>(_connectionString, query, _environment)
+            new SqlRawQueryExecutorFactory<MySqlConnection>(this, query, _environment)
                 .Customize<ISqlParameterAdapter, MySqlParameterAdapter>();
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
-            new SqlInsertExecutorFactory<MySqlConnection>(_connectionString, table, source, batchSize, _environment)
+            new SqlInsertExecutorFactory<MySqlConnection>(this, table, source, batchSize, _environment)
                 .Customize<ISqlParameterAdapter, MySqlParameterAdapter>();
 
         public void ExecuteScript(string script)
         {
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = new MySqlConnection(ConnectionString);
             connection.ExecuteScript(script);
         }
     }

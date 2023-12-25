@@ -15,12 +15,13 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
     {
         private const int DefaultImportBatchSize = 500;
 
-        private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
+
+        public string ConnectionString { get; }
 
         public ElasticsearchDatabase(string connectionString, IExecutionEnvironment environment)
         {
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
             _environment = environment;
         }
 
@@ -63,10 +64,10 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new ElasticsearchQueryExecutorFactory(CreateClient, NormalizeNames(table), query);
+            new ElasticsearchQueryExecutorFactory(this, CreateClient, NormalizeNames(table), query);
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new ElasticsearchRawQueryExecutorFactory(CreateClient, query);
+            new ElasticsearchRawQueryExecutorFactory(this, CreateClient, query);
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
             new ElasticsearchInsertExecutorFactory(CreateClient, table, source, batchSize);
@@ -75,7 +76,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
         private ElasticClient CreateClient()
         {
-            var connectionSettings = new ConnectionSettings(new Uri(_connectionString))
+            var connectionSettings = new ConnectionSettings(new Uri(ConnectionString))
                 .ThrowExceptions();
 
             if (_environment.TraceQueries || _environment.TraceResults)

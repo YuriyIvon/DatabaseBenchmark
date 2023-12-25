@@ -3,6 +3,8 @@ using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.MongoDb.Interfaces;
+using DatabaseBenchmark.Generators;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -12,25 +14,27 @@ namespace DatabaseBenchmark.Databases.MongoDb
     public class MongoDbQueryExecutorFactory : QueryExecutorFactoryBase
     {
         public MongoDbQueryExecutorFactory(
-            string connectionString,
+            IDatabase database,
             Table table,
             Query query,
             IExecutionEnvironment environment,
             IOptionsProvider optionsProvider)
         {
+            Container.RegisterInstance<IDatabase>(database);
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<Query>(query);
             Container.RegisterInstance<IExecutionEnvironment>(environment);
             Container.RegisterInstance<IOptionsProvider>(optionsProvider);
             Container.RegisterSingleton<IColumnPropertiesProvider, TableColumnPropertiesProvider>();
-            Container.RegisterSingleton<IRandomGenerator, RandomGenerator>();
+            Container.RegisterSingleton<IGeneratorFactory, GeneratorFactory>();
+            Container.RegisterSingleton<IRandomPrimitives, RandomPrimitives>();
             Container.RegisterSingleton<ICache, MemoryCache>();
             Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);
 
             Container.Register<IMongoDatabase>(() =>
                 {
-                    var client = new MongoClient(connectionString);
-                    var databaseName = MongoUrl.Create(connectionString).DatabaseName;
+                    var client = new MongoClient(database.ConnectionString);
+                    var databaseName = MongoUrl.Create(database.ConnectionString).DatabaseName;
                     return client.GetDatabase(databaseName);
                 }, 
                 Lifestyle);

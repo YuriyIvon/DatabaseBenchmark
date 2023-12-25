@@ -3,6 +3,8 @@ using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
+using DatabaseBenchmark.Generators;
+using DatabaseBenchmark.Generators.Interfaces;
 using Elasticsearch.Net;
 using Nest;
 using RawQuery = DatabaseBenchmark.Model.RawQuery;
@@ -12,12 +14,15 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
     public class ElasticsearchRawQueryExecutorFactory : QueryExecutorFactoryBase
     {
         public ElasticsearchRawQueryExecutorFactory(
+            IDatabase database,
             Func<ElasticClient> createClient,
             RawQuery query)
         {
+            Container.RegisterInstance<IDatabase>(database);
             Container.RegisterInstance<RawQuery>(query);
             Container.RegisterSingleton<IColumnPropertiesProvider, RawQueryColumnPropertiesProvider>();
-            Container.RegisterSingleton<IRandomGenerator, RandomGenerator>();
+            Container.RegisterSingleton<IGeneratorFactory, GeneratorFactory>();
+            Container.RegisterSingleton<IRandomPrimitives, RandomPrimitives>();
             Container.RegisterSingleton<ICache, MemoryCache>();
             Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);
 

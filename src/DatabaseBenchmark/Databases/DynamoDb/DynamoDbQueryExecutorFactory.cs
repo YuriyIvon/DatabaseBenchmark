@@ -5,6 +5,8 @@ using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
+using DatabaseBenchmark.Generators;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using SimpleInjector;
 
@@ -13,16 +15,19 @@ namespace DatabaseBenchmark.Databases.DynamoDb
     public class DynamoDbQueryExecutorFactory : QueryExecutorFactoryBase
     {
         public DynamoDbQueryExecutorFactory(
-           Func<AmazonDynamoDBClient> createClient,
-           Table table,
-           Query query,
-           IExecutionEnvironment environment)
+            IDatabase database,
+            Func<AmazonDynamoDBClient> createClient,
+            Table table,
+            Query query,
+            IExecutionEnvironment environment)
         {
+            Container.RegisterInstance<IDatabase>(database);
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<Query>(query);
             Container.RegisterInstance<IExecutionEnvironment>(environment);
             Container.RegisterSingleton<IColumnPropertiesProvider, TableColumnPropertiesProvider>();
-            Container.RegisterSingleton<IRandomGenerator, RandomGenerator>();
+            Container.RegisterSingleton<IGeneratorFactory, GeneratorFactory>();
+            Container.RegisterSingleton<IRandomPrimitives, RandomPrimitives>();
             Container.RegisterSingleton<ICache, MemoryCache>();
             Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);
 

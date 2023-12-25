@@ -13,18 +13,19 @@ namespace DatabaseBenchmark.Databases.MonetDb
     {
         private const int DefaultImportBatchSize = 100;
 
-        private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
+
+        public string ConnectionString { get; }
 
         public MonetDbDatabase(string connectionString, IExecutionEnvironment environment)
         {
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
             _environment = environment;
         }
 
         public void CreateTable(Table table, bool dropExisting)
         {
-            using var connection = new MonetDbConnection(_connectionString);
+            using var connection = new MonetDbConnection(ConnectionString);
             connection.Open();
 
             if (dropExisting)
@@ -43,7 +44,7 @@ namespace DatabaseBenchmark.Databases.MonetDb
 
         public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
             new SqlDataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
-                .Connection<MonetDbConnection>(_connectionString)
+                .Connection<MonetDbConnection>(ConnectionString)
                 .ParametersBuilder<SqlNoParametersBuilder>()
                 .ParameterAdapter<MonetDbParameterAdapter>()
                 .TransactionProvider<MonetDbTransactionProvider>()
@@ -54,22 +55,22 @@ namespace DatabaseBenchmark.Databases.MonetDb
                 .Build();
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new SqlQueryExecutorFactory<MonetDbConnection>(_connectionString, table, query, _environment)
+            new SqlQueryExecutorFactory<MonetDbConnection>(this, table, query, _environment)
                 .Customize<ISqlQueryBuilder, MonetDbQueryBuilder>()
                 .Customize<ISqlParameterAdapter, MonetDbParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new SqlRawQueryExecutorFactory<MonetDbConnection>(_connectionString, query, _environment)
+            new SqlRawQueryExecutorFactory<MonetDbConnection>(this, query, _environment)
                 .Customize<ISqlParameterAdapter, MonetDbParameterAdapter>();
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
-            new SqlInsertExecutorFactory<MonetDbConnection>(_connectionString, table, source, batchSize, _environment)
+            new SqlInsertExecutorFactory<MonetDbConnection>(this, table, source, batchSize, _environment)
                 .Customize<ISqlParametersBuilder, SqlNoParametersBuilder>()
                 .Customize<ISqlParameterAdapter, MonetDbParameterAdapter>();
 
         public void ExecuteScript(string script)
         {
-            using var connection = new MonetDbConnection(_connectionString);
+            using var connection = new MonetDbConnection(ConnectionString);
             connection.ExecuteScript(script);
         }
     }

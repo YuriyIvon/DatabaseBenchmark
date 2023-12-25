@@ -10,23 +10,24 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 {
     public class PostgreSqlJsonbDatabase : IDatabase
     {
-        private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
         private readonly IOptionsProvider _optionsProvider;
+
+        public string ConnectionString { get; }
 
         public PostgreSqlJsonbDatabase(
             string connectionString,
             IExecutionEnvironment environment,
             IOptionsProvider optionsProvider)
         {
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
             _environment = environment;
             _optionsProvider = optionsProvider;
         }
 
         public void CreateTable(Table table, bool dropExisting)
         {
-            using var connection = new NpgsqlConnection(_connectionString);
+            using var connection = new NpgsqlConnection(ConnectionString);
             connection.Open();
 
             if (dropExisting)
@@ -50,11 +51,11 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                 _environment.WriteLine("Import batch size parameter is not used with PostgreSQL databases");
             }
 
-            return new PostgreSqlJsonbDataImporter(_connectionString, table, source, _environment);
+            return new PostgreSqlJsonbDataImporter(ConnectionString, table, source, _environment);
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-             new SqlQueryExecutorFactory<NpgsqlConnection>(_connectionString, table, query, _environment)
+             new SqlQueryExecutorFactory<NpgsqlConnection>(this, table, query, _environment)
                 .Customize<IOptionsProvider>(() => _optionsProvider)
                 .Customize<IDistinctValuesProvider, PostgreSqlJsonbDistinctValuesProvider>()
                 .Customize<ISqlQueryBuilder, PostgreSqlJsonbQueryBuilder>()
@@ -64,13 +65,13 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             throw new NotImplementedException();
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
-             new SqlInsertExecutorFactory<NpgsqlConnection>(_connectionString, table, source, batchSize, _environment)
+             new SqlInsertExecutorFactory<NpgsqlConnection>(this, table, source, batchSize, _environment)
                 .Customize<ISqlQueryBuilder, PostgreSqlJsonbInsertBuilder>()
                 .Customize<ISqlParameterAdapter, PostgreSqlJsonbParameterAdapter>();
 
         public void ExecuteScript(string script)
         {
-            using var connection = new NpgsqlConnection(_connectionString);
+            using var connection = new NpgsqlConnection(ConnectionString);
             connection.ExecuteScript(script);
         }
     }

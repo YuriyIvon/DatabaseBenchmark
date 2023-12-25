@@ -14,23 +14,24 @@ namespace DatabaseBenchmark.Databases.ClickHouse
     {
         private const int DefaultImportBatchSize = 1000;
 
-        private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
         private readonly IOptionsProvider _optionsProvider;
+
+        public string ConnectionString { get; }
 
         public ClickHouseDatabase(
             string connectionString,
             IExecutionEnvironment environment,
             IOptionsProvider optionsProvider)
         {
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
             _environment = environment;
             _optionsProvider = optionsProvider;
         }
 
         public void CreateTable(Table table, bool dropExisting)
         {
-            using var connection = new ClickHouseConnection(_connectionString);
+            using var connection = new ClickHouseConnection(ConnectionString);
             connection.Open();
 
             if (dropExisting)
@@ -54,7 +55,7 @@ namespace DatabaseBenchmark.Databases.ClickHouse
 
         public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
             new SqlDataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
-                .Connection<ClickHouseConnection>(_connectionString)
+                .Connection<ClickHouseConnection>(ConnectionString)
                 .ParametersBuilder<SqlNoParametersBuilder>()
                 .ParameterAdapter<ClickHouseParameterAdapter>()
                 .OptionsProvider(_optionsProvider)
@@ -66,16 +67,16 @@ namespace DatabaseBenchmark.Databases.ClickHouse
                 .Build();
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new SqlQueryExecutorFactory<ClickHouseConnection>(_connectionString, table, query, _environment)
+            new SqlQueryExecutorFactory<ClickHouseConnection>(this, table, query, _environment)
                 .Customize<ISqlQueryBuilder, ClickHouseQueryBuilder>()
                 .Customize<ISqlParameterAdapter, ClickHouseParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new SqlRawQueryExecutorFactory<ClickHouseConnection>(_connectionString, query, _environment)
+            new SqlRawQueryExecutorFactory<ClickHouseConnection>(this, query, _environment)
                 .Customize<ISqlParameterAdapter, ClickHouseParameterAdapter>();
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
-            new SqlInsertExecutorFactory<ClickHouseConnection>(_connectionString, table, source, batchSize, _environment)
+            new SqlInsertExecutorFactory<ClickHouseConnection>(this, table, source, batchSize, _environment)
                 .Customize<ISqlParameterAdapter, ClickHouseParameterAdapter>();
 
         public void ExecuteScript(string script) => throw new InputArgumentException("Custom scripts are not supported for ClickHouse");

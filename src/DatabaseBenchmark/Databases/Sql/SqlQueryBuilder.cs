@@ -1,6 +1,7 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Text;
 
@@ -18,20 +19,20 @@ namespace DatabaseBenchmark.Databases.Sql
 
         protected IRandomValueProvider RandomValueProvider { get; }
 
-        protected IRandomGenerator RandomGenerator { get; }
+        protected IRandomPrimitives RandomPrimitives { get; }
 
         public SqlQueryBuilder(
             Table table,
             Query query,
             ISqlParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
-            IRandomGenerator randomGenerator)
+            IRandomPrimitives randomPrimitives)
         {
             Table = table;
             Query = query;
             ParametersBuilder = parametersBuilder;
             RandomValueProvider = randomValueProvider;
-            RandomGenerator = randomGenerator;
+            RandomPrimitives = randomPrimitives;
         }
 
         public string Build()
@@ -137,7 +138,7 @@ namespace DatabaseBenchmark.Databases.Sql
 
         protected virtual string BuildCondition(IQueryCondition condition)
         {
-            if (condition.RandomizeInclusion && RandomGenerator.GetRandomBoolean())
+            if (condition.RandomizeInclusion && RandomPrimitives.GetRandomBoolean())
             {
                 return null;
             }

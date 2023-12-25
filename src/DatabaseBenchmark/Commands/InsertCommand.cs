@@ -39,7 +39,7 @@ namespace DatabaseBenchmark.Commands
                 table.Name = options.TableName;
             }
 
-            var dataSourceFactory = new DataSourceFactory(databaseFactory, _optionsProvider);
+            var dataSourceFactory = new DataSourceFactory(database, databaseFactory, _optionsProvider);
             var dataSource = dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath);
 
             if (options.DataSourceMaxRows > 0)

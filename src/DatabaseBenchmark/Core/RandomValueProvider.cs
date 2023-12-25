@@ -1,113 +1,85 @@
-﻿using DatabaseBenchmark.Common;
+﻿using Bogus;
+using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Generators;
+using DatabaseBenchmark.Generators.Interfaces;
+using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
-using System.Collections.Concurrent;
 
 namespace DatabaseBenchmark.Core
 {
     public class RandomValueProvider : IRandomValueProvider
     {
-        private readonly IRandomGenerator _randomGenerator;
+        //TODO: what to do with the faker
+        private readonly Faker _faker = new();
+        private readonly Dictionary<(ValueRandomizationRule, bool), IGenerator> _generators = [];
+
+        private readonly IGeneratorFactory _randomGeneratorFactory;
         private readonly IColumnPropertiesProvider _columnPropertiesProvider;
         private readonly IDistinctValuesProvider _distinctValuesProvider;
 
         public RandomValueProvider(
-            IRandomGenerator randomGenerator,
+            IGeneratorFactory randomGeneratorFactory,
             IColumnPropertiesProvider columnPropertiesProvider,
             IDistinctValuesProvider distinctValuesProvider)
         {
-            _randomGenerator = randomGenerator;
+            _randomGeneratorFactory = randomGeneratorFactory;
             _columnPropertiesProvider = columnPropertiesProvider;
             _distinctValuesProvider = distinctValuesProvider;
         }
 
-        public object GetRandomValue(string tableName, string columnName, ValueRandomizationRule randomizationRule)
+        public object GetRandomValue(string tableName, string columnName, ValueRandomizationRule randomizationRule) =>
+            GetRandomValue(tableName, columnName, randomizationRule, false);
+
+        public IEnumerable<object> GetRandomValueCollection(string tableName, string columnName, ValueRandomizationRule randomizationRule) =>
+            (IEnumerable<object>)GetRandomValue(tableName, columnName, randomizationRule, true);
+
+        private object GetRandomValue(string tableName, string columnName, ValueRandomizationRule randomizationRule, bool collection)
         {
-            if (randomizationRule.UseExistingValues)
+            if (!_generators.TryGetValue((randomizationRule, collection), out var generator))
             {
-                var values = GetExistingValues(tableName, columnName, randomizationRule);
-                return values[_randomGenerator.GetRandomInteger(0, values.Length - 1)];
-            }
-            else
-            {
-                return GetRandomPrimitiveValue(tableName, columnName, randomizationRule);
-            }
-        }
-
-        public IEnumerable<object> GetRandomValueCollection(string tableName, string columnName, ValueRandomizationRule randomizationRule)
-        {
-            var length = _randomGenerator.GetRandomInteger(randomizationRule.MinCollectionLength, randomizationRule.MaxCollectionLength);
-
-            if (randomizationRule.UseExistingValues)
-            {
-                var values = (object[])GetExistingValues(tableName, columnName, randomizationRule).Clone();
-                Shuffle(values);
-                return values.Take(length);
-            }
-            else
-            {
-                return Enumerable.Range(1, length)
-                    .Select(_ => GetRandomPrimitiveValue(tableName, columnName, randomizationRule))
-                    .ToArray();
-            }
-        }
-
-        private object GetRandomPrimitiveValue(string tableName, string columnName, ValueRandomizationRule randomizationRule)
-        {
-            var columnType = _columnPropertiesProvider.GetColumnType(tableName, columnName);
-
-            return columnType switch
-            {
-                ColumnType.Boolean => _randomGenerator.GetRandomBoolean(),
-                ColumnType.Integer => _randomGenerator.GetRandomInteger(randomizationRule.MinNumericValue, randomizationRule.MaxNumericValue),
-                ColumnType.Double => _randomGenerator.GetRandomDouble(randomizationRule.MinNumericValue, randomizationRule.MaxNumericValue),
-                ColumnType.String => _randomGenerator.GetRandomString(
-                    randomizationRule.MinStringValueLength,
-                    randomizationRule.MaxStringValueLength,
-                    randomizationRule.AllowedCharacters),
-                ColumnType.Text => _randomGenerator.GetRandomString(
-                    randomizationRule.MinStringValueLength,
-                    randomizationRule.MaxStringValueLength,
-                    randomizationRule.AllowedCharacters),
-                ColumnType.DateTime => _randomGenerator.GetRandomDateTime(
-                    randomizationRule.MinDateTimeValue,
-                    randomizationRule.MaxDateTimeValue,
-                    randomizationRule.DateTimeValueStep),
-                _ => throw new InputArgumentException($"Unsupported random value type \"{columnType}\"")
-            };
-        }
-
-        private object[] GetExistingValues(string tableName, string columnName, ValueRandomizationRule randomizationRule)
-        {
-            if (randomizationRule.ExistingValuesOverride == null)
-            {
-                var sourceTableName = randomizationRule.ExistingValuesSourceTableName ?? tableName;
-                var sourceColumnName = randomizationRule.ExistingValuesSourceColumnName ?? columnName;
-
-                if (sourceTableName == null)
+                if (randomizationRule.UseExistingValues)
                 {
-                    throw new InputArgumentException($"Table name is not specified for the column \"{sourceColumnName}\"");
+                    if (randomizationRule.GeneratorOptions != null && randomizationRule.GeneratorOptions is not ListItemGeneratorOptions)
+                    {
+                        throw new InputArgumentException("Only ListItem generator type is allowed when UseExistingValues is set");
+                    }
+
+                    var options = randomizationRule.GeneratorOptions as ListItemGeneratorOptions ?? new ListItemGeneratorOptions();
+                    options.Items = _distinctValuesProvider.GetDistinctValues(tableName, columnName);
+
+                    generator = new ListItemGenerator(_faker, options);
+                }
+                else
+                {
+                    var columnType = _columnPropertiesProvider.GetColumnType(tableName, columnName);
+                    var generatorOptions = randomizationRule.GeneratorOptions ?? GetDefaultGeneratorOptions(columnType);
+                    generator = _randomGeneratorFactory.Create(generatorOptions.Type, generatorOptions);
                 }
 
-                return _distinctValuesProvider.GetDistinctValues(sourceTableName, sourceColumnName);
+                if (collection)
+                {
+                    generator = new CollectionGeneratorDecorator(_faker, generator, randomizationRule.MaxCollectionLength, randomizationRule.MaxCollectionLength);
+                }
+
+                _generators.Add((randomizationRule, collection), generator);
             }
-            else
-            {
-                return randomizationRule.ExistingValuesOverride;
-            }
+
+            return generator.Generate();
         }
 
-        private void Shuffle<T>(T[] array)
-        {
-            int n = array.Length;
-            while (n > 1)
+        private static IGeneratorOptions GetDefaultGeneratorOptions(ColumnType columnType) =>
+            columnType switch
             {
-                n--;
-                int k = _randomGenerator.GetRandomInteger(0, n);
-                T value = array[k];
-                array[k] = array[n];
-                array[n] = value;
-            }
-        }
+                ColumnType.Boolean => new BooleanGeneratorOptions(),
+                ColumnType.Guid => new GuidGeneratorOptions(),
+                ColumnType.Integer => new IntegerGeneratorOptions(),
+                ColumnType.Double => new FloatGeneratorOptions(),
+                ColumnType.Long => new IntegerGeneratorOptions(),
+                ColumnType.DateTime => new DateTimeGeneratorOptions(),
+                ColumnType.String => new StringGeneratorOptions(),
+                ColumnType.Text => new StringGeneratorOptions(),
+                _ => throw new InputArgumentException($"Unsupported random value type \"{columnType}\"")
+            };
     }
 }

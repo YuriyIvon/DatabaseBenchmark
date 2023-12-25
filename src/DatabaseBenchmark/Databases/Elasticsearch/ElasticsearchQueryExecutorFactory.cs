@@ -5,20 +5,25 @@ using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Model;
 using Nest;
+using DatabaseBenchmark.Generators.Interfaces;
+using DatabaseBenchmark.Generators;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
 {
     public class ElasticsearchQueryExecutorFactory : QueryExecutorFactoryBase
     {
         public ElasticsearchQueryExecutorFactory(
+            IDatabase database,
             Func<ElasticClient> createClient,
             Table table,
             Query query)
         {
+            Container.RegisterInstance<IDatabase>(database);
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<Query>(query);
             Container.RegisterSingleton<IColumnPropertiesProvider, TableColumnPropertiesProvider>();
-            Container.RegisterSingleton<IRandomGenerator, RandomGenerator>();
+            Container.RegisterSingleton<IGeneratorFactory, GeneratorFactory>();
+            Container.RegisterSingleton<IRandomPrimitives, RandomPrimitives>();
             Container.RegisterSingleton<ICache, MemoryCache>();
             Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);
 

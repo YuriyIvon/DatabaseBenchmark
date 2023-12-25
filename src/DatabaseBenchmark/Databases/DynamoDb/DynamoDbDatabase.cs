@@ -19,12 +19,13 @@ namespace DatabaseBenchmark.Databases.DynamoDb
         private const string SecretAccessKeyConnectionStringProperty = "SecretAccessKey";
         private const string RegionEndpointConnectionStringProperty = "RegionEndpoint";
 
-        private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
+
+        public string ConnectionString { get; }
 
         public DynamoDbDatabase(string connectionString, IExecutionEnvironment environment)
         {
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
             _environment = environment;
         }
 
@@ -64,10 +65,10 @@ namespace DatabaseBenchmark.Databases.DynamoDb
                 .Build();
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new DynamoDbQueryExecutorFactory(CreateClient, table, query, _environment);
+            new DynamoDbQueryExecutorFactory(this, CreateClient, table, query, _environment);
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new DynamoDbRawQueryExecutorFactory(CreateClient, query, _environment);
+            new DynamoDbRawQueryExecutorFactory(this, CreateClient, query, _environment);
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource dataSource, int batchSize) =>
         new DynamoDbInsertExecutorFactory(CreateClient, table, dataSource, batchSize, _environment);
@@ -77,7 +78,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
         private AmazonDynamoDBClient CreateClient()
         {
             var connectionParameters = ConnectionStringParser.Parse(
-                _connectionString,
+                ConnectionString,
                 AccessKeyIdConnectionStringProperty,
                 SecretAccessKeyConnectionStringProperty,
                 RegionEndpointConnectionStringProperty);

@@ -13,12 +13,13 @@ namespace DatabaseBenchmark.Databases.Snowflake
     {
         private const int DefaultImportBatchSize = 10000;
 
-        private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
+
+        public string ConnectionString { get; }
 
         public SnowflakeDatabase(string connectionString, IExecutionEnvironment environment)
         {
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
             _environment = environment;
 
             SnowflakeDbConnectionPool.SetPooling(false);
@@ -28,7 +29,7 @@ namespace DatabaseBenchmark.Databases.Snowflake
         {
             using var connection = new SnowflakeDbConnection
             {
-                ConnectionString = _connectionString
+                ConnectionString = ConnectionString
             };
 
             connection.Open();
@@ -52,7 +53,7 @@ namespace DatabaseBenchmark.Databases.Snowflake
 
         public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
             new SqlDataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
-                .Connection<SnowflakeDbConnection>(_connectionString)
+                .Connection<SnowflakeDbConnection>(ConnectionString)
                 .ParametersBuilder(() => new SqlParametersBuilder(':'))
                 .ParameterAdapter<SnowflakeParameterAdapter>()
                 .TransactionProvider<SqlTransactionProvider>()
@@ -62,24 +63,24 @@ namespace DatabaseBenchmark.Databases.Snowflake
                 .Build();
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-             new SqlQueryExecutorFactory<SnowflakeDbConnection>(_connectionString, table, query, _environment)
+             new SqlQueryExecutorFactory<SnowflakeDbConnection>(this, table, query, _environment)
                 .Customize<ISqlQueryBuilder, SnowflakeQueryBuilder>()
                 .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
                 .Customize<ISqlParameterAdapter, SnowflakeParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new SqlRawQueryExecutorFactory<SnowflakeDbConnection>(_connectionString, query, _environment)
+            new SqlRawQueryExecutorFactory<SnowflakeDbConnection>(this, query, _environment)
                 .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
                 .Customize<ISqlParameterAdapter, SnowflakeParameterAdapter>();
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
-            new SqlInsertExecutorFactory<SnowflakeDbConnection>(_connectionString, table, source, batchSize, _environment)
+            new SqlInsertExecutorFactory<SnowflakeDbConnection>(this, table, source, batchSize, _environment)
                 .Customize<ISqlParametersBuilder>(() => new SqlParametersBuilder(':'))
                 .Customize<ISqlParameterAdapter, SnowflakeParameterAdapter>();
 
         public void ExecuteScript(string script)
         {
-            using var connection = new SnowflakeDbConnection(_connectionString);
+            using var connection = new SnowflakeDbConnection(ConnectionString);
             connection.ExecuteScript(script);
         }
     }

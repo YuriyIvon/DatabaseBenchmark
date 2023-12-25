@@ -14,16 +14,17 @@ namespace DatabaseBenchmark.Databases.MongoDb
     {
         private const int DefaultImportBatchSize = 500;
 
-        private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
         private readonly IOptionsProvider _optionsProvider;
+
+        public string ConnectionString { get; }
 
         public MongoDbDatabase(
             string connectionString,
             IExecutionEnvironment environment,
             IOptionsProvider optionsProvider)
         {
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
             _environment = environment;
             _optionsProvider = optionsProvider;
         }
@@ -68,20 +69,20 @@ namespace DatabaseBenchmark.Databases.MongoDb
                 .Build();
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new MongoDbQueryExecutorFactory(_connectionString, table, query, _environment, _optionsProvider);
+            new MongoDbQueryExecutorFactory(this, table, query, _environment, _optionsProvider);
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new MongoDbRawQueryExecutorFactory(_connectionString, query, _environment, _optionsProvider);
+            new MongoDbRawQueryExecutorFactory(this, query, _environment, _optionsProvider);
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
-            new MongoDbInsertExecutorFactory(_connectionString, table, source, batchSize, _environment, _optionsProvider);
+            new MongoDbInsertExecutorFactory(this, table, source, batchSize, _environment, _optionsProvider);
 
         public void ExecuteScript(string script) => throw new InputArgumentException("Custom scripts are not supported for MongoDB");
 
         private IMongoDatabase GetDatabase()
         {
-            var client = new MongoClient(_connectionString);
-            var databaseName = MongoUrl.Create(_connectionString).DatabaseName;
+            var client = new MongoClient(ConnectionString);
+            var databaseName = MongoUrl.Create(ConnectionString).DatabaseName;
             return client.GetDatabase(databaseName);
         }
     }

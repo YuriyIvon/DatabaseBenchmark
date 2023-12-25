@@ -2,6 +2,7 @@
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Text;
 using System.Text.Json;
@@ -17,9 +18,9 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             Query query,
             ISqlParametersBuilder parametersBuilder,
             IRandomValueProvider randomValueProvider,
-            IRandomGenerator randomGenerator,
+            IRandomPrimitives randomPrimitives,
             IOptionsProvider optionsProvider) 
-            : base(table, query, parametersBuilder, randomValueProvider, randomGenerator)
+            : base(table, query, parametersBuilder, randomValueProvider, randomPrimitives)
         {
             _queryOptions = optionsProvider.GetOptions<PostgreSqlJsonbQueryOptions>();
         }

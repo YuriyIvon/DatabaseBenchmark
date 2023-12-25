@@ -12,7 +12,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
     public class MongoDbInsertExecutorFactory : QueryExecutorFactoryBase
     {
         public MongoDbInsertExecutorFactory(
-            string connectionString,
+            IDatabase database,
             Table table,
             IDataSource source,
             int batchSize,
@@ -31,8 +31,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
             Container.Register<IMongoDatabase>(() =>
                 {
-                    var client = new MongoClient(connectionString);
-                    var databaseName = MongoUrl.Create(connectionString).DatabaseName;
+                    var client = new MongoClient(database.ConnectionString);
+                    var databaseName = MongoUrl.Create(database.ConnectionString).DatabaseName;
                     return client.GetDatabase(databaseName);
                 },
                 Lifestyle);

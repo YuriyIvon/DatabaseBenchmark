@@ -1,0 +1,30 @@
+﻿using Bogus;
+using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Generators.Interfaces;
+using DatabaseBenchmark.Generators.Options;
+using GeneratorKind = DatabaseBenchmark.Generators.Options.TextGeneratorOptions.GeneratorKind;
+
+namespace DatabaseBenchmark.Generators
+{
+    public class TextGenerator : IGenerator
+    {
+        private readonly Faker _faker;
+        private readonly TextGeneratorOptions _options;
+
+        public TextGenerator(Faker faker, TextGeneratorOptions options)
+        {
+            _faker = faker;
+            _options = options;
+        }
+
+        public object Generate() =>
+            _options.Kind switch
+            {
+                GeneratorKind.Word => _faker.Lorem.Word(),
+                GeneratorKind.Sentence => _faker.Lorem.Sentence(),
+                GeneratorKind.Paragraph => _faker.Lorem.Paragraph(),
+                GeneratorKind.Text => _faker.Lorem.Text(),
+                _ => throw new InputArgumentException($"Unknown text generator kind \"{_options.Kind}\"")
+            };
+    }
+}

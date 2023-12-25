@@ -10,18 +10,19 @@ namespace DatabaseBenchmark.Databases.SqlServer
 {
     public class SqlServerDatabase : IDatabase
     {
-        private readonly string _connectionString;
         private readonly IExecutionEnvironment _environment;
+
+        public string ConnectionString { get; }
 
         public SqlServerDatabase(string connectionString, IExecutionEnvironment environment)
         {
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
             _environment = environment;
         }
 
         public void CreateTable(Table table, bool dropExisting)
         {
-            using var connection = new SqlConnection(_connectionString);
+            using var connection = new SqlConnection(ConnectionString);
             connection.Open();
 
             if (dropExisting)
@@ -39,23 +40,23 @@ namespace DatabaseBenchmark.Databases.SqlServer
         }
 
         public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
-            new SqlServerDataImporter(_connectionString, table, source, batchSize, _environment);
+            new SqlServerDataImporter(ConnectionString, table, source, batchSize, _environment);
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new SqlQueryExecutorFactory<SqlConnection>(_connectionString, table, query, _environment)
+            new SqlQueryExecutorFactory<SqlConnection>(this, table, query, _environment)
                 .Customize<ISqlParameterAdapter, SqlServerParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            new SqlRawQueryExecutorFactory<SqlConnection>(_connectionString, query, _environment)
+            new SqlRawQueryExecutorFactory<SqlConnection>(this, query, _environment)
                 .Customize<ISqlParameterAdapter, SqlServerParameterAdapter>();
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
-            new SqlInsertExecutorFactory<SqlConnection>(_connectionString, table, source, batchSize, _environment)
+            new SqlInsertExecutorFactory<SqlConnection>(this, table, source, batchSize, _environment)
                 .Customize<ISqlParameterAdapter, SqlServerParameterAdapter>();
 
         public void ExecuteScript(string script)
         {
-            using var connection = new SqlConnection(_connectionString);
+            using var connection = new SqlConnection(ConnectionString);
             connection.ExecuteScript(script);
         }
     }

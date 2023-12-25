@@ -13,7 +13,7 @@ namespace DatabaseBenchmark.Databases.Sql
         where TConnection : class, IDbConnection, new()
     {
         public SqlInsertExecutorFactory(
-            string connectionString,
+            IDatabase database,
             Table table,
             IDataSource source,
             int batchSize,
@@ -28,7 +28,7 @@ namespace DatabaseBenchmark.Databases.Sql
 
             Container.RegisterSingleton<IDataSourceReader, DataSourceReader>();
 
-            Container.Register<IDbConnection>(() => new TConnection { ConnectionString = connectionString }, Lifestyle);
+            Container.Register<IDbConnection>(() => new TConnection { ConnectionString = database.ConnectionString }, Lifestyle);
             Container.Register<ISqlQueryBuilder, SqlInsertBuilder>(Lifestyle);
             Container.Register<ISqlParametersBuilder>(() => new SqlParametersBuilder(), Lifestyle);
             Container.Register<IQueryExecutor, SqlInsertExecutor>(Lifestyle);
