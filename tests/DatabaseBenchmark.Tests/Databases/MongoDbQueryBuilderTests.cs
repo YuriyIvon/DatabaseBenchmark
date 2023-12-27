@@ -1,5 +1,5 @@
-﻿using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.MongoDb;
+﻿using DatabaseBenchmark.Databases.MongoDb;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Tests.Utils;
 using MongoDB.Bson;
 using NSubstitute;
@@ -42,9 +42,9 @@ namespace DatabaseBenchmark.Tests.Databases
         {
             var query = SampleInputs.AllArgumentsQueryRandomizeInclusionAll;
 
-            var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
-            mockRandomValueProvider.GetRandomBoolean().Returns(true);
-            var builder = new MongoDbQueryBuilder(SampleInputs.Table, query, null, mockRandomValueProvider);
+            var mockRandomPrimitives = Substitute.For<IRandomPrimitives>();
+            mockRandomPrimitives.GetRandomBoolean().Returns(true);
+            var builder = new MongoDbQueryBuilder(SampleInputs.Table, query, null, mockRandomPrimitives);
 
             var queryBson = builder.Build();
             var queryText = queryBson.ToJson();
@@ -61,9 +61,9 @@ namespace DatabaseBenchmark.Tests.Databases
         {
             var query = SampleInputs.AllArgumentsQueryRandomizeInclusionPartial;
 
-            var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
-            mockRandomValueProvider.GetRandomBoolean().Returns(true);
-            var builder = new MongoDbQueryBuilder(SampleInputs.Table, query, null, mockRandomValueProvider);
+            var mockRandomPrimitives = Substitute.For<IRandomPrimitives>();
+            mockRandomPrimitives.GetRandomBoolean().Returns(true);
+            var builder = new MongoDbQueryBuilder(SampleInputs.Table, query, null, mockRandomPrimitives);
 
             var queryBson = builder.Build();
             var queryText = queryBson.ToJson();

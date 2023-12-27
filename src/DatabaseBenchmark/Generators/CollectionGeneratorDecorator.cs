@@ -6,28 +6,32 @@ namespace DatabaseBenchmark.Generators
     public class CollectionGeneratorDecorator : IGenerator
     {
         private readonly Faker _faker;
-        private readonly IGenerator _randomGenerator;
-        private readonly int _minCollectionLength;
-        private readonly int _maxCollectionLength;
+        private readonly IGenerator _generator;
+        private readonly ICollectionGenerator _collectionGenerator;
+        private readonly int _minLength;
+        private readonly int _maxLength;
 
         public CollectionGeneratorDecorator(Faker faker,
-            IGenerator randomGenerator,
-            int minCollectionLength,
-            int maxCollectionLength)
+            IGenerator generator,
+            int minLength,
+            int maxLength)
         {
             _faker = faker;
-            _randomGenerator = randomGenerator;
-            _minCollectionLength = minCollectionLength;
-            _maxCollectionLength = maxCollectionLength;
+            _generator = generator;
+            _collectionGenerator = generator as ICollectionGenerator;
+            _minLength = minLength;
+            _maxLength = maxLength;
         }
 
         public object Generate()
         {
-            var length = _faker.Random.Int(_minCollectionLength, _maxCollectionLength);
+            var length = _faker.Random.Int(_minLength, _maxLength);
 
-            return Enumerable.Range(1, length)
-                .Select(_ => _randomGenerator.Generate())
-                .ToArray();
+            return _collectionGenerator != null 
+                ? _collectionGenerator.GenerateCollection(length)
+                : Enumerable.Range(1, length)
+                    .Select(_ => _generator.Generate())
+                    .ToArray();
         }
     }
 }

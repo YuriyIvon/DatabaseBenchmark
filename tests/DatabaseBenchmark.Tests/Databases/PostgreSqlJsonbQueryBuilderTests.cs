@@ -2,6 +2,7 @@
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.PostgreSql;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
 using MongoDB.Driver.Linq;
@@ -126,10 +127,10 @@ namespace DatabaseBenchmark.Tests.Databases
         {
             var query = SampleInputs.AllArgumentsQueryRandomizeInclusionAll;
 
-            var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
-            mockRandomValueProvider.GetRandomBoolean().Returns(true);
+            var mockRandomPrimitives = Substitute.For<IRandomPrimitives>();
+            mockRandomPrimitives.GetRandomBoolean().Returns(true);
             var parametersBuilder = new SqlParametersBuilder();
-            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomValueProvider, _optionsProvider);
+            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomPrimitives, _optionsProvider);
 
             var queryText = builder.Build();
 
@@ -156,10 +157,10 @@ namespace DatabaseBenchmark.Tests.Databases
             var groupConditions = (QueryGroupCondition)query.Condition;
             groupConditions.Conditions = groupConditions.Conditions.Where(c => c is QueryPrimitiveCondition).ToArray();
 
-            var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
-            mockRandomValueProvider.GetRandomBoolean().Returns(true);
+            var mockRandomPrimitives = Substitute.For<IRandomPrimitives>();
+            mockRandomPrimitives.GetRandomBoolean().Returns(true);
             var parametersBuilder = new SqlParametersBuilder();
-            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomValueProvider, _optionsProvider);
+            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomPrimitives, _optionsProvider);
 
             var queryText = builder.Build();
 

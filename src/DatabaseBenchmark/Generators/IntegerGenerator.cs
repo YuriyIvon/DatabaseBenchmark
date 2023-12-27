@@ -9,7 +9,7 @@ namespace DatabaseBenchmark.Generators
         private readonly Faker _faker;
         private readonly IntegerGeneratorOptions _options;
 
-        private double? _lastValue;
+        private int? _lastValue;
 
         public IntegerGenerator(Faker faker, IntegerGeneratorOptions options)
         {

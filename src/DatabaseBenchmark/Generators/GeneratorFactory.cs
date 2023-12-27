@@ -20,9 +20,10 @@ namespace DatabaseBenchmark.Generators
             type switch
             {
                 GeneratorType.Address => new AddressGenerator(_faker, (AddressGeneratorOptions)options),
-                GeneratorType.Boolean => new BoolGenerator(_faker, (BooleanGeneratorOptions)options),
+                GeneratorType.Boolean => new BooleanGenerator(_faker, (BooleanGeneratorOptions)options),
                 GeneratorType.Company => new CompanyGenerator(_faker, (CompanyGeneratorOptions)options),
                 GeneratorType.DateTime => new DateTimeGenerator(_faker, (DateTimeGeneratorOptions)options),
+                GeneratorType.Finance => new FinanceGenerator(_faker, (FinanceGeneratorOptions)options),
                 GeneratorType.Float => new FloatGenerator(_faker, (FloatGeneratorOptions)options),
                 GeneratorType.ForeignKey => new ForeignKeyGenerator(_faker, (ForeignKeyGeneratorOptions)options, _database),
                 GeneratorType.Guid => new GuidGenerator(_faker),

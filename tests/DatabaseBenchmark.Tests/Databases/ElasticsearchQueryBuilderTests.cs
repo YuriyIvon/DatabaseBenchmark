@@ -1,5 +1,5 @@
-﻿using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.Elasticsearch;
+﻿using DatabaseBenchmark.Databases.Elasticsearch;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Tests.Utils;
 using Nest;
 using NSubstitute;
@@ -43,9 +43,9 @@ namespace DatabaseBenchmark.Tests.Databases
         {
             var query = SampleInputs.AllArgumentsQueryRandomizeInclusionAll;
 
-            var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
-            mockRandomValueProvider.GetRandomBoolean().Returns(true);
-            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, mockRandomValueProvider);
+            var mockRandomPrimitives = Substitute.For<IRandomPrimitives>();
+            mockRandomPrimitives.GetRandomBoolean().Returns(true);
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, mockRandomPrimitives);
 
             var request = builder.Build();
             var rawQuery = SerializeSearchRequest(request);
@@ -62,9 +62,9 @@ namespace DatabaseBenchmark.Tests.Databases
         {
             var query = SampleInputs.AllArgumentsQueryRandomizeInclusionPartial;
 
-            var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
-            mockRandomValueProvider.GetRandomBoolean().Returns(true);
-            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, mockRandomValueProvider);
+            var mockRandomPrimitives = Substitute.For<IRandomPrimitives>();
+            mockRandomPrimitives.GetRandomBoolean().Returns(true);
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, mockRandomPrimitives);
 
             var request = builder.Build();
             var rawQuery = SerializeSearchRequest(request);

@@ -5,7 +5,7 @@ using DatabaseBenchmark.Generators.Options;
 
 namespace DatabaseBenchmark.Generators
 {
-    public class ListItemGenerator : IGenerator
+    public class ListItemGenerator : IGenerator, ICollectionGenerator
     {
         private readonly Faker _faker;
         private readonly ListItemGeneratorOptions _options;
@@ -32,7 +32,22 @@ namespace DatabaseBenchmark.Generators
 
             return useWeighted
                 ? _faker.Random.WeightedRandom(_weightedItems, _weights)
-                : _faker.Random.ListItem(_items);
+                : _faker.Random.ArrayElement(_items);
+        }
+
+        public IEnumerable<object> GenerateCollection(int length)
+        {
+            if (_items == null)
+            {
+                Initialize();
+            }
+
+            if (_options.WeightedItems?.Any() == true)
+            {
+                throw new InputArgumentException("Generating a collection based on item weights is not supported");
+            }
+
+            return  _faker.Random.ArrayElements(_items, length);
         }
 
         private void Initialize()

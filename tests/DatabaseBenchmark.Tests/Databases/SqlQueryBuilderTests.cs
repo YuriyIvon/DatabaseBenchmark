@@ -1,5 +1,5 @@
-﻿using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.Sql;
+﻿using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
 using NSubstitute;
@@ -55,10 +55,10 @@ namespace DatabaseBenchmark.Tests.Databases
         {
             var query = SampleInputs.AllArgumentsQueryRandomizeInclusionAll;
 
-            var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
-            mockRandomValueProvider.GetRandomBoolean().Returns(true);
+            var mockRandomPrimitives = Substitute.For<IRandomPrimitives>();
+            mockRandomPrimitives.GetRandomBoolean().Returns(true);
             var parametersBuilder = new SqlParametersBuilder();
-            var builder = new SqlQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomValueProvider);
+            var builder = new SqlQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomPrimitives);
 
             var queryText = builder.Build();
 
@@ -82,10 +82,10 @@ namespace DatabaseBenchmark.Tests.Databases
         {
             var query = SampleInputs.AllArgumentsQueryRandomizeInclusionPartial;
 
-            var mockRandomValueProvider = Substitute.For<IRandomGenerator>();
-            mockRandomValueProvider.GetRandomBoolean().Returns(true);
+            var mockRandomPrimitives = Substitute.For<IRandomPrimitives>();
+            mockRandomPrimitives.GetRandomBoolean().Returns(true);
             var parametersBuilder = new SqlParametersBuilder();
-            var builder = new SqlQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomValueProvider);
+            var builder = new SqlQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, mockRandomPrimitives);
 
             var queryText = builder.Build();
 

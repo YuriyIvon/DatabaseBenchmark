@@ -6,6 +6,7 @@
         Boolean,
         Company,
         DateTime,
+        Finance,
         Float,
         ForeignKey,
         Guid,
