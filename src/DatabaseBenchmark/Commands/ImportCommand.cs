@@ -1,12 +1,12 @@
 ﻿using DatabaseBenchmark.Commands.Interfaces;
 using DatabaseBenchmark.Commands.Options;
+using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
 using DatabaseBenchmark.DataSources;
 using DatabaseBenchmark.DataSources.Decorators;
 using DatabaseBenchmark.Model;
-using DatabaseBenchmark.Utils;
 
 namespace DatabaseBenchmark.Commands
 {

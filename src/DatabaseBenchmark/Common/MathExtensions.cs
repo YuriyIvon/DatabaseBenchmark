@@ -1,4 +1,4 @@
-﻿namespace DatabaseBenchmark.Utils
+﻿namespace DatabaseBenchmark.Common
 {
     public static class MathExtensions
     {

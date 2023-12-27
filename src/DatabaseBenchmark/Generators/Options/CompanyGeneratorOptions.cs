@@ -8,7 +8,7 @@ namespace DatabaseBenchmark.Generators.Options
         public GeneratorType Type => GeneratorType.Company;
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public GeneratorKind Kind { get; set; }
+        public GeneratorKind Kind { get; set; } = GeneratorKind.CompanyName;
 
         public enum GeneratorKind
         {

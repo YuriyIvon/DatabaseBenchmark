@@ -15,6 +15,9 @@ namespace DatabaseBenchmark.Generators
             _options = options;
         }
 
-        public object Generate() => _faker.Random.Bool(_options.Weight);
+        public object Generate() => 
+            _options.Weight != null 
+                ? _faker.Random.Bool(_options.Weight.Value)
+                : _faker.Random.Bool();
     }
 }

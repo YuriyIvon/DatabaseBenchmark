@@ -1,8 +1,8 @@
-﻿using DatabaseBenchmark.Databases.Common.Interfaces;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
-using DatabaseBenchmark.Utils;
 
 namespace DatabaseBenchmark.DataSources.Generator
 {

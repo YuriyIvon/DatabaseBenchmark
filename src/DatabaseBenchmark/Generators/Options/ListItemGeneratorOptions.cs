@@ -1,4 +1,6 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Generators.Interfaces;
+using System.Text.Json.Serialization;
 
 namespace DatabaseBenchmark.Generators.Options
 {
@@ -6,6 +8,7 @@ namespace DatabaseBenchmark.Generators.Options
     {
         public GeneratorType Type => GeneratorType.ListItem;
 
+        [JsonConverter(typeof(JsonObjectArrayConverter))]
         public object[] Items { get; set; }
 
         public WeightedListItem[] WeightedItems { get; set; }

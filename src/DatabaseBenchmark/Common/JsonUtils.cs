@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace DatabaseBenchmark.Utils
+namespace DatabaseBenchmark.Common
 {
     public static class JsonUtils
     {

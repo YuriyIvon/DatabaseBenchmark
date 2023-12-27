@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace DatabaseBenchmark.Model
+namespace DatabaseBenchmark.Common
 {
     public class JsonObjectArrayConverter : JsonConverter<object[]>
     {

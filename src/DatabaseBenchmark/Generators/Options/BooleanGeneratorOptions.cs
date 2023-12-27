@@ -6,6 +6,6 @@ namespace DatabaseBenchmark.Generators.Options
     {
         public GeneratorType Type => GeneratorType.Boolean;
 
-        public float Weight { get; set; }
+        public float? Weight { get; set; }
     }
 }

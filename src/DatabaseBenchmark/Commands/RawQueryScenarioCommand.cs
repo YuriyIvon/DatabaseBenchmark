@@ -6,7 +6,6 @@ using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Reporting;
-using DatabaseBenchmark.Utils;
 
 namespace DatabaseBenchmark.Commands
 {

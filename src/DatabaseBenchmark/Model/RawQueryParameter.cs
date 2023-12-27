@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using DatabaseBenchmark.Common;
+using System.Text.Json.Serialization;
 
 namespace DatabaseBenchmark.Model
 {

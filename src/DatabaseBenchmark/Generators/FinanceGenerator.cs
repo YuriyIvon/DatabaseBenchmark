@@ -28,6 +28,6 @@ namespace DatabaseBenchmark.Generators
                 GeneratorKind.BitcoinAddress => _faker.Finance.BitcoinAddress(),
                 GeneratorKind.EthereumAddress => _faker.Finance.EthereumAddress(),
                 _ => throw new InputArgumentException($"Unknown finance generator kind \"{_options.Kind}\"")
-            };;
+            };
     }
 }
