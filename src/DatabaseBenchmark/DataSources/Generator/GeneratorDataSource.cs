@@ -3,6 +3,7 @@ using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
+using DatabaseBenchmark.Generators.Options;
 
 namespace DatabaseBenchmark.DataSources.Generator
 {
@@ -24,14 +25,28 @@ namespace DatabaseBenchmark.DataSources.Generator
 
             var generatorFactory = new GeneratorFactory(database);
             _generators = _options.Columns
-                .Select(c => generatorFactory.Create(c.GeneratorOptions.Type, c.GeneratorOptions))
+                .Select(c => GeneratorOptionsDeserializer.Deserialize(c.GeneratorOptions))
+                .Select(go => generatorFactory.Create(go.Type, go))
                 .ToArray();
         }
 
         public object GetValue(Type type, string name)
         {
             var index = _columnIndexes[name];
-            return _currentRow[index];
+            var value = _currentRow[index];
+
+            if (value != null)
+            {
+                var valueType = value.GetType();
+
+                //TODO: handle other type inconsistencies
+                if (valueType != type && type == typeof(string))
+                {
+                     return value.ToString();
+                }
+            }
+
+            return value;
         }
 
         public bool Read()

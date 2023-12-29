@@ -21,6 +21,7 @@ namespace DatabaseBenchmark.Databases.Sql
         {
             Container.Options.AllowOverridingRegistrations = true;
 
+            Container.RegisterInstance<IDatabase>(database);
             Container.RegisterInstance<RawQuery>(query);
             Container.RegisterInstance<IExecutionEnvironment>(environment);
             Container.RegisterSingleton<IColumnPropertiesProvider, RawQueryColumnPropertiesProvider>();

@@ -2,11 +2,11 @@
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
-using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
 using NSubstitute;
 using System;
+using System.Text.Json;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Common
@@ -48,7 +48,7 @@ namespace DatabaseBenchmark.Tests.Common
             var randomizationRule = new ValueRandomizationRule
             {
                 UseExistingValues = false,
-                GeneratorOptions = new StringGeneratorOptions()
+                GeneratorOptions = JsonDocument.Parse("{\"Type\":\"String\"}").RootElement
             };
 
             var value = _randomValueProvider.GetRandomValue(_tableName, _distinctColumnName, randomizationRule);
@@ -64,7 +64,7 @@ namespace DatabaseBenchmark.Tests.Common
             var randomizationRule = new ValueRandomizationRule
             {
                 UseExistingValues = false,
-                GeneratorOptions = new IntegerGeneratorOptions()
+                GeneratorOptions = JsonDocument.Parse("{\"Type\":\"Integer\"}").RootElement
             };
 
             var value = _randomValueProvider.GetRandomValue(_tableName, integerColumn, randomizationRule);
@@ -80,7 +80,7 @@ namespace DatabaseBenchmark.Tests.Common
             var randomizationRule = new ValueRandomizationRule
             {
                 UseExistingValues = false,
-                GeneratorOptions = new FloatGeneratorOptions()
+                GeneratorOptions = JsonDocument.Parse("{\"Type\":\"Float\"}").RootElement
             };
 
             var value = _randomValueProvider.GetRandomValue(_tableName, doubleColumn, randomizationRule);
@@ -96,7 +96,7 @@ namespace DatabaseBenchmark.Tests.Common
             var randomizationRule = new ValueRandomizationRule
             {
                 UseExistingValues = false,
-                GeneratorOptions = new DateTimeGeneratorOptions()
+                GeneratorOptions = JsonDocument.Parse("{\"Type\":\"DateTime\"}").RootElement
             };
 
             var value = _randomValueProvider.GetRandomValue(_tableName, dateTimeColumn, randomizationRule);

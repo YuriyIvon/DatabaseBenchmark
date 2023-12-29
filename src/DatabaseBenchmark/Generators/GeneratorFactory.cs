@@ -35,7 +35,7 @@ namespace DatabaseBenchmark.Generators
                 GeneratorType.String => new StringGenerator(_faker, (StringGeneratorOptions)options),
                 GeneratorType.Text => new TextGenerator(_faker, (TextGeneratorOptions)options),
                 GeneratorType.Vehicle => new VehicleGenerator(_faker, (VehicleGeneratorOptions)options),
-                _ => throw new InputArgumentException($"Unknown random generator type \"{type}\"")
+                _ => throw new InputArgumentException($"Unknown generator type \"{type}\"")
             };
     }
 }

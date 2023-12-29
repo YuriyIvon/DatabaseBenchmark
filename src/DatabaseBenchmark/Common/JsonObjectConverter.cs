@@ -43,7 +43,7 @@ namespace DatabaseBenchmark.Common
 
         public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            JsonSerializer.Serialize(writer, value, options);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace DatabaseBenchmark.Core
         private readonly Faker _faker = new();
         private readonly Dictionary<(ValueRandomizationRule, bool), IGenerator> _generators = [];
 
-        private readonly IGeneratorFactory _randomGeneratorFactory;
+        private readonly IGeneratorFactory _generatorFactory;
         private readonly IColumnPropertiesProvider _columnPropertiesProvider;
         private readonly IDistinctValuesProvider _distinctValuesProvider;
 
@@ -23,7 +23,7 @@ namespace DatabaseBenchmark.Core
             IColumnPropertiesProvider columnPropertiesProvider,
             IDistinctValuesProvider distinctValuesProvider)
         {
-            _randomGeneratorFactory = randomGeneratorFactory;
+            _generatorFactory = randomGeneratorFactory;
             _columnPropertiesProvider = columnPropertiesProvider;
             _distinctValuesProvider = distinctValuesProvider;
         }
@@ -38,14 +38,16 @@ namespace DatabaseBenchmark.Core
         {
             if (!_generators.TryGetValue((randomizationRule, collection), out var generator))
             {
+                var generatorOptions = GeneratorOptionsDeserializer.Deserialize(randomizationRule.GeneratorOptions);
+
                 if (randomizationRule.UseExistingValues)
                 {
-                    if (randomizationRule.GeneratorOptions != null && randomizationRule.GeneratorOptions is not ListItemGeneratorOptions)
+                    if (generatorOptions != null && generatorOptions is not ListItemGeneratorOptions)
                     {
                         throw new InputArgumentException("Only ListItem generator type is allowed when UseExistingValues is set");
                     }
 
-                    var options = randomizationRule.GeneratorOptions as ListItemGeneratorOptions ?? new ListItemGeneratorOptions();
+                    var options = generatorOptions as ListItemGeneratorOptions ?? new ListItemGeneratorOptions();
                     options.Items = _distinctValuesProvider.GetDistinctValues(tableName, columnName);
 
                     generator = new ListItemGenerator(_faker, options);
@@ -53,8 +55,8 @@ namespace DatabaseBenchmark.Core
                 else
                 {
                     var columnType = _columnPropertiesProvider.GetColumnType(tableName, columnName);
-                    var generatorOptions = randomizationRule.GeneratorOptions ?? GetDefaultGeneratorOptions(columnType);
-                    generator = _randomGeneratorFactory.Create(generatorOptions.Type, generatorOptions);
+                    generatorOptions ??= GetDefaultGeneratorOptions(columnType);
+                    generator = _generatorFactory.Create(generatorOptions.Type, generatorOptions);
                 }
 
                 if (collection)

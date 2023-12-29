@@ -1,6 +1,5 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-using DatabaseBenchmark.Generators.Options;
-using System.Text.Json.Serialization;
+﻿using DatabaseBenchmark.Model;
+using System.Text.Json;
 
 namespace DatabaseBenchmark.DataSources.Generator
 {
@@ -8,7 +7,6 @@ namespace DatabaseBenchmark.DataSources.Generator
     {
         public string Name { get; set; }
 
-        [JsonConverter(typeof(GeneratorOptionsConverter))]
-        public IGeneratorOptions GeneratorOptions { get; set; }
+        public JsonElement GeneratorOptions { get; set; }
     }
 }

@@ -37,4 +37,10 @@
     <ProjectReference Include="..\..\src\DatabaseBenchmark\DatabaseBenchmark.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="DataSources\GeneratorDataSourceOptions.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

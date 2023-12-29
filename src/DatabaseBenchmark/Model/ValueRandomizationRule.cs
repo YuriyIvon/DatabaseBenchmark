@@ -1,6 +1,4 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-using DatabaseBenchmark.Generators.Options;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json;
 
 namespace DatabaseBenchmark.Model
 {
@@ -8,8 +6,7 @@ namespace DatabaseBenchmark.Model
     {
         public bool UseExistingValues { get; set; } = true;
 
-        [JsonConverter(typeof(GeneratorOptionsConverter))]
-        public IGeneratorOptions GeneratorOptions { get; set; }
+        public JsonElement GeneratorOptions { get; set; }
 
         public int MinCollectionLength { get; set; } = 1;
 
