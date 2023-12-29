@@ -14,11 +14,11 @@ namespace DatabaseBenchmark.Model
                 var operatorString = predicateJson.RootElement.GetProperty(nameof(QueryPrimitiveCondition.Operator)).GetString();
                 if (Enum.IsDefined(typeof(QueryPrimitiveOperator), operatorString))
                 {
-                    return predicateJson.RootElement.Deserialize<QueryPrimitiveCondition>(options);
+                    return predicateJson.Deserialize<QueryPrimitiveCondition>(options);
                 }
                 else if (Enum.IsDefined(typeof(QueryGroupOperator), operatorString))
                 {
-                    return predicateJson.RootElement.Deserialize<QueryGroupCondition>(options);
+                    return predicateJson.Deserialize<QueryGroupCondition>(options);
                 }
                 else
                 {

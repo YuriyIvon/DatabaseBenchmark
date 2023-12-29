@@ -46,7 +46,7 @@ namespace DatabaseBenchmark.Commands
         private static IDictionary<string, string> ParseDictionary(string json)
         {
             var dictionary = new Dictionary<string, string>();
-            var jsonDocument = JsonDocument.Parse(json);
+            using var jsonDocument = JsonDocument.Parse(json);
 
             foreach (var property in jsonDocument.RootElement.EnumerateObject())
             {
