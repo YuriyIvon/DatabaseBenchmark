@@ -47,7 +47,15 @@ namespace DatabaseBenchmark.Databases.DynamoDb
             var createTableRequest = tableBuilder.Build(table);
             var createResponse = client.CreateTableAsync(createTableRequest).Result;
 
-            //TODO: handle result
+            var status = createResponse.TableDescription.TableStatus;
+            while (status != TableStatus.ACTIVE)
+            {
+                _environment.WriteLine("Waiting until the table is active");
+                Thread.Sleep(1000);
+
+                var describeResponse = client.DescribeTableAsync(createTableRequest.TableName).Result;
+                status = describeResponse.Table.TableStatus;
+            }
         }
         public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
             new DataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
