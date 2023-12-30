@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Databases.Elasticsearch;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Databases.Elasticsearch;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Tests.Utils;
 using Nest;
@@ -19,6 +20,27 @@ namespace DatabaseBenchmark.Tests.Databases
             var rawQuery = SerializeSearchRequest(request);
 
             Assert.Equal("{}", rawQuery);
+        }
+
+        [Fact]
+        public void BuildQueryNoArgumentsDistinct()
+        {
+            var query = SampleInputs.NoArgumentsQuery;
+            query.Distinct = true;
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, null);
+
+            Assert.Throws<InputArgumentException>(builder.Build);
+        }
+
+        [Fact]
+        public void BuildQueryDistinct()
+        {
+            var query = SampleInputs.NoArgumentsQuery;
+            query.Distinct = true;
+            query.Columns = ["Category", "SubCategory"];
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, null);
+
+            Assert.Throws<InputArgumentException>(builder.Build);
         }
 
         [Fact]

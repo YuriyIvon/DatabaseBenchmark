@@ -67,6 +67,11 @@ namespace DatabaseBenchmark.Databases.MongoDb
                 request.Add(new BsonDocument("$project", BuildProjection()));
             }
 
+            if (_query.Distinct)
+            {
+                request.AddRange(BuildDistinctAggregate());
+            }
+
             return request;
         }
 
@@ -90,7 +95,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
         private BsonDocument BuildGroupCondition(QueryGroupCondition predicate)
         {
             var predicates = predicate.Conditions
-                .Select(p => BuildCondition(p))
+                .Select(BuildCondition)
                 .Where(p => p != null)
                 .ToArray();
 
@@ -157,6 +162,30 @@ namespace DatabaseBenchmark.Databases.MongoDb
             }
 
             return aggregate;
+        }
+
+        private IEnumerable<BsonDocument> BuildDistinctAggregate()
+        {
+            if (_query.Columns == null)
+            {
+                throw new InputArgumentException("Columns must be explicitly specified if the distinct flag is set");
+            }
+
+            var items = new List<BsonDocument>();
+
+            var groupColumns = new BsonDocument(_query.Columns.ToDictionary(c => c, c => $"${c}"));
+            var groupKey = new BsonDocument("_id", groupColumns);
+            items.Add(new BsonDocument("$group", groupKey));
+
+            var projectionColumns = new BsonDocument()
+            {
+                { "_id", 0 }
+            };
+
+            projectionColumns.AddRange(_query.Columns.ToDictionary(c => c, c => $"$_id.{c}"));
+            items.Add(new BsonDocument("$project", projectionColumns));
+
+            return items;
         }
 
         public BsonDocument BuildProjection()

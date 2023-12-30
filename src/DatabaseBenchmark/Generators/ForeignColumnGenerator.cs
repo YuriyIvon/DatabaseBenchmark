@@ -6,15 +6,15 @@ using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Generators
 {
-    public class ForeignKeyGenerator : IGenerator, ICollectionGenerator
+    public class ForeignColumnGenerator : IGenerator, ICollectionGenerator
     {
         private readonly Faker _faker;
-        private readonly ForeignKeyGeneratorOptions _options;
+        private readonly ForeignColumnGeneratorOptions _options;
         private readonly IDatabase _database;
 
         private ListItemGenerator _itemGenerator = null;
 
-        public ForeignKeyGenerator(Faker faker, ForeignKeyGeneratorOptions options, IDatabase database)
+        public ForeignColumnGenerator(Faker faker, ForeignColumnGeneratorOptions options, IDatabase database)
         {
             _faker = faker;
             _options = options;
@@ -69,7 +69,8 @@ namespace DatabaseBenchmark.Generators
 
             var query = new Query
             {
-                Columns = [_options.ColumnName]
+                Columns = [_options.ColumnName],
+                Distinct = _options.Distinct
             };
 
             var executorFactory = _database.CreateQueryExecutorFactory(table, query);

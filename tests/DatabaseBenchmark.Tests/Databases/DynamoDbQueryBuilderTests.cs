@@ -1,10 +1,8 @@
 ﻿using DatabaseBenchmark.Common;
-using DatabaseBenchmark.Databases.CosmosDb;
 using DatabaseBenchmark.Databases.DynamoDb;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
-using System;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Databases
@@ -15,12 +13,35 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryNoArguments()
         {
             var parametersBuilder = new SqlParametersBuilder('?', true);
-            var builder = new CosmosDbQueryBuilder(SampleInputs.Table, SampleInputs.NoArgumentsQuery, parametersBuilder, null, null);
+            var builder = new DynamoDbQueryBuilder(SampleInputs.Table, SampleInputs.NoArgumentsQuery, parametersBuilder, null, null);
 
             var queryText = builder.Build();
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal(@"SELECT * FROM Sample", normalizedQueryText);
+        }
+
+        [Fact]
+        public void BuildQueryNoArgumentsDistinct()
+        {
+            var parametersBuilder = new SqlParametersBuilder();
+            var query = SampleInputs.NoArgumentsQuery;
+            query.Distinct = true;
+            var builder = new DynamoDbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null);
+
+            Assert.Throws<InputArgumentException>(builder.Build);
+        }
+
+        [Fact]
+        public void BuildQueryDistinct()
+        {
+            var parametersBuilder = new SqlParametersBuilder();
+            var query = SampleInputs.NoArgumentsQuery;
+            query.Distinct = true;
+            query.Columns = ["Category"];
+            var builder = new DynamoDbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null);
+
+            Assert.Throws<InputArgumentException>(builder.Build);
         }
 
         [Fact]
@@ -33,7 +54,7 @@ namespace DatabaseBenchmark.Tests.Databases
             var parametersBuilder = new SqlParametersBuilder('?', true);
             var builder = new DynamoDbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null);
 
-            Assert.Throws<InputArgumentException>(() => builder.Build());
+            Assert.Throws<InputArgumentException>(builder.Build);
         }
 
         [Fact]
@@ -45,7 +66,7 @@ namespace DatabaseBenchmark.Tests.Databases
             var parametersBuilder = new SqlParametersBuilder('?', true);
             var builder = new DynamoDbQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null);
 
-            Assert.Throws<InputArgumentException>(() => builder.Build());
+            Assert.Throws<InputArgumentException>(builder.Build);
         }
 
         [Fact]

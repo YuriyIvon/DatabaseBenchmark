@@ -19,7 +19,7 @@ namespace DatabaseBenchmark.Databases.ClickHouse
         {
         }
 
-        protected override string BuildLimit()
+        protected override string BuildLimitClause()
         {
             var expression = new StringBuilder();
 

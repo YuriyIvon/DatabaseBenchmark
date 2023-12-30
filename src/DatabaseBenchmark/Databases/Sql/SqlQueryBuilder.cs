@@ -42,28 +42,7 @@ namespace DatabaseBenchmark.Databases.Sql
             var query = new StringBuilder();
             query.AppendLine("SELECT");
 
-            var columns = new List<string>();
-
-            if (Query.Columns != null)
-            {
-                columns.AddRange(Query.Columns.Select(BuildRegularSelectColumn));
-            }
-
-            if (Query.Aggregate != null)
-            {
-                columns.AddRange(Query.Aggregate.ResultColumns.Select(BuildAggregateSelectColumn));
-            }
-
-            if (columns.Any())
-            {
-                var expression = string.Join("," + Environment.NewLine, columns.Select(c => Spacing + c));
-                query.AppendLine(expression);
-            }
-            else
-            {
-                query.Append(Spacing);
-                query.AppendLine("*");
-            }
+            query.Append(BuildSelectClause());
 
             query.AppendLine("FROM");
             query.Append(Spacing);
@@ -85,7 +64,7 @@ namespace DatabaseBenchmark.Databases.Sql
                 query.AppendLine("GROUP BY");
                 query.Append(Spacing);
 
-                query.AppendLine(string.Join(", ", Query.Aggregate.GroupColumnNames.Select(BuildRegularColumnReference)));
+                query.AppendLine(BuildGroupByClause());
             }
 
             if (Query.Sort != null)
@@ -93,16 +72,10 @@ namespace DatabaseBenchmark.Databases.Sql
                 query.AppendLine("ORDER BY");
                 query.Append(Spacing);
 
-                query.AppendLine(
-                    string.Join(", ",
-                        Query.Sort.Select(x =>
-                        {
-                            var direction = x.Direction == QuerySortDirection.Ascending ? "ASC" : "DESC";
-                            return $"{BuildRegularColumnReference(x.ColumnName)} {direction}";
-                        })));
+                query.AppendLine(BuildOrderByClause());
             }
 
-            var limit = BuildLimit();
+            var limit = BuildLimitClause();
             if (!string.IsNullOrEmpty(limit))
             {
                 query.Append(limit);
@@ -134,6 +107,45 @@ namespace DatabaseBenchmark.Databases.Sql
 
             string sourceColumnModifier = column.Function == QueryAggregateFunction.DistinctCount ? "DISTINCT" : "";
             return $"{aggregateFunction}({sourceColumnModifier}{sourceColumnExpression}) {column.ResultColumnName}";
+        }
+
+        protected virtual string BuildSelectClause()
+        {
+            var selectClause = new StringBuilder();
+            var columns = new List<string>();
+
+            if (Query.Columns != null)
+            {
+                columns.AddRange(Query.Columns.Select(BuildRegularSelectColumn));
+            }
+
+            if (Query.Aggregate != null)
+            {
+                columns.AddRange(Query.Aggregate.ResultColumns.Select(BuildAggregateSelectColumn));
+            }
+
+            if (columns.Any())
+            {
+                if (Query.Distinct)
+                {
+                    selectClause.AppendLine("DISTINCT");
+                }
+
+                var expression = string.Join("," + Environment.NewLine, columns.Select(c => Spacing + c));
+                selectClause.AppendLine(expression);
+            }
+            else
+            {
+                if (Query.Distinct)
+                {
+                    throw new InputArgumentException("Columns must be explicitly specified if the distinct flag is set");
+                }
+
+                selectClause.Append(Spacing);
+                selectClause.AppendLine("*");
+            }
+
+            return selectClause.ToString();
         }
 
         protected virtual string BuildCondition(IQueryCondition condition)
@@ -291,7 +303,18 @@ namespace DatabaseBenchmark.Databases.Sql
             return conditionExpression.ToString();
         }
 
-        protected virtual string BuildLimit()
+        protected virtual string BuildGroupByClause() =>
+            string.Join(", ", Query.Aggregate.GroupColumnNames.Select(BuildRegularColumnReference));
+
+        protected virtual string BuildOrderByClause() =>
+            string.Join(", ",
+                Query.Sort.Select(x =>
+                {
+                    var direction = x.Direction == QuerySortDirection.Ascending ? "ASC" : "DESC";
+                    return $"{BuildRegularColumnReference(x.ColumnName)} {direction}";
+                }));
+
+        protected virtual string BuildLimitClause()
         {
             var expression = new StringBuilder();
 

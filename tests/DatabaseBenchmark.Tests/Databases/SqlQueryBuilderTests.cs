@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Databases.Sql;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
@@ -19,6 +20,32 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal(@"SELECT * FROM Sample", normalizedQueryText);
+        }
+
+        [Fact]
+        public void BuildQueryNoArgumentsDistinct()
+        {
+            var parametersBuilder = new SqlParametersBuilder();
+            var query = SampleInputs.NoArgumentsQuery;
+            query.Distinct = true;
+            var builder = new SqlQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null);
+
+            Assert.Throws<InputArgumentException>(builder.Build);
+        }
+
+        [Fact]
+        public void BuildQueryDistinct()
+        {
+            var parametersBuilder = new SqlParametersBuilder();
+            var query = SampleInputs.NoArgumentsQuery;
+            query.Distinct = true;
+            query.Columns = ["Category", "SubCategory"];
+            var builder = new SqlQueryBuilder(SampleInputs.Table, query, parametersBuilder, null, null);
+
+            var queryText = builder.Build();
+
+            var normalizedQueryText = queryText.NormalizeSpaces();
+            Assert.Equal(@"SELECT DISTINCT Category, SubCategory FROM Sample", normalizedQueryText);
         }
 
         [Fact]

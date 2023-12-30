@@ -22,6 +22,16 @@ namespace DatabaseBenchmark.Databases.DynamoDb
         protected override string BuildAggregateSelectColumn(QueryAggregateColumn column) =>
             throw new InputArgumentException("DynamoDB doesn't support aggregations");
 
+        protected override string BuildSelectClause()
+        {
+            if (Query.Distinct)
+            {
+                throw new InputArgumentException("DynamoDB doesn't support distinct queries");
+            }
+
+            return base.BuildSelectClause();
+        }
+
         protected override string BuildStringCondition(QueryPrimitiveCondition condition, object value)
         {
             var column = GetColumn(condition.ColumnName);
@@ -49,7 +59,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
             };
         }
 
-        protected override string BuildLimit()
+        protected override string BuildLimitClause()
         {
             if (Query.Take > 0 || Query.Skip > 0)
             {

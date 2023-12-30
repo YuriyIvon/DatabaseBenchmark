@@ -28,6 +28,11 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
         public SearchRequest Build()
         {
+            if (_query.Distinct)
+            {
+                throw new InputArgumentException("Distinct queries are not yet supported for Elasticsearch");
+            }
+
             var request = new SearchRequest(_table.Name);
 
             if (_query.Columns != null)

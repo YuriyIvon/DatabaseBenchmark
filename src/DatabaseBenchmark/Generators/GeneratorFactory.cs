@@ -25,7 +25,7 @@ namespace DatabaseBenchmark.Generators
                 GeneratorType.DateTime => new DateTimeGenerator(_faker, (DateTimeGeneratorOptions)options),
                 GeneratorType.Finance => new FinanceGenerator(_faker, (FinanceGeneratorOptions)options),
                 GeneratorType.Float => new FloatGenerator(_faker, (FloatGeneratorOptions)options),
-                GeneratorType.ForeignKey => new ForeignKeyGenerator(_faker, (ForeignKeyGeneratorOptions)options, _database),
+                GeneratorType.ForeignColumn => new ForeignColumnGenerator(_faker, (ForeignColumnGeneratorOptions)options, _database),
                 GeneratorType.Guid => new GuidGenerator(_faker),
                 GeneratorType.Integer => new IntegerGenerator(_faker, (IntegerGeneratorOptions)options),
                 GeneratorType.Internet => new InternetGenerator(_faker, (InternetGeneratorOptions)options),

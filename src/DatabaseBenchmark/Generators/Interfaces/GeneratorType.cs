@@ -8,7 +8,7 @@
         DateTime,
         Finance,
         Float,
-        ForeignKey,
+        ForeignColumn,
         Guid,
         Integer,
         Internet,

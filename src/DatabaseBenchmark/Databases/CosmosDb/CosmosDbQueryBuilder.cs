@@ -34,7 +34,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             };
         }
 
-        protected override string BuildLimit()
+        protected override string BuildLimitClause()
         {
             var expression = new StringBuilder();
 

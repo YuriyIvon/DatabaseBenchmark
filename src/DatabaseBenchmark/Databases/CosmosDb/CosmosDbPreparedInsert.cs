@@ -59,6 +59,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             key switch
             {
                 bool boolKey => new PartitionKey(boolKey),
+                int intKey => new PartitionKey(intKey),
                 double doubleKey => new PartitionKey(doubleKey),
                 _ => new PartitionKey(key.ToString())
             };

@@ -4,6 +4,8 @@ namespace DatabaseBenchmark.Model
 {
     public class Query
     {
+        public bool Distinct { get; set; } = false;
+
         public string[] Columns { get; set; }
 
         [JsonConverter(typeof(JsonQueryConditionConverter))]

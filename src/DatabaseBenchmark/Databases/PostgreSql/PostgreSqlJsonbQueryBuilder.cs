@@ -57,7 +57,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
         protected override string BuildGroupCondition(QueryGroupCondition condition)
         {
             var conditions = condition.Conditions
-                .Select(p => BuildCondition(p))
+                .Select(BuildCondition)
                 .Where(p => p != null)
                 .ToArray();
 
@@ -174,7 +174,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                 return condition.Operator switch
                 {
                     QueryPrimitiveOperator.Equals => basicExpression,
-                    QueryPrimitiveOperator.NotEquals => BuildNotCondition(new string[] { basicExpression }),
+                    QueryPrimitiveOperator.NotEquals => BuildNotCondition([basicExpression]),
                     _ => throw new InputArgumentException($"Primitive operator \"{condition.Operator}\" can't be used with NULL operand")
                 };
             }
