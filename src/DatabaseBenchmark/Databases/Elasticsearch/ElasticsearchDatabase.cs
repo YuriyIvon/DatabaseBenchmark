@@ -83,12 +83,12 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             {
                 connectionSettings.EnableDebugMode(response =>
                 {
-                    if (_environment.TraceQueries)
+                    if (_environment.TraceQueries && response.RequestBodyInBytes != null)
                     {
                         _environment.WriteLine(Encoding.UTF8.GetString(response.RequestBodyInBytes));
                     }
 
-                    if (_environment.TraceResults)
+                    if (_environment.TraceResults && response.ResponseBodyInBytes != null)
                     {
                         _environment.WriteLine(Encoding.UTF8.GetString(response.ResponseBodyInBytes));
                     }
