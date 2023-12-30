@@ -1,7 +1,9 @@
-﻿namespace DatabaseBenchmark.Generators.Interfaces
+﻿using DatabaseBenchmark.Model;
+
+namespace DatabaseBenchmark.Generators.Interfaces
 {
     public interface IGeneratorFactory
     {
-        public IGenerator Create(GeneratorType type, IGeneratorOptions options);
+        public IGenerator Create(IGeneratorOptions options);
     }
 }

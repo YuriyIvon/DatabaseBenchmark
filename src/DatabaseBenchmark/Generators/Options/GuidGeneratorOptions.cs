@@ -1,9 +1,7 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-
-namespace DatabaseBenchmark.Generators.Options
+﻿namespace DatabaseBenchmark.Generators.Options
 {
-    public class GuidGeneratorOptions : IGeneratorOptions
+    public class GuidGeneratorOptions : GeneratorOptionsBase
     {
-        public GeneratorType Type => GeneratorType.Guid;
+        public override GeneratorType Type => GeneratorType.Guid;
     }
 }

@@ -1,10 +1,8 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-
-namespace DatabaseBenchmark.Generators.Options
+﻿namespace DatabaseBenchmark.Generators.Options
 {
-    public class StringGeneratorOptions : IGeneratorOptions
+    public class StringGeneratorOptions : GeneratorOptionsBase
     {
-        public GeneratorType Type => GeneratorType.String;
+        public override GeneratorType Type => GeneratorType.String;
 
         public int MinLength { get; set; } = 1;
 

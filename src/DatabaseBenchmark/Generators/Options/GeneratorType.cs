@@ -1,4 +1,4 @@
-﻿namespace DatabaseBenchmark.Generators.Interfaces
+﻿namespace DatabaseBenchmark.Generators.Options
 {
     public enum GeneratorType
     {

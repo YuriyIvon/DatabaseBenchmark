@@ -1,10 +1,8 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-
-namespace DatabaseBenchmark.Generators.Options
+﻿namespace DatabaseBenchmark.Generators.Options
 {
-    public class FloatGeneratorOptions : IGeneratorOptions
+    public class FloatGeneratorOptions : GeneratorOptionsBase
     {
-        public GeneratorType Type => GeneratorType.Float;
+        public override GeneratorType Type => GeneratorType.Float;
 
         public double MinValue { get; set; } = 0;
 

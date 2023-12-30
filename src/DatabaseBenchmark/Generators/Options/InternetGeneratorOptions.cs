@@ -1,11 +1,10 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace DatabaseBenchmark.Generators.Options
 {
-    public class InternetGeneratorOptions : IGeneratorOptions
+    public class InternetGeneratorOptions : GeneratorOptionsBase
     {
-        public GeneratorType Type => GeneratorType.Internet;
+        public override GeneratorType Type => GeneratorType.Internet;
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GeneratorKind Kind { get; set; } = GeneratorKind.Email;

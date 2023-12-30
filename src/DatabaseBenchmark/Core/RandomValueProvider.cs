@@ -38,25 +38,25 @@ namespace DatabaseBenchmark.Core
         {
             if (!_generators.TryGetValue((randomizationRule, collection), out var generator))
             {
-                var generatorOptions = GeneratorOptionsDeserializer.Deserialize(randomizationRule.GeneratorOptions);
+                var options = randomizationRule.GeneratorOptions;
 
                 if (randomizationRule.UseExistingValues)
                 {
-                    if (generatorOptions != null && generatorOptions is not ListItemGeneratorOptions)
+                    if (options != null && options is not ListItemGeneratorOptions)
                     {
                         throw new InputArgumentException("Only ListItem generator type is allowed when UseExistingValues is set");
                     }
 
-                    var options = generatorOptions as ListItemGeneratorOptions ?? new ListItemGeneratorOptions();
-                    options.Items = _distinctValuesProvider.GetDistinctValues(tableName, columnName);
+                    var listItemGeneratorOptions = options as ListItemGeneratorOptions ?? new ListItemGeneratorOptions();
+                    listItemGeneratorOptions.Items = _distinctValuesProvider.GetDistinctValues(tableName, columnName);
 
-                    generator = new ListItemGenerator(_faker, options);
+                    generator = _generatorFactory.Create(listItemGeneratorOptions);
                 }
                 else
                 {
                     var columnType = _columnPropertiesProvider.GetColumnType(tableName, columnName);
-                    generatorOptions ??= GetDefaultGeneratorOptions(columnType);
-                    generator = _generatorFactory.Create(generatorOptions.Type, generatorOptions);
+                    options ??= GetDefaultGeneratorOptions(columnType);
+                    generator = _generatorFactory.Create(options);
                 }
 
                 if (collection)

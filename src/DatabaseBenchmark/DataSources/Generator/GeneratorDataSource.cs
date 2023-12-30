@@ -17,7 +17,7 @@ namespace DatabaseBenchmark.DataSources.Generator
 
         public GeneratorDataSource(string filePath, IDatabase database)
         {
-            _options = JsonUtils.DeserializeFile<GeneratorDataSourceOptions>(filePath);
+            _options = JsonUtils.DeserializeFile<GeneratorDataSourceOptions>(filePath, new GeneratorOptionsConverter());
 
             _columnIndexes = _options.Columns
                 .Select((c, i) => new { c.Name, Index = i })
@@ -25,8 +25,7 @@ namespace DatabaseBenchmark.DataSources.Generator
 
             var generatorFactory = new GeneratorFactory(database);
             _generators = _options.Columns
-                .Select(c => GeneratorOptionsDeserializer.Deserialize(c.GeneratorOptions))
-                .Select(go => generatorFactory.Create(go.Type, go))
+                .Select(c => generatorFactory.Create(c.GeneratorOptions))
                 .ToArray();
         }
 

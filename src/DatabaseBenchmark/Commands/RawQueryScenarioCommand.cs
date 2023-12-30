@@ -4,6 +4,7 @@ using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
+using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Reporting;
 
@@ -59,7 +60,7 @@ namespace DatabaseBenchmark.Commands
 
                     if (scenarioStep.QueryParametersFilePath != null)
                     {
-                        query.Parameters = JsonUtils.DeserializeFile<RawQueryParameter[]>(scenarioStep.QueryParametersFilePath);
+                        query.Parameters = JsonUtils.DeserializeFile<RawQueryParameter[]>(scenarioStep.QueryParametersFilePath, new GeneratorOptionsConverter());
                     }
 
                     var executorFactory = database.CreateRawQueryExecutorFactory(query);

@@ -1,12 +1,11 @@
 ﻿using DatabaseBenchmark.Common;
-using DatabaseBenchmark.Generators.Interfaces;
 using System.Text.Json.Serialization;
 
 namespace DatabaseBenchmark.Generators.Options
 {
-    public class ListItemGeneratorOptions : IGeneratorOptions
+    public class ListItemGeneratorOptions : GeneratorOptionsBase
     {
-        public GeneratorType Type => GeneratorType.ListItem;
+        public override GeneratorType Type => GeneratorType.ListItem;
 
         [JsonConverter(typeof(JsonObjectArrayConverter))]
         public object[] Items { get; set; }

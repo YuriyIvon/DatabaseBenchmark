@@ -1,11 +1,10 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-using DatabaseBenchmark.Model;
+﻿using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Generators.Options
 {
-    public class ForeignColumnGeneratorOptions : IGeneratorOptions
+    public class ForeignColumnGeneratorOptions : GeneratorOptionsBase
     {
-        public GeneratorType Type => GeneratorType.ForeignColumn;
+        public override GeneratorType Type => GeneratorType.ForeignColumn;
 
         public string TableName { get; set; }
 

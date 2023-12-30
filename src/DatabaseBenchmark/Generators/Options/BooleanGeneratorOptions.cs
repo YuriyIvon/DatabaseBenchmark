@@ -1,10 +1,8 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-
-namespace DatabaseBenchmark.Generators.Options
+﻿namespace DatabaseBenchmark.Generators.Options
 {
-    public class BooleanGeneratorOptions : IGeneratorOptions
+    public class BooleanGeneratorOptions : GeneratorOptionsBase
     {
-        public GeneratorType Type => GeneratorType.Boolean;
+        public override GeneratorType Type => GeneratorType.Boolean;
 
         public float? Weight { get; set; }
     }

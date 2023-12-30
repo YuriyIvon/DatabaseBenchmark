@@ -1,5 +1,4 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-using DatabaseBenchmark.Generators.Options;
+﻿using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
 using System;
 using System.Collections.Generic;
@@ -50,8 +49,9 @@ namespace DatabaseBenchmark.Tests.Generators
         [MemberData(nameof(SampleData))]
         public void DeserializeOptions(string sampleJson, IGeneratorOptions sampleOptions)
         {
-            using var jsonDocument = JsonDocument.Parse(sampleJson);
-            var options = GeneratorOptionsDeserializer.Deserialize(jsonDocument.RootElement);
+            var serializerOptions = new JsonSerializerOptions();
+            serializerOptions.Converters.Add(new GeneratorOptionsConverter());
+            var options = JsonSerializer.Deserialize<IGeneratorOptions>(sampleJson, serializerOptions);
 
             var serializedOptions = JsonSerializer.Serialize(options, options.GetType());
             var serializedSampleOptions = JsonSerializer.Serialize(sampleOptions, sampleOptions.GetType());

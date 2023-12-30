@@ -11,7 +11,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
         private readonly Table _table;
         private readonly IDataSourceReader _sourceReader;
         private readonly InsertBuilderOptions _options;
-        private readonly Dictionary<object, List<IDictionary<string, object>>> _batches = new();
+        private readonly Dictionary<object, List<IDictionary<string, object>>> _batches = [];
 
         public int BatchSize => _options.BatchSize;
 

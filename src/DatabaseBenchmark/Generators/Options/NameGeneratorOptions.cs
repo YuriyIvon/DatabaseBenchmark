@@ -1,11 +1,10 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace DatabaseBenchmark.Generators.Options
 {
-    public class NameGeneratorOptions : IGeneratorOptions
+    public class NameGeneratorOptions : GeneratorOptionsBase
     {
-        public GeneratorType Type => GeneratorType.Name;
+        public override GeneratorType Type => GeneratorType.Name;
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GeneratorKind Kind { get; set; } = GeneratorKind.FirstName;

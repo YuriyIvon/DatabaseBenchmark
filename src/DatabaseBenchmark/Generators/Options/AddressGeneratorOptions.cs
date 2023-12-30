@@ -1,11 +1,10 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace DatabaseBenchmark.Generators.Options
 {
-    public class AddressGeneratorOptions : IGeneratorOptions
+    public class AddressGeneratorOptions : GeneratorOptionsBase
     {
-        public GeneratorType Type => GeneratorType.Address;
+        public override GeneratorType Type => GeneratorType.Address;
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GeneratorKind Kind { get; set; } = GeneratorKind.Country;

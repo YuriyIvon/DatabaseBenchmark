@@ -1,5 +1,4 @@
 ﻿using DatabaseBenchmark.Model;
-using System.Text.Json;
 
 namespace DatabaseBenchmark.DataSources.Generator
 {
@@ -7,6 +6,6 @@ namespace DatabaseBenchmark.DataSources.Generator
     {
         public string Name { get; set; }
 
-        public JsonElement GeneratorOptions { get; set; }
+        public IGeneratorOptions GeneratorOptions { get; set; }
     }
 }

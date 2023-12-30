@@ -1,10 +1,8 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-
-namespace DatabaseBenchmark.Generators.Options
+﻿namespace DatabaseBenchmark.Generators.Options
 {
-    public class DateTimeGeneratorOptions : IGeneratorOptions
+    public class DateTimeGeneratorOptions : GeneratorOptionsBase
     {
-        public GeneratorType Type => GeneratorType.DateTime;
+        public override GeneratorType Type => GeneratorType.DateTime;
 
         public DateTime MinValue { get; set; } = DateTime.Now;
 

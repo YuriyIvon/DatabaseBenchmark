@@ -1,11 +1,10 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace DatabaseBenchmark.Generators.Options
 {
-    public class FinanceGeneratorOptions : IGeneratorOptions
+    public class FinanceGeneratorOptions : GeneratorOptionsBase
     {
-        public GeneratorType Type => GeneratorType.Finance;
+        public override GeneratorType Type => GeneratorType.Finance;
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GeneratorKind Kind { get; set; } = GeneratorKind.Iban;

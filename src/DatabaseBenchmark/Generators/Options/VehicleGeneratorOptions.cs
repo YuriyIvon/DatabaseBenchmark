@@ -1,11 +1,10 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace DatabaseBenchmark.Generators.Options
 {
-    public class VehicleGeneratorOptions : IGeneratorOptions
+    public class VehicleGeneratorOptions : GeneratorOptionsBase
     {
-        public GeneratorType Type => GeneratorType.Vehicle;
+        public override GeneratorType Type => GeneratorType.Vehicle;
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GeneratorKind Kind { get; set; } = GeneratorKind.Manufacturer;

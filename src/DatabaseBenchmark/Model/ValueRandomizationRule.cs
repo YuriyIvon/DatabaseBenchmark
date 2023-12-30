@@ -6,7 +6,7 @@ namespace DatabaseBenchmark.Model
     {
         public bool UseExistingValues { get; set; } = true;
 
-        public JsonElement GeneratorOptions { get; set; }
+        public IGeneratorOptions GeneratorOptions { get; set; }
 
         public int MinCollectionLength { get; set; } = 1;
 

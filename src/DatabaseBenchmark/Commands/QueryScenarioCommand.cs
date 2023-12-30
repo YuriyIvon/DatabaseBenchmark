@@ -4,6 +4,7 @@ using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
+using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Reporting;
 
@@ -52,7 +53,7 @@ namespace DatabaseBenchmark.Commands
                     var databaseFactory = new DatabaseFactory(_environment, jsonOptionsProvider);
                     var database = databaseFactory.Create(scenarioStep.DatabaseType, scenarioStep.ConnectionString);
                     var table = JsonUtils.DeserializeFile<Table>(scenarioStep.TableFilePath);
-                    var query = JsonUtils.DeserializeFile<Query>(scenarioStep.QueryFilePath);
+                    var query = JsonUtils.DeserializeFile<Query>(scenarioStep.QueryFilePath, new GeneratorOptionsConverter());
 
                     if (!string.IsNullOrEmpty(scenarioStep.TableName))
                     {

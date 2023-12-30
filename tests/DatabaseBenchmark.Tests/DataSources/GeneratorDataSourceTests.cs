@@ -6,8 +6,12 @@ namespace DatabaseBenchmark.Tests.DataSources
 {
     public class GeneratorDataSourceTests
     {
-        private readonly GeneratorDataSource _dataSource =
-            new GeneratorDataSource("DataSources/GeneratorDataSourceOptions.json", null);
+        private readonly GeneratorDataSource _dataSource;
+
+        public GeneratorDataSourceTests()
+        {
+            _dataSource = new GeneratorDataSource("DataSources/GeneratorDataSourceOptions.json", null);
+        }
 
         [Fact]
         public void GenerateValues()

@@ -2,11 +2,11 @@
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
+using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
 using NSubstitute;
 using System;
-using System.Text.Json;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Common
@@ -48,7 +48,7 @@ namespace DatabaseBenchmark.Tests.Common
             var randomizationRule = new ValueRandomizationRule
             {
                 UseExistingValues = false,
-                GeneratorOptions = JsonDocument.Parse("{\"Type\":\"String\"}").RootElement
+                GeneratorOptions = new StringGeneratorOptions()
             };
 
             var value = _randomValueProvider.GetRandomValue(_tableName, _distinctColumnName, randomizationRule);
@@ -64,7 +64,7 @@ namespace DatabaseBenchmark.Tests.Common
             var randomizationRule = new ValueRandomizationRule
             {
                 UseExistingValues = false,
-                GeneratorOptions = JsonDocument.Parse("{\"Type\":\"Integer\"}").RootElement
+                GeneratorOptions = new IntegerGeneratorOptions()
             };
 
             var value = _randomValueProvider.GetRandomValue(_tableName, integerColumn, randomizationRule);
@@ -80,7 +80,7 @@ namespace DatabaseBenchmark.Tests.Common
             var randomizationRule = new ValueRandomizationRule
             {
                 UseExistingValues = false,
-                GeneratorOptions = JsonDocument.Parse("{\"Type\":\"Float\"}").RootElement
+                GeneratorOptions = new FloatGeneratorOptions()
             };
 
             var value = _randomValueProvider.GetRandomValue(_tableName, doubleColumn, randomizationRule);
@@ -96,7 +96,7 @@ namespace DatabaseBenchmark.Tests.Common
             var randomizationRule = new ValueRandomizationRule
             {
                 UseExistingValues = false,
-                GeneratorOptions = JsonDocument.Parse("{\"Type\":\"DateTime\"}").RootElement
+                GeneratorOptions = new DateTimeGeneratorOptions()
             };
 
             var value = _randomValueProvider.GetRandomValue(_tableName, dateTimeColumn, randomizationRule);
