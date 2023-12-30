@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Options;
 using System;
@@ -16,7 +17,7 @@ namespace DatabaseBenchmark.Tests.Generators
         };
 
         [Fact]
-        public void GenerateValue()
+        public void GenerateValueNoDelta()
         {
             var generator = new DateTimeGenerator(_faker, _options);
 
@@ -30,7 +31,7 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateValueConstantDelta()
+        public void GenerateValueWithDelta()
         {
             DateTime maxValue = DateTime.Now;
             DateTime minValue = maxValue.AddYears(-10);
@@ -69,7 +70,17 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateIncreasingValueConstantDelta()
+        public void GenerateIncreasingValueNoDelta()
+        {
+            _options.Increasing = true;
+
+            var generator = new DateTimeGenerator(_faker, _options);
+
+            Assert.Throws<InputArgumentException>(generator.Generate);
+        }
+
+        [Fact]
+        public void GenerateIncreasingValueWithConstantDelta()
         {
             _options.Delta = TimeSpan.FromDays(1);
             _options.Increasing = true;
@@ -90,7 +101,7 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateIncreasingValueRandomDelta()
+        public void GenerateIncreasingValueWithRandomDelta()
         {
             _options.Delta = TimeSpan.FromDays(1);
             _options.Increasing = true;

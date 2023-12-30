@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Options;
 using Xunit;
@@ -15,7 +16,7 @@ namespace DatabaseBenchmark.Tests.Generators
         };
 
         [Fact]
-        public void GenerateValue()
+        public void GenerateValueNoDelta()
         {
             var generator = new FloatGenerator(_faker, _options);
 
@@ -29,7 +30,34 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateIncreasingValueConstantDelta()
+        public void GenerateValueWithDelta()
+        {
+            _options.Delta = 2;
+
+            var generator = new FloatGenerator(_faker, _options);
+
+            var value = generator.Generate();
+
+            Assert.IsType<double>(value);
+
+            var doubleValue = (double)value;
+            Assert.True(doubleValue >= _options.MinValue);
+            Assert.True(doubleValue <= _options.MaxValue);
+            Assert.Equal(1, doubleValue % 2);
+        }
+
+        [Fact]
+        public void GenerateIncreasingValueNoDelta()
+        {
+            _options.Increasing = true;
+
+            var generator = new FloatGenerator(_faker, _options);
+
+            Assert.Throws<InputArgumentException>(generator.Generate);
+        }
+
+        [Fact]
+        public void GenerateIncreasingValueWithConstantDelta()
         {
             _options.Delta = 1;
             _options.Increasing = true;
@@ -50,7 +78,7 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateIncreasingValueRandomDelta()
+        public void GenerateIncreasingValueWithRandomDelta()
         {
             _options.Delta = 1;
             _options.Increasing = true;

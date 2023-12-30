@@ -12,7 +12,7 @@ namespace DatabaseBenchmark.Generators.Options
 
         public bool Increasing { get; set; } = false;
 
-        public int Delta { get; set; } = 1;
+        public int Delta { get; set; } = 0;
 
         public bool RandomizeDelta { get; set; } = false;
 

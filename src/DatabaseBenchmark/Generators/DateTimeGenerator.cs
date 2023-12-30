@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
 
@@ -21,6 +22,11 @@ namespace DatabaseBenchmark.Generators
         {
             if (_options.Increasing)
             {
+                if (_options.Delta.TotalMilliseconds == 0)
+                {
+                    throw new InputArgumentException("Delta must be set for the \"Increasing\" generator mode");
+                }
+
                 if (_lastValue == null)
                 {
                     _lastValue = _options.MinValue;
@@ -41,7 +47,7 @@ namespace DatabaseBenchmark.Generators
 
                 return _lastValue;
             }
-            else
+            else if (_options.Delta.TotalMilliseconds != 0)
             {
                 var deltaMilliseconds = _options.Delta.TotalMilliseconds;
                 var rangeMilliseconds = (_options.MaxValue - _options.MinValue).TotalMilliseconds;
@@ -49,6 +55,10 @@ namespace DatabaseBenchmark.Generators
                 var randomSegment = _faker.Random.Long(0, totalSegments);
 
                 return _options.MinValue.AddMilliseconds(deltaMilliseconds * randomSegment);
+            }
+            else
+            {
+                return _faker.Date.Between(_options.MinValue, _options.MaxValue);
             }
         }
     }

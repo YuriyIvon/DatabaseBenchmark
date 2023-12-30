@@ -12,7 +12,7 @@ namespace DatabaseBenchmark.Generators.Options
 
         public bool Increasing { get; set; } = false;
 
-        public TimeSpan Delta { get; set; } = TimeSpan.FromDays(1);
+        public TimeSpan Delta { get; set; } = TimeSpan.Zero;
 
         public bool RandomizeDelta { get; set; } = false;
     }
