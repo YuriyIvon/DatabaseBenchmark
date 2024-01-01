@@ -4,6 +4,7 @@
     {
         Address,
         Boolean,
+        Collection, //Not exposed through the factory yet
         Company,
         DateTime,
         Finance,
@@ -14,6 +15,7 @@
         Internet,
         ListItem,
         Name,
+        Null,
         Phone,
         String,
         Text,

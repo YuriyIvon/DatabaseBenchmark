@@ -1,17 +1,18 @@
 ﻿using Bogus;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
+using DatabaseBenchmark.Generators.Options;
 using NSubstitute;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Generators
 {
-    public class NullGeneratorDecoratorTests
+    public class NullGeneratorTests
     {
         private readonly Faker _faker = new();
         private readonly IGenerator _baseGenerator;
 
-        public NullGeneratorDecoratorTests()
+        public NullGeneratorTests()
         {
             _baseGenerator = Substitute.For<IGenerator>();
             _baseGenerator.Generate().Returns(1);
@@ -19,7 +20,7 @@ namespace DatabaseBenchmark.Tests.Generators
 
         public void GenerateNull()
         {
-            var generator = new NullGeneratorDecorator(_faker, _baseGenerator, 1);
+            var generator = new NullGenerator(_faker, new NullGeneratorOptions { NullProbability = 1 }, _baseGenerator);
             var value = generator.Generate();
 
             Assert.Null(value);
@@ -27,7 +28,7 @@ namespace DatabaseBenchmark.Tests.Generators
 
         public void GenerateNotNull()
         {
-            var generator = new NullGeneratorDecorator(_faker, _baseGenerator, 0);
+            var generator = new NullGenerator(_faker, new NullGeneratorOptions { NullProbability = 0 }, _baseGenerator);
             var value = generator.Generate();
 
             Assert.Equal(1, value);

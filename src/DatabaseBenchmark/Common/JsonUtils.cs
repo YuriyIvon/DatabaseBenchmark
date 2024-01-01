@@ -10,10 +10,7 @@ namespace DatabaseBenchmark.Common
             var json = File.ReadAllText(filePath);
 
             var options = new JsonSerializerOptions();
-            if (converters != null)
-            {
-                converters.ToList().ForEach(options.Converters.Add);
-            }
+            converters?.ToList().ForEach(options.Converters.Add);
 
             return JsonSerializer.Deserialize<T>(json, options);
         }

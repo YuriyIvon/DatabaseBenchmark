@@ -36,18 +36,13 @@ namespace DatabaseBenchmark.Generators
                 InternetGeneratorOptions o => new InternetGenerator(_faker, o),
                 ListItemGeneratorOptions o => new ListItemGenerator(_faker, o),
                 NameGeneratorOptions o => new NameGenerator(_faker, o),
+                NullGeneratorOptions o => new NullGenerator(_faker, o, Create(o.SourceGeneratorOptions)),
                 PhoneGeneratorOptions o => new PhoneGenerator(_faker, o),
                 StringGeneratorOptions o => new StringGenerator(_faker, o),
                 TextGeneratorOptions o => new TextGenerator(_faker, o),
                 VehicleGeneratorOptions o => new VehicleGenerator(_faker, o),
                 _ => throw new InputArgumentException($"Unknown generator options type \"{options.GetType()}\"")
             };
-
-            var nullProbability = ((GeneratorOptionsBase)options).NullProbability;
-            if (nullProbability > 0)
-            {
-                generator = new NullGeneratorDecorator(_faker, generator, nullProbability);
-            }
 
             return generator;
         }

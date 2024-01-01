@@ -1,13 +1,13 @@
 ﻿using Bogus;
-using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
+using DatabaseBenchmark.Generators.Options;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Generators
 {
-    public class CollectionGeneratorDecoratorTests
+    public class CollectionGeneratorTests
     {
         private const string SingleValue = "value";
         private const string CollectionValue = "collection";
@@ -19,7 +19,10 @@ namespace DatabaseBenchmark.Tests.Generators
         [Fact]
         public void GenerateCollectionWithValueGenerator()
         {
-            var collectionGenerator = new CollectionGeneratorDecorator(_faker, new ValueGenerator(), MinLength, MaxLength);
+            var collectionGenerator = new DatabaseBenchmark.Generators.CollectionGenerator(
+                _faker, 
+                new ValueGenerator(),
+                new CollectionGeneratorOptions { MinLength = MinLength, MaxLength = MaxLength });
 
             var collection = (IEnumerable<object>)collectionGenerator.Generate();
 
@@ -31,7 +34,10 @@ namespace DatabaseBenchmark.Tests.Generators
         [Fact]
         public void GenerateCollectionWithCollectionGenerator()
         {
-            var collectionGenerator = new CollectionGeneratorDecorator(_faker, new CollectionGenerator(), MinLength, MaxLength);
+            var collectionGenerator = new DatabaseBenchmark.Generators.CollectionGenerator(
+                _faker,
+                new CollectionGenerator(),
+                new CollectionGeneratorOptions { MinLength = MinLength, MaxLength = MaxLength });
 
             var collection = (IEnumerable<object>)collectionGenerator.Generate();
 

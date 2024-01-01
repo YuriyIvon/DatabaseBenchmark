@@ -12,10 +12,13 @@
     },
     { 
       "Name": "CountryCode",
-      "GeneratorOptions": { 
-        "Type": "Address",
-        "Kind": "CountryCode",
-        "NullProbability": 0.5
+      "GeneratorOptions": {
+        "Type": "Null",
+        "NullProbability": 0.5,
+        "SourceGeneratorOptions": { 
+          "Type": "Address",
+          "Kind": "CountryCode"
+        }        
       }
     },
     { 
