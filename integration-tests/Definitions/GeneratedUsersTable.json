@@ -1,0 +1,9 @@
+{
+  "Name": "GeneratedUsers",
+  "Columns": [
+    { "Name": "Id", "Type": "Integer", "Nullable": false, "Queryable": false, "PartitionKey": true },
+    { "Name": "CreatedAt", "Type": "DateTime", "Queryable": true },
+    { "Name": "FirstName", "Type": "String", "Queryable": true },
+    { "Name": "LastName", "Type": "String", "Queryable": true }
+  ]
+}

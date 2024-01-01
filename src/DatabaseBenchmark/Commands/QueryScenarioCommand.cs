@@ -45,6 +45,8 @@ namespace DatabaseBenchmark.Commands
 
             try
             {
+                var queryScenarioFolder = Path.GetDirectoryName(options.QueryScenarioFilePath);
+
                 foreach (var rawScenarioStep in scenarioSteps)
                 {
                     var jsonOptionsProvider = new JsonOptionsProvider(rawScenarioStep.ToString(), parametersJson);
@@ -52,8 +54,8 @@ namespace DatabaseBenchmark.Commands
 
                     var databaseFactory = new DatabaseFactory(_environment, jsonOptionsProvider);
                     var database = databaseFactory.Create(scenarioStep.DatabaseType, scenarioStep.ConnectionString);
-                    var table = JsonUtils.DeserializeFile<Table>(scenarioStep.TableFilePath);
-                    var query = JsonUtils.DeserializeFile<Query>(scenarioStep.QueryFilePath, new GeneratorOptionsConverter());
+                    var table = JsonUtils.DeserializeFile<Table>(PathUtils.CombinePaths(queryScenarioFolder, scenarioStep.TableFilePath));
+                    var query = JsonUtils.DeserializeFile<Query>(PathUtils.CombinePaths(queryScenarioFolder, scenarioStep.QueryFilePath), new GeneratorOptionsConverter());
 
                     if (!string.IsNullOrEmpty(scenarioStep.TableName))
                     {

@@ -1,0 +1,4 @@
+SELECT Sales.ItemType, SUM(Sales.UnitsSold * Sales.UnitPrice) TotalPrice
+FROM Sales
+WHERE Sales.Country=${Country}
+GROUP BY Sales.ItemType

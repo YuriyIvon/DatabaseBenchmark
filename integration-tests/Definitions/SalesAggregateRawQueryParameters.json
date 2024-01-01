@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Country",
+    "Type": "String",
+    "RandomizeValue": true,
+    "ValueRandomizationRule": {
+      "UseExistingValues": false,
+      "GeneratorOptions": {
+        "Type": "ForeignColumn",
+        "TableName": "Sales",
+        "ColumnName": "Country"
+      }
+    }
+  }
+]

@@ -1,0 +1,48 @@
+{
+  "Columns": [ "Id", "Country", "ItemType", "SalesChannel", "OrderPriority", "OrderDate", "OrderID", "ShipDate", "UnitsSold", "UnitPrice", "UnitCost" ],
+  "Condition": {
+    "Operator": "And",
+    "Conditions": [
+      { 
+        "ColumnName": "Country", 
+        "Operator": "Equals",
+        "RandomizeValue": true
+      },
+      { "ColumnName": "UnitsSold", "Operator": "Greater", "Value": 1000 },
+      { "ColumnName": "SalesChannel", "Operator": "Equals", "Value": "Online" },
+      { 
+        "ColumnName": "OrderDate",
+        "Operator": "GreaterEquals",
+        "RandomizeValue": true,
+        "ValueRandomizationRule": { 
+          "UseExistingValues": false, 
+          "GeneratorOptions": {
+            "Type": "DateTime",
+            "MinValue": "2015-01-01",
+            "MaxValue": "2016-01-01",
+            "Delta": "7.00:00:00"
+          }
+        },
+        "RandomizeInclusion": true
+      },
+      { 
+        "ColumnName": "OrderDate",
+        "Operator": "Lower",
+        "RandomizeValue": true,
+        "ValueRandomizationRule": { 
+          "UseExistingValues": false,
+          "GeneratorOptions": {
+            "Type": "DateTime",
+            "MinValue": "2017-01-01",
+            "MaxValue": "2018-01-01",
+            "Delta": "7.00:00:00"
+          }
+        },
+        "RandomizeInclusion": true
+      }
+    ]
+  },
+  "Sort": [ { "ColumnName": "OrderDate", "Direction": "Descending" } ],
+  "Skip": 0,
+  "Take": 100
+}

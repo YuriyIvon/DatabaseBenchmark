@@ -1,0 +1,6 @@
+{
+  "TableFilePath": "SalesTable.json",
+  "QueryCount": 100,
+  "QueryParallelism": 1,
+  "QueryParametersFilePath": "SalesAggregateRawQueryParameters.json"
+}

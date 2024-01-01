@@ -1,0 +1,5 @@
+SELECT ItemType, SUM(UnitsSold * UnitPrice) TotalPrice
+FROM Sales
+WHERE Country=${Country}
+GROUP BY ItemType
+ORDER BY ItemType
