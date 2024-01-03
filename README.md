@@ -2,7 +2,7 @@
 # Database Benchmark
 ![Application Status](https://github.com/YuriyIvon/DatabaseBenchmark/actions/workflows/build.yml/badge.svg)
 
-A universal multi-database query benchmark tool
+A universal multi-database query benchmark and data generator tool
 
 ## Motivation<a name="motivation"></a>
 When deciding what database engine to choose for your project, you need to compare how quickly different engines can handle typical queries specific to the project. Usually, such comparison requires writing a test application that executes a few hard-coded queries against the database engines in question. However, this approach is far from ideal:
@@ -24,9 +24,11 @@ This tool addresses the issues from above by introducing a data import and query
   * [Raw query benchmark](#raw_query_benchmark)
   * [Raw query benchmark scenarios](#raw_query_benchmark_scenarios)
   * [Insert benchmark](#insert_benchmark)
+  * [Data sources](#data_sources)
   * [Table definition](#table_definition)
   * [Query definition](#query_definition)
-  * [Value randomization rules](#value_randomization_rules)
+  * [Value randomization rule](#value_randomization_rule)
+  * [Generators](#generators)
   * [Report columns](#report_columns)
   * [Connection strings](#connection_strings)
 
@@ -219,6 +221,9 @@ An insert benchmark is a combination of a query benchmark and import procedure: 
 DatabaseBenchmark insert --DatabaseType=SqlServer --ConnectionString="Data Source=.;Initial Catalog=benchmark;Integrated Security=True;" --TableFilePath=SalesTable.json --DataSourceType=Csv --DataSourceFilePath="1000000 Sales Records.csv" --QueryParallelism=10 --QueryCount=10000 --WarmupQueryCount=100 --BatchSize=10 
 ```
 
+### Data sources<a name="data_sources"></a>
+
+
 ### Table definition<a name="table_definition"></a>
 A table definition has the following top-level properties:
 
@@ -272,24 +277,142 @@ Each element of `ResultColumns` array has the following properties:
 * `Function` - an aggregate function, can be one of `Average`, `Count`, `DistinctCount`, `Max`, `Min`, `Sum`.
 * `ResultColumnName` - a name assigned to the aggregate expression in the result set.
 
-### Value randomization rules<a name="value_randomization_rules"></a>
+### Value randomization rule<a name="value_randomization_rule"></a>
 
-When `RandomizeValue` is `true` on a query condition or on a raw query parameter, this structure defines how the value should be generated. The value type depends on the column used in the condition or on the corresponding raw query parameter definition. A random collection is generated only for `In` operator condition or for a raw query parameter with `Collection` property set to `true`.
+When `RandomizeValue` is `true` on a query condition or on a raw query parameter, this structure defines how the value should be generated.
 
 * `UseExistingValues` - specifies if the value should be randomly picked from already existing values in this column. Is `true` by default.
-* `ExistingValuesOverride` - provides a specific array of values to pick a random value from. Can be particularly useful in case "distinct" queries are too slow on the database being tested. 
-* `ExistingValuesSourceTableName` - provides an alternative table to select existing values from.
-* `ExistingValuesSourceColumnName` - provides an alternative column name to select existing values from. 
+* `GeneratorOptions` - specifies value generator type and its options. See [generators](#generators) for more details. Can be omitted only if `UseExistingValues` is set to `true`.
 * `MinCollectionLength` - minimum random collection length. Default value is `1`.
 * `MaxCollectionLength` - maximum random collection length. Default value is `10`.
-* `MinNumericValue` - minimum numeric value. Default value is `0`.
-* `MaxNumericValue` - maximum numeric value. Default value is `100`.
-* `MinDateTimeValue` - minimum date-time value. Is equal to the current date and time minus 10 years by default. 
-* `MaxDateTimeValue` - maximum date-time value. Is equal to the current date and time by default.
-* `DateTimeValueStep` - date time value step in `D.HH:MM:SS` format. Is `0.00:00:01` by default, which corresponds to 1 second.
-* `MinStringValueLength` - minimum random string length. Default value is `1`.
-* `MaxStringValueLength` - maximum random string length. Default value is `10`.
+
+The last two options are currently used to produce values for the `In` operator only. 
+
+### Generators<a name="generators"></a>
+Generators can be used for creating test data and generating query parameter values in benchmarks. Each generator is configured using the "Generator Options" structure, which includes a mandatory `Type` field. The characteristics and parameters of a generator vary based on its specific type. 
+
+Detailed descriptions of each generator type are provided in the following sub-sections.
+
+#### Address
+Generates geographical attributes. The following values are available for its `Kind` attribute:
+* `BuildingNumber`
+* `City`
+* `Country`
+* `County`
+* `FullAddress`
+* `Latitude`
+* `Longitude`
+* `SecondaryAddress`
+* `State`
+* `StreetAddress`
+* `StreetName`
+* `ZipCode`
+
+#### Boolean
+Generates a random Boolean. Its `Weight` attribute specifies the probability of the `true` value in the range between 0 and 1.
+
+#### Company
+Generates some company attributes. The following values are available for its `Kind` attribute:
+* `CompanySuffix`
+* `CompanyName`
+
+#### DateTime
+Generates random date/time value. The available attributes are:
+* `MinValue` - minimum value. Defaults to the current date and time.
+* `MaxValue` - maximum value. Defaults to the year after the current date and time.
+* `Increasing` - if set to `true`, makes each newly generated value greater than the previous one. Is `false` by default.
+* `Delta` - when `Increasing` is set to `true`, this parameter determines the increment for each subsequent generated value, or the maximum increment if `RandomizeDelta` is also enabled. If `Increasing` is `false`, it specifies the fixed interval between all possible generated values. For example, with a `MinValue` of `2020-01-01 13:00:00`, a `MaxValue` of `2020-01-04 13:00:00`, and a `Delta` of `1.00:00:00` (one day), the utility will generate values from January 1st to January 4th, 2020, all at `13:00:00`, in random order. The value of `00:00:00` is allowed only when `Increasing` is `false` and means no restriction on the set of generated values other than the minimum and maximum. The default value is `00:00:00`.
+
+#### Finance
+Generates finance-related pieces of information. The following values are available for its  `Kind`  attribute:
+* `Bic`
+* `BitcoinAddress`
+* `CreditCardCvv`
+* `CreditCardNumber`
+* `Currency`
+* `EthereumAddress`
+* `Iban`
+
+#### Float<a name="#float_generator"></a>
+Generates random floating-point numbers. The available attributes are:
+* `MinValue` - minimum value. Default is `0`.
+* `MaxValue` - maximum value. Default is `100`.
+* `Increasing` - if set to `true`, makes each newly generated value greater than the previous one. Is `false` by default.
+* `Delta` - when `Increasing` is set to `true`, this parameter determines the increment for each subsequent generated value, or the maximum increment if `RandomizeDelta` is also enabled. If `Increasing` is `false`, it specifies the fixed interval between all possible generated values. For instance, with a `MinValue` of 10, a `MaxValue` of 30, and a `Delta` of 5, the utility will generate the values 10, 15, 20, 25, and 30 in random order. The value of `0` is allowed only if `Increasing` is `false` and means no restriction on the set of generated values apart from minimum and maximum. The default value is `0`.
+
+#### ForeignColumn
+Randomly picks a value from a list retrieved from a table in the target database. Uses the same logic as the [ListItem generator](#listitem_generator), but a different primary source.
+
+The available attributes are:
+* `TableName` - a name of the source table.
+* `ColumnName` - a name of the source column.
+* `ColumnType` - a source column type.
+* `Distinct` - specifies whether to apply a distinct value filter when retrieving data from the source column.
+* `WeightedItems` - see [ListItem generator](#listitem_generator) for more details.
+
+#### Guid
+Generates a random GUID.
+
+#### Integer
+Generates random integers. The available attributes are the same as in the [Float](#float_generator) generator.
+
+#### Internet
+Generates Internet-related pieces of information. The following values are available for its  `Kind`  attribute:
+* `DomainName`
+* `Email`
+* `Ip`
+* `Ipv6`
+* `Mac`
+* `Port`
+* `Url`
+* `UserAgent`
+* `UserName`
+
+#### ListItem<a name="listitem_generator"></a>
+Randomly picks a value from the provided list. The available attributes are:
+
+* `Items` - a list of values from which one must be randomly picked.
+* `WeightedItems` - a list of objects providing values along with their probabilities, from which one must be randomly picked. Each object has two attributes, where `Value` is a value and `Weight` is its probability in the range between 0 and 1.
+
+At least one of the attributes from above must be provided. The sum of probabilities in the `WeightedItems` attribute must not exceed 1. If both attributes are specified, the generator calculates the total probability in `WeightedItems` and chooses to go with `WeightedItems` based on this total. Therefore, the probability of using the `Items` collection is 1 minus the total probability in the `WeightedItems`. Both collections can be used when there are many available values, where only a small subset need to be made more frequent among the generated values. In this case all items can be listed in the `Items` collection, and the "boosted" values - in `WeightedItems` along with their respective probabilities.
+
+#### Name
+Generates random names. The following values are available for its  `Kind`  attribute:
+* `FirstName`
+* `LastName`
+* `FullName`
+
+#### Null
+A nested generator designed to integrate the functionality of any other generator with the capability to generate null values.
+
+The available attributes are:
+* `Weight` - the probability of a null value. The allowed range for this parameter is between 0 and 1. Default value is `0.5`.
+* `GeneratorOptions` - the underlying generator options - can be any of the other types.
+
+#### Phone
+Generates random phone numbers. The following values are available for its  `Kind`  attribute:
+* `PhoneNumber`
+
+#### String
+Generates random strings. The available attributes are:
+* `MinLength` - minimum random string length. Default value is `1`
+* `MaxLength` - maximum random string length. Default value is `10`
 * `AllowedCharacters` - characters to be used when generating a random string. By default contains uppercase Latin letters and digits.
+
+#### Text
+Generates random pieces of text. The following values are available for its `Kind` attribute:
+* `Word`
+* `Sentence`
+* `Paragraph`
+* `Text`
+
+#### Vehicle
+Generates vehicle-related pieces of information. The following values are available for its  `Kind`  attribute:
+* `Manufacturer`
+* `Model`
+* `Vin`
+* `Fuel`
+* `Type`
 
 ### Report columns<a name="report_columns"></a>
 Each benchmark command has a couple of optional parameters - `ReportColumns` and `ReportCustomMetricColumns`. These parameters control the set of columns to be shown in the benchmark report.
@@ -375,3 +498,4 @@ There are some limitations that are going to be addressed in the future:
 * Random inclusion of condition parts is currently not supported for raw queries.
 * Configurable partitioning is supported for Cosmos DB and DynamoDB only.
 * Importing from Elasticsearch database doesn't support an unlimited number of rows.
+* Generators do not currently support contextually dependent values. For example, the first name and full name values produced by the name generator for the same row of data won't correspond to each other.
