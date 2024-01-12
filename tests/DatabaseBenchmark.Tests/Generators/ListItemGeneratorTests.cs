@@ -80,6 +80,21 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
+        public void GenerateWeightedItemsError()
+        {
+            _weightedItems[0].Weight = 1;
+
+            var generator = new ListItemGenerator(
+                _faker,
+                new ListItemGeneratorOptions
+                {
+                    WeightedItems = _weightedItems
+                });
+
+            Assert.Throws<InputArgumentException>(generator.Generate);
+        }
+
+        [Fact]
         public void GenerateCollectionFromItems()
         {
             var generator = new ListItemGenerator(

@@ -6,15 +6,15 @@ using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Generators
 {
-    public class ForeignColumnGenerator : IGenerator, ICollectionGenerator
+    public class ColumnItemGenerator : IGenerator, ICollectionGenerator
     {
         private readonly Faker _faker;
-        private readonly ForeignColumnGeneratorOptions _options;
+        private readonly ColumnItemGeneratorOptions _options;
         private readonly IDatabase _database;
 
         private ListItemGenerator _itemGenerator = null;
 
-        public ForeignColumnGenerator(Faker faker, ForeignColumnGeneratorOptions options, IDatabase database)
+        public ColumnItemGenerator(Faker faker, ColumnItemGeneratorOptions options, IDatabase database)
         {
             _faker = faker;
             _options = options;

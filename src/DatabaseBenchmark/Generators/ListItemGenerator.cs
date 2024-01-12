@@ -63,6 +63,11 @@ namespace DatabaseBenchmark.Generators
                 _weights = _options.WeightedItems.Select(i => i.Weight).ToArray();
                 _totalWeight = _weights.Sum();
 
+                if (_totalWeight > 1)
+                {
+                    throw new InputArgumentException("The total weight of the weighted items can't exceed 1");
+                }
+
                 if (_options.Items?.Any() == true)
                 {
                     _items = _options.Items.Except(_weightedItems).ToArray();

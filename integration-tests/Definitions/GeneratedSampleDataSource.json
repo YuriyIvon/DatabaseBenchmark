@@ -14,7 +14,7 @@
       "Name": "CountryCode",
       "GeneratorOptions": {
         "Type": "Null",
-        "NullProbability": 0.5,
+        "Weight": 0.3,
         "SourceGeneratorOptions": { 
           "Type": "Address",
           "Kind": "CountryCode"

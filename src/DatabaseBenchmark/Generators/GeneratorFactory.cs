@@ -30,7 +30,7 @@ namespace DatabaseBenchmark.Generators
                 DateTimeGeneratorOptions o => new DateTimeGenerator(_faker, o),
                 FinanceGeneratorOptions o => new FinanceGenerator(_faker, o),
                 FloatGeneratorOptions o => new FloatGenerator(_faker, o),
-                ForeignColumnGeneratorOptions o => new ForeignColumnGenerator(_faker, o, _database),
+                ColumnItemGeneratorOptions o => new ColumnItemGenerator(_faker, o, _database),
                 GuidGeneratorOptions => new GuidGenerator(_faker),
                 IntegerGeneratorOptions o => new IntegerGenerator(_faker, o),
                 InternetGeneratorOptions o => new InternetGenerator(_faker, o),

@@ -9,7 +9,7 @@
         DateTime,
         Finance,
         Float,
-        ForeignColumn,
+        ColumnItem,
         Guid,
         Integer,
         Internet,

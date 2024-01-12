@@ -28,7 +28,7 @@ namespace DatabaseBenchmark.Generators.Options
                     GeneratorType.DateTime => optionsJson.Deserialize<DateTimeGeneratorOptions>(options),
                     GeneratorType.Finance => optionsJson.Deserialize<FinanceGeneratorOptions>(options),
                     GeneratorType.Float => optionsJson.Deserialize<FloatGeneratorOptions>(options),
-                    GeneratorType.ForeignColumn => optionsJson.Deserialize<ForeignColumnGeneratorOptions>(options),
+                    GeneratorType.ColumnItem => optionsJson.Deserialize<ColumnItemGeneratorOptions>(options),
                     GeneratorType.Guid => optionsJson.Deserialize<GuidGeneratorOptions>(options),
                     GeneratorType.Integer => optionsJson.Deserialize<IntegerGeneratorOptions>(options),
                     GeneratorType.Internet => optionsJson.Deserialize<InternetGeneratorOptions>(options),

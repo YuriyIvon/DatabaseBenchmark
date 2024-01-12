@@ -2,9 +2,9 @@
 
 namespace DatabaseBenchmark.Generators.Options
 {
-    public class ForeignColumnGeneratorOptions : GeneratorOptionsBase
+    public class ColumnItemGeneratorOptions : GeneratorOptionsBase
     {
-        public override GeneratorType Type => GeneratorType.ForeignColumn;
+        public override GeneratorType Type => GeneratorType.ColumnItem;
 
         public string TableName { get; set; }
 

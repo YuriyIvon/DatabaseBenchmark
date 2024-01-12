@@ -20,7 +20,7 @@ namespace DatabaseBenchmark.Tests.Generators
 
         public void GenerateNull()
         {
-            var generator = new NullGenerator(_faker, new NullGeneratorOptions { NullProbability = 1 }, _baseGenerator);
+            var generator = new NullGenerator(_faker, new NullGeneratorOptions { Weight = 1 }, _baseGenerator);
             var value = generator.Generate();
 
             Assert.Null(value);
@@ -28,7 +28,7 @@ namespace DatabaseBenchmark.Tests.Generators
 
         public void GenerateNotNull()
         {
-            var generator = new NullGenerator(_faker, new NullGeneratorOptions { NullProbability = 0 }, _baseGenerator);
+            var generator = new NullGenerator(_faker, new NullGeneratorOptions { Weight = 0 }, _baseGenerator);
             var value = generator.Generate();
 
             Assert.Equal(1, value);

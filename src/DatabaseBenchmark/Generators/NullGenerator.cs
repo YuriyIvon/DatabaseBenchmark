@@ -18,6 +18,6 @@ namespace DatabaseBenchmark.Generators
         }
 
         public object Generate()
-            => _faker.Random.Bool(_options.NullProbability) ? null : _sourceGenerator.Generate();
+            => _faker.Random.Bool(_options.Weight) ? null : _sourceGenerator.Generate();
     }
 }

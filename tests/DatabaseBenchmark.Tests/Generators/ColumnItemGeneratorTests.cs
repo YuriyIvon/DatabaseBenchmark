@@ -10,18 +10,18 @@ using Xunit;
 
 namespace DatabaseBenchmark.Tests.Generators
 {
-    public class ForeignColumnGeneratorTests
+    public class ColumnItemGeneratorTests
     {
         private readonly Faker _faker = new();
         private readonly IDatabase _database;
-        private readonly ForeignColumnGeneratorOptions _options = new()
+        private readonly ColumnItemGeneratorOptions _options = new()
         {
             TableName = "Test",
             ColumnName = "Id",
             ColumnType = ColumnType.Integer
         };
 
-        public ForeignColumnGeneratorTests()
+        public ColumnItemGeneratorTests()
         {
             _database = Substitute.For<IDatabase>();
             var executorFactory = Substitute.For<IQueryExecutorFactory>();
@@ -36,7 +36,7 @@ namespace DatabaseBenchmark.Tests.Generators
         [Fact]
         public void GenerateValueFromItems()
         {
-            var generator = new ForeignColumnGenerator(_faker, _options, _database);
+            var generator = new ColumnItemGenerator(_faker, _options, _database);
 
             var value = generator.Generate();
 
@@ -47,7 +47,7 @@ namespace DatabaseBenchmark.Tests.Generators
         [Fact]
         public void GenerateCollectionFromItems()
         {
-            var generator = new ForeignColumnGenerator(_faker, _options, _database);
+            var generator = new ColumnItemGenerator(_faker, _options, _database);
 
             var collection = generator.GenerateCollection(3);
 
