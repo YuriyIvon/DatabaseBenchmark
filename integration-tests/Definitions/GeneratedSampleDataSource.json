@@ -61,7 +61,7 @@
     { 
       "Name": "UserId",
       "GeneratorOptions": { 
-        "Type": "ForeignColumn",
+        "Type": "ColumnItem",
         "TableName": "GeneratedUsers",
         "ColumnName": "Id",
         "Distinct": false,

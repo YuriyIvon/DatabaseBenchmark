@@ -6,7 +6,7 @@
     "ValueRandomizationRule": {
       "UseExistingValues": false,
       "GeneratorOptions": {
-        "Type": "ForeignColumn",
+        "Type": "ColumnItem",
         "TableName": "Sales",
         "ColumnName": "Country"
       }
