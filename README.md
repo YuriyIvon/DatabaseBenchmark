@@ -54,7 +54,7 @@ DatabaseBenchmark create --DatabaseType=MongoDb --ConnectionString="mongodb://lo
 
 **Please note that in most real-life scenarios, the benchmark tool and a database engine must run on separate machines to take network throughput into account and avoid resource contention.**
 
-Supported values for `DatabaseType` parameter are:
+<a name="database_types"></a>Supported values for `DatabaseType` parameter are:
 * `ClickHouse`
 * `CosmosDb` - SQL API only, connection string must contain a non-standard property specifying a database name to be used - `Database=database_name`.
 * `DynamoDB` - the connection string format is specific to the tool, an example can be found in the [Connection strings](#connection_strings) section.
@@ -83,14 +83,14 @@ This command also has a few database-specific parameters:
 
 Once tables are created, it is the time to import the dataset you are going to use in your benchmarks:
 ```
-DatabaseBenchmark import --DatabaseType=SqlServer --ConnectionString="Data Source=.;Initial Catalog=benchmark;Integrated Security=True;" --TableFilePath=SalesTable.json --DataSourceType=Csv --DataSourceFilePath="1000000 Sales Records.csv"
+DatabaseBenchmark import --DatabaseType=SqlServer --ConnectionString="Data Source=.;Initial Catalog=benchmark;Integrated Security=True;" --TableFilePath=SalesTable.json --DataSourceType=Csv --DataSourceFilePath="1000000 Sales Records.csv" --MappingFilePath=SalesTableMapping.json
 
-DatabaseBenchmark import --DatabaseType=Postgres --ConnectionString="Host=localhost;Port=5432;Database=benchmark;Username=postgres;Password=postgres" --TableFilePath=SalesTable.json --DataSourceType=Csv --DataSourceFilePath="1000000 Sales Records.csv"
+DatabaseBenchmark import --DatabaseType=Postgres --ConnectionString="Host=localhost;Port=5432;Database=benchmark;Username=postgres;Password=postgres" --TableFilePath=SalesTable.json --DataSourceType=Csv --DataSourceFilePath="1000000 Sales Records.csv" --MappingFilePath=SalesTableMapping.json
 
-DatabaseBenchmark import --DatabaseType=MongoDb --ConnectionString="mongodb://localhost/benchmark" --TableFilePath=SalesTable.json --DataSourceType=Csv --DataSourceFilePath="1000000 Sales Records.csv" 
+DatabaseBenchmark import --DatabaseType=MongoDb --ConnectionString="mongodb://localhost/benchmark" --TableFilePath=SalesTable.json --DataSourceType=Csv --DataSourceFilePath="1000000 Sales Records.csv" --MappingFilePath=SalesTableMapping.json
 ```
 
-These snippets use a sample CSV file from [here](https://eforexcel.com/wp/wp-content/uploads/2017/07/1000000%20Sales%20Records.zip). _You will need to remove spaces from CSV headers to make them consistent with the table definition._
+These snippets use a sample CSV file from [here](https://eforexcel.com/wp/wp-content/uploads/2017/07/1000000%20Sales%20Records.zip).
 
 Alternatively, data can be imported from any database supported by the tool:
 
@@ -100,9 +100,9 @@ DatabaseBenchmark import --DatabaseType=Postgres --ConnectionString="Host=localh
 
 Here file [SalesSqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseBenchmark/blob/main/samples/Sales/SalesSqlServerDataSource.json) defines where and how to get source data. With relational databases, a raw query stored in a file referenced by `QueryFilePath` parameter must return all columns declared in the target table definition. Extra columns are ignored. For those databases where the container name doesn't appear in a query, there is an optional data source parameter `TableName`.
 
-CSV data source has an optional parameter `DataSource.Csv.Delimiter`, which allows you to override the default column delimiter, and `DataSource.Csv.Culture` to override the default system culture used for parsing the input CSV file.
+More information on all data source types and their parameters can be found in the [corresponding section](#data_sources).
 
-If column names in the data source don't match table columns (for example, when CSV headers contain space characters), a mapping can be applied by specifying `MappingFilePath` parameter pointing to a JSON file with column mappings. An object in this file must have `Columns` array where each item consists of two fields - `SourceColumnName` and `TableColumnName`.
+If column names in the data source don't match table columns (like in the example above, where CSV headers contain space characters), a mapping can be applied by specifying `MappingFilePath` parameter pointing to a JSON file with column mappings. An object in this file must have `Columns` array where each item consists of two fields - `SourceColumnName` and `TableColumnName`.
 
 This command also has a database-specific parameter:
 * `MongoDb.CollectCosmosDbRequestUnits` - allows collecting request charge metric in case of Azure Cosmos DB API for MongoDB (may affect query timing).
@@ -222,7 +222,27 @@ DatabaseBenchmark insert --DatabaseType=SqlServer --ConnectionString="Data Sourc
 ```
 
 ### Data sources<a name="data_sources"></a>
+#### Csv
+Reads data from a CSV file specified by the `DataSourceFilePath` parameter. Supports the following extra parameters:
 
+* `DataSource.Csv.Delimiter` - overrides the default value delimiter.
+* `DataSource.Csv.Culture` - overrides the default system culture used for parsing the input CSV file.
+
+#### Database
+Reads data from any database engine supported by the tool. The file specified by the `DataSourceFilePath` parameter must contain a valid JSON object with the following attributes:
+
+* `DatabaseType` - any of the [database types](#database_types) supported by the tool.
+* `ConnectionString` - a connection string.
+* `QueryFilePath` - a path to the file containing the raw query retrieving the source data.
+* `TableName` - a specific table (collection) name the query should be executed against. Should be used only for the database engines, where raw queries don't include the table name (e.g., MongoDB, Elasticsearch, etc.)
+
+#### Generator
+Dynamically generates data based on user-defined configurations, allowing for the customization of columns and their corresponding generator settings to suit specific data simulation needs.
+
+The file specified by the `DataSourceFilePath` parameter must contain a valid JSON object with the `Columns` array, where each array element has the following attributes:
+
+* `Name` - specifies the name of the column to be provided by the data source.
+* `GeneratorOptions` - defines the type of value generator to be used for the column, along with its relevant options. See [generators](#generators) for more details. 
 
 ### Table definition<a name="table_definition"></a>
 A table definition has the following top-level properties:
@@ -340,8 +360,8 @@ Generates random floating-point numbers. The available attributes are:
 * `Increasing` - if set to `true`, makes each newly generated value greater than the previous one. Is `false` by default.
 * `Delta` - when `Increasing` is set to `true`, this parameter determines the increment for each subsequent generated value, or the maximum increment if `RandomizeDelta` is also enabled. If `Increasing` is `false`, it specifies the fixed interval between all possible generated values. For instance, with a `MinValue` of 10, a `MaxValue` of 30, and a `Delta` of 5, the utility will generate the values 10, 15, 20, 25, and 30 in random order. The value of `0` is allowed only if `Increasing` is `false` and means no restriction on the set of generated values apart from minimum and maximum. The default value is `0`.
 
-#### ForeignColumn
-Randomly picks a value from a list retrieved from a table in the target database. Uses the same logic as the [ListItem generator](#listitem_generator), but a different primary source.
+#### ColumnItem
+Randomly picks a value from a list retrieved from a table column in the target database. Uses the same logic as the [ListItem generator](#listitem_generator), but a different primary source.
 
 The available attributes are:
 * `TableName` - a name of the source table.
@@ -349,6 +369,15 @@ The available attributes are:
 * `ColumnType` - a source column type.
 * `Distinct` - specifies whether to apply a distinct value filter when retrieving data from the source column.
 * `WeightedItems` - see [ListItem generator](#listitem_generator) for more details.
+
+#### ColumnIterator
+Sequentially returns each item from a list retrieved from a table column in the target database. Uses the same logic as the [ListIterator generator](#listiterator_generator), but a different primary source.
+
+The available attributes are:
+* `TableName` - a name of the source table.
+* `ColumnName` - a name of the source column.
+* `ColumnType` - a source column type.
+* `Distinct` - specifies whether to apply a distinct value filter when retrieving data from the source column.
 
 #### Guid
 Generates a random GUID.
@@ -375,6 +404,12 @@ Randomly picks a value from the provided list. The available attributes are:
 * `WeightedItems` - a list of objects providing values along with their probabilities, from which one must be randomly picked. Each object has two attributes, where `Value` is a value and `Weight` is its probability in the range between 0 and 1.
 
 At least one of the attributes from above must be provided. The sum of probabilities in the `WeightedItems` attribute must not exceed 1. If both attributes are specified, the generator calculates the total probability in `WeightedItems` and chooses to go with `WeightedItems` based on this total. Therefore, the probability of using the `Items` collection is 1 minus the total probability in the `WeightedItems`. Both collections can be used when there are many available values, where only a small subset need to be made more frequent among the generated values. In this case all items can be listed in the `Items` collection, and the "boosted" values - in `WeightedItems` along with their respective probabilities.
+
+#### ListIterator<a name="listiterator_generator"></a>
+Sequentially returns each item from the provided list. Once the end of the list is reached, the data generation process stops, so that no generated queries or data source rows can be further produced.
+
+The available attributes are:
+* `Items` - a list of values from which each one should be sequentially picked.
 
 #### Name
 Generates random names. The following values are available for its  `Kind`  attribute:
