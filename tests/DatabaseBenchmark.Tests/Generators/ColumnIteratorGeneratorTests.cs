@@ -10,18 +10,17 @@ using Xunit;
 
 namespace DatabaseBenchmark.Tests.Generators
 {
-    public class ColumnItemGeneratorTests
+    public class ColumnIteratorGeneratorTests
     {
-        private readonly Faker _faker = new();
         private readonly IDatabase _database;
-        private readonly ColumnItemGeneratorOptions _options = new()
+        private readonly ColumnIteratorGeneratorOptions _options = new()
         {
             TableName = "Test",
             ColumnName = "Id",
             ColumnType = ColumnType.Integer
         };
 
-        public ColumnItemGeneratorTests()
+        public ColumnIteratorGeneratorTests()
         {
             _database = Substitute.For<IDatabase>();
             var executorFactory = Substitute.For<IQueryExecutorFactory>();
@@ -34,27 +33,18 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateValueFromItems()
+        public void Generate()
         {
-            var generator = new ColumnItemGenerator(_faker, _options, _database);
+            var generator = new ColumnIteratorGenerator(_options, _database);
+            var items = new List<object>();
 
-            generator.Next();
-            var value = generator.Current;
+            for (int i = 0; i < TestQueryResults.Values.Length + 10 && generator.Next(); i++)
+            {
+                items.Add(generator.Current);
+            }
 
-            Assert.Contains((int)value, TestQueryResults.Values);
-            _database.CreateQueryExecutorFactory(Arg.Any<Table>(), Arg.Any<Query>()).Received(1);
-        }
-
-        [Fact]
-        public void GenerateCollectionFromItems()
-        {
-            var generator = new ColumnItemGenerator(_faker, _options, _database);
-
-            generator.NextCollection(3);
-            var collection = generator.CurrentCollection;
-
-            Assert.Equal(3, collection.Count());
-            Assert.True(collection.All(i => TestQueryResults.Values.Contains((int)i)));
+            Assert.Equal(TestQueryResults.Values, items.Select(i => (int)i));
+            Assert.False(generator.Next());
             _database.CreateQueryExecutorFactory(Arg.Any<Table>(), Arg.Any<Query>()).Received(1);
         }
 
@@ -68,7 +58,7 @@ namespace DatabaseBenchmark.Tests.Generators
 
             public object GetValue(string columnName) => Values[_index];
 
-            public bool Read() => ++_index < Values.Length; 
+            public bool Read() => ++_index < Values.Length;
         }
     }
 }

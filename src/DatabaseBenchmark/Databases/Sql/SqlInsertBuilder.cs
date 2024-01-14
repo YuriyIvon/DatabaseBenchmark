@@ -45,7 +45,12 @@ namespace DatabaseBenchmark.Databases.Sql
                 rows.Add(values);
             }
 
-            return rows.Any() ? BuildCommandText(Table.Name, columnNames, rows) : null;
+            if (!rows.Any())
+            {
+                throw new NoDataAvailableException();
+            }
+
+            return BuildCommandText(Table.Name, columnNames, rows);
         }
 
         protected virtual string BuildCommandText(

@@ -11,14 +11,17 @@ namespace DatabaseBenchmark.Generators
         private readonly Faker _faker;
         private readonly AddressGeneratorOptions _options;
 
+        public object Current { get; private set; }
+
         public AddressGenerator(Faker faker, AddressGeneratorOptions options)
         {
             _faker = faker;
             _options = options;
         }
 
-        public object Generate() =>
-            _options.Kind switch
+        public bool Next()
+        {
+            Current = _options.Kind switch
             {
                 GeneratorKind.BuildingNumber => _faker.Address.BuildingNumber(),
                 GeneratorKind.City => _faker.Address.City(),
@@ -35,5 +38,8 @@ namespace DatabaseBenchmark.Generators
                 GeneratorKind.ZipCode => _faker.Address.ZipCode(),
                 _ => throw new InputArgumentException($"Unknown address generator kind \"{_options.Kind}\"")
             };
+
+            return true;
+        }
     }
 }

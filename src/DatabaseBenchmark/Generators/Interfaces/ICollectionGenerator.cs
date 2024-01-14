@@ -2,6 +2,8 @@
 {
     public interface ICollectionGenerator
     {
-        IEnumerable<object> GenerateCollection(int length);
+        IEnumerable<object> CurrentCollection { get; }
+
+        bool NextCollection(int length);
     }
 }

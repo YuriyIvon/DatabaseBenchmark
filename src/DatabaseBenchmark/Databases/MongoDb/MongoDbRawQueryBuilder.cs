@@ -22,6 +22,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
         public IEnumerable<BsonDocument> Build()
         {
+            _randomValueProvider?.Next();
+
             var queryText = _query.Text;
 
             if (_query.Parameters != null)
@@ -44,8 +46,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
                 var rawValue = !parameter.RandomizeValue
                     ? parameter.Value
                     : parameter.Collection
-                        ? _randomValueProvider.GetRandomValueCollection(null, parameter.Name, parameter.ValueRandomizationRule)
-                        : _randomValueProvider.GetRandomValue(null, parameter.Name, parameter.ValueRandomizationRule);
+                        ? _randomValueProvider.GetValueCollection(null, parameter.Name, parameter.ValueRandomizationRule)
+                        : _randomValueProvider.GetValue(null, parameter.Name, parameter.ValueRandomizationRule);
 
                 if (rawValue is IEnumerable<object> rawCollection)
                 {

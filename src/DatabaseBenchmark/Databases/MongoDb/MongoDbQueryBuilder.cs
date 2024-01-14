@@ -28,6 +28,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
         public IEnumerable<BsonDocument> Build()
         {
+            _randomValueProvider?.Next();
+
             var request = new List<BsonDocument>();
 
             if (_query.Condition != null)
@@ -120,8 +122,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
             var rawValue = !predicate.RandomizeValue
                 ? predicate.Value
                 : predicate.Operator == QueryPrimitiveOperator.In
-                    ? _randomValueProvider.GetRandomValueCollection(_table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
-                    : _randomValueProvider.GetRandomValue(_table.Name, predicate.ColumnName, predicate.ValueRandomizationRule);
+                    ? _randomValueProvider.GetValueCollection(_table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
+                    : _randomValueProvider.GetValue(_table.Name, predicate.ColumnName, predicate.ValueRandomizationRule);
 
             var bsonValue = BsonValue.Create(rawValue);
 

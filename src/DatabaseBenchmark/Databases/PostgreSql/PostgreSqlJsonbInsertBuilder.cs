@@ -48,7 +48,12 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
             columnNames.Add(PostgreSqlJsonbConstants.JsonbColumnName);
 
-            return rows.Any() ? BuildCommandText(Table.Name, columnNames, rows) : null;
+            if (!rows.Any())
+            {
+                throw new NoDataAvailableException();
+            }
+
+            return BuildCommandText(Table.Name, columnNames, rows);
         }
     }
 }

@@ -4,8 +4,10 @@ namespace DatabaseBenchmark.Core.Interfaces
 {
     public interface IRandomValueProvider
     {
-        object GetRandomValue(string tableName, string columnName, ValueRandomizationRule randomizationRule);
+        void Next();
 
-        IEnumerable<object> GetRandomValueCollection(string tableName, string columnName, ValueRandomizationRule randomizationRule);
+        object GetValue(string tableName, string columnName, ValueRandomizationRule randomizationRule);
+
+        IEnumerable<object> GetValueCollection(string tableName, string columnName, ValueRandomizationRule randomizationRule);
     }
 }

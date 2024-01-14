@@ -15,13 +15,17 @@ namespace DatabaseBenchmark.Generators
         private object[] _weightedItems;
         private float[] _weights;
 
+        public object Current { get; private set; }
+
+        public IEnumerable<object> CurrentCollection { get; private set; }
+
         public ListItemGenerator(Faker faker, ListItemGeneratorOptions options)
         {
             _faker = faker;
             _options = options;
         }
 
-        public object Generate()
+        public bool Next()
         {
             if (_items == null)
             {
@@ -30,12 +34,14 @@ namespace DatabaseBenchmark.Generators
 
             var useWeighted = _items == null || !_items.Any() || _faker.Random.Bool(_totalWeight);
 
-            return useWeighted
+            Current = useWeighted
                 ? _faker.Random.WeightedRandom(_weightedItems, _weights)
                 : _faker.Random.ArrayElement(_items);
+
+            return true;
         }
 
-        public IEnumerable<object> GenerateCollection(int length)
+        public bool NextCollection(int length)
         {
             if (_items == null)
             {
@@ -47,7 +53,9 @@ namespace DatabaseBenchmark.Generators
                 throw new InputArgumentException("Generating a collection based on item weights is not supported");
             }
 
-            return  _faker.Random.ArrayElements(_items, length);
+            CurrentCollection = _faker.Random.ArrayElements(_items, length);
+
+            return true;
         }
 
         private void Initialize()

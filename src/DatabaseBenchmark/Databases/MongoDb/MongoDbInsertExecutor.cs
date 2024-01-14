@@ -32,9 +32,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
             TraceDocuments(documents);
 
-            return documents.Any()
-                ? new MongoDbPreparedInsert(_collection, documents, _options)
-                : null;
+            return new MongoDbPreparedInsert(_collection, documents, _options);
         }
 
         public IPreparedQuery Prepare(ITransaction transaction) => Prepare();

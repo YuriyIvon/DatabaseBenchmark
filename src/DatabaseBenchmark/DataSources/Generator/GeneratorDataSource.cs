@@ -50,9 +50,19 @@ namespace DatabaseBenchmark.DataSources.Generator
 
         public bool Read()
         {
-            _currentRow = _generators
-                .Select(g => g.Generate())
-                .ToArray();
+            _currentRow = new object[_generators.Length];
+
+            for (int i = 0; i < _generators.Length; i++)
+            {
+                var generator = _generators[i];
+
+                if (!generator.Next())
+                {
+                    return false;
+                }
+
+                _currentRow[i] = generator.Current;
+            }
 
             return true;
         }

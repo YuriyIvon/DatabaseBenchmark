@@ -12,13 +12,15 @@ namespace DatabaseBenchmark.Generators
 
         private DateTime? _lastValue;
 
+        public object Current { get; private set; }
+
         public DateTimeGenerator(Faker faker, DateTimeGeneratorOptions options)
         {
             _faker = faker;
             _options = options;
         }
 
-        public object Generate()
+        public bool Next()
         {
             if (_options.Increasing)
             {
@@ -42,10 +44,19 @@ namespace DatabaseBenchmark.Generators
                         delta = TimeSpan.FromMilliseconds(randomMilliseconds);
                     }
 
-                    _lastValue += delta;
+                    var value = _lastValue + delta;
+
+                    if (value > _options.MaxValue)
+                    {
+                        return false;
+                    }
+
+                    _lastValue = value;
                 }
 
-                return _lastValue;
+                Current = _lastValue;
+
+                return true;
             }
             else if (_options.Delta.TotalMilliseconds != 0)
             {
@@ -54,11 +65,15 @@ namespace DatabaseBenchmark.Generators
                 var totalSegments = (long)(rangeMilliseconds / deltaMilliseconds);
                 var randomSegment = _faker.Random.Long(0, totalSegments);
 
-                return _options.MinValue.AddMilliseconds(deltaMilliseconds * randomSegment);
+                Current = _options.MinValue.AddMilliseconds(deltaMilliseconds * randomSegment);
+
+                return true;
             }
             else
             {
-                return _faker.Date.Between(_options.MinValue, _options.MaxValue);
+                Current = _faker.Date.Between(_options.MinValue, _options.MaxValue);
+
+                return true;
             }
         }
     }

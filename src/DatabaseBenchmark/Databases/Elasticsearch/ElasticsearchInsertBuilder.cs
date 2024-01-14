@@ -32,6 +32,11 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                 documents.Add(document);
             }
 
+            if (!documents.Any())
+            {
+                throw new NoDataAvailableException();
+            }
+
             return documents;
         }
     }

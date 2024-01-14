@@ -14,9 +14,9 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             var generator = new GuidGenerator(_faker);
 
-            var value = generator.Generate();
+            generator.Next();
 
-            Assert.IsType<Guid>(value);
+            Assert.IsType<Guid>(generator.Current);
         }
     }
 }

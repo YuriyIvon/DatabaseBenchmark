@@ -7,11 +7,18 @@ namespace DatabaseBenchmark.Generators
     {
         private readonly Faker _faker;
 
+        public object Current { get; private set; }
+
         public GuidGenerator(Faker faker)
         {
             _faker = faker;
         }
 
-        public object Generate() => _faker.Random.Guid();
+        public bool Next()
+        {
+            Current = _faker.Random.Guid();
+
+            return true;
+        }
     }
 }

@@ -28,6 +28,8 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
         public SearchRequest Build()
         {
+            _randomValueProvider?.Next();
+
             if (_query.Distinct)
             {
                 throw new InputArgumentException("Distinct queries are not yet supported for Elasticsearch");
@@ -133,8 +135,8 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             var rawValue = !predicate.RandomizeValue 
                 ? predicate.Value
                 : predicate.Operator == QueryPrimitiveOperator.In 
-                    ? _randomValueProvider.GetRandomValueCollection(_table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
-                    : _randomValueProvider.GetRandomValue(_table.Name, predicate.ColumnName, predicate.ValueRandomizationRule);
+                    ? _randomValueProvider.GetValueCollection(_table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
+                    : _randomValueProvider.GetValue(_table.Name, predicate.ColumnName, predicate.ValueRandomizationRule);
 
             var column = _table.Columns.First(c => c.Name == predicate.ColumnName);
 

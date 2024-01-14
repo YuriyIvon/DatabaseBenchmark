@@ -38,6 +38,7 @@ namespace DatabaseBenchmark.Databases.Sql
         public string Build()
         {
             ParametersBuilder.Reset();
+            RandomValueProvider?.Next();
 
             var query = new StringBuilder();
             query.AppendLine("SELECT");
@@ -219,7 +220,7 @@ namespace DatabaseBenchmark.Databases.Sql
             else
             {
                 var value = condition.RandomizeValue
-                    ? RandomValueProvider.GetRandomValue(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                    ? RandomValueProvider.GetValue(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
                     : condition.Value;
 
                 if (value != null)
@@ -248,7 +249,7 @@ namespace DatabaseBenchmark.Databases.Sql
             conditionExpression.Append(' ');
 
             var rawCollection = condition.RandomizeValue
-                ? RandomValueProvider.GetRandomValueCollection(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                ? RandomValueProvider.GetValueCollection(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
                 : (IEnumerable<object>)condition.Value;
 
             if (rawCollection == null)

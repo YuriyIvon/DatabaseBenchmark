@@ -52,9 +52,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
                 ReturnConsumedCapacity = ReturnConsumedCapacity.TOTAL
             };
 
-            return items.Any()
-                ? new DynamoDbPreparedInsert(_client, batchRequest, _metricsReporter)
-                : null;
+            return new DynamoDbPreparedInsert(_client, batchRequest, _metricsReporter);
         }
 
         public IPreparedQuery Prepare(ITransaction transaction) => Prepare();

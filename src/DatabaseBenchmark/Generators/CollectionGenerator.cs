@@ -11,7 +11,10 @@ namespace DatabaseBenchmark.Generators
         private readonly IGenerator _sourceGenerator;
         private readonly ICollectionGenerator _sourceCollectionGenerator;
 
-        public CollectionGenerator(Faker faker,
+        public object Current { get; private set; }
+
+        public CollectionGenerator(
+            Faker faker,
             IGenerator sourceGenerator,
             CollectionGeneratorOptions options)
         {
@@ -21,15 +24,39 @@ namespace DatabaseBenchmark.Generators
             _sourceCollectionGenerator = sourceGenerator as ICollectionGenerator;
         }
 
-        public object Generate()
+        public bool Next()
         {
             var length = _faker.Random.Int(_options.MinLength, _options.MaxLength);
 
-            return _sourceCollectionGenerator != null 
-                ? _sourceCollectionGenerator.GenerateCollection(length)
-                : Enumerable.Range(1, length)
-                    .Select(_ => _sourceGenerator.Generate())
-                    .ToArray();
+            if (_sourceCollectionGenerator != null)
+            {
+                if (!_sourceCollectionGenerator.NextCollection(length))
+                {
+                    return false;
+                }
+
+                Current = _sourceCollectionGenerator.CurrentCollection;
+
+                return true;
+            }
+            else
+            {
+                var collection = new object[length];
+
+                for (int i = 0; i < length; i++)
+                {
+                    if (!_sourceGenerator.Next())
+                    {
+                        return false;
+                    }
+
+                    collection[i] = _sourceGenerator.Current;
+                }
+
+                Current = collection;
+
+                return true;
+            }
         }
     }
 }

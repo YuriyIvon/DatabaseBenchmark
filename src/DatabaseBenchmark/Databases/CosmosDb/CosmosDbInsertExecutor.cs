@@ -31,9 +31,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 
             TraceItems(items);
 
-            return items.Any()
-                ? new CosmosDbPreparedInsert(_container, items, _insertBuilder.PartitionKeyName)
-                : null;
+            return new CosmosDbPreparedInsert(_container, items, _insertBuilder.PartitionKeyName);
         }
 
         public IPreparedQuery Prepare(ITransaction transaction) => Prepare();

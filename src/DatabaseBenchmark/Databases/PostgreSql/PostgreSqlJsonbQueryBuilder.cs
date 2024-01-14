@@ -84,7 +84,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             if (_queryOptions.UseGinOperators && column.Queryable)
             {
                 var rawCollection = condition.RandomizeValue
-                    ? RandomValueProvider.GetRandomValueCollection(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                    ? RandomValueProvider.GetValueCollection(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
                     : (IEnumerable<object>)condition.Value;
 
                 //Rewrite IN operator as a set of OR expressions

@@ -11,14 +11,17 @@ namespace DatabaseBenchmark.Generators
         private readonly Faker _faker;
         private readonly VehicleGeneratorOptions _options;
 
+        public object Current { get; private set; }
+
         public VehicleGenerator(Faker faker, VehicleGeneratorOptions options)
         {
             _faker = faker;
             _options = options;
         }
 
-        public object Generate() =>
-            _options.Kind switch
+        public bool Next()
+        {
+            Current = _options.Kind switch
             {
                 GeneratorKind.Manufacturer => _faker.Vehicle.Manufacturer(),
                 GeneratorKind.Model => _faker.Vehicle.Model(),
@@ -27,5 +30,8 @@ namespace DatabaseBenchmark.Generators
                 GeneratorKind.Type => _faker.Vehicle.Type(),
                 _ => throw new InputArgumentException($"Unknown vehicle generator kind \"{_options.Kind}\"")
             };
+
+            return true;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Reporting;
 using System.Data;
@@ -46,43 +47,36 @@ namespace DatabaseBenchmark.Core
             IQueryExecutor executor,
             IQueryExecutionOptions options)
         {
-            for (int i = 0; i < options.WarmupQueryCount; i++)
+            try
             {
-                using var preparedQuery = executor.Prepare();
-
-                if (preparedQuery == null)
-                {
-                    PrintNoQueriesWarning();
-                    return;
-                }
-
-                ExecuteQuery(preparedQuery);
-
-                if (options.QueryDelay > 0)
-                {
-                    Thread.Sleep(options.QueryDelay);
-                }
+                BenchmarkQuery(executor, options.WarmupQueryCount, options.QueryDelay, null);
+                BenchmarkQuery(executor, options.QueryCount, options.QueryDelay, _metricsCollector);
             }
+            catch (NoDataAvailableException)
+            {
+                _environment.WriteLine("WARNING: No more queries left");
+            }
+        }
 
-            for (int i = 0; i < options.QueryCount; i++)
+        private void BenchmarkQuery(
+            IQueryExecutor executor,
+            int count,
+            int delay,
+            MetricsCollector metricsCollector)
+        {
+            for (int i = 0; i < count; i++)
             {
                 using var preparedQuery = executor.Prepare();
-
-                if (preparedQuery == null)
-                {
-                    PrintNoQueriesWarning();
-                    return;
-                }
 
                 var startTimestamp = DateTime.UtcNow;
                 var rowCount = ExecuteQuery(preparedQuery);
                 var endTimestamp = DateTime.UtcNow;
 
-                _metricsCollector.AppendResult(startTimestamp, endTimestamp, rowCount, preparedQuery.CustomMetrics);
+                metricsCollector?.AppendResult(startTimestamp, endTimestamp, rowCount, preparedQuery.CustomMetrics);
 
-                if (options.QueryDelay > 0)
+                if (delay > 0)
                 {
-                    Thread.Sleep(options.QueryDelay);
+                    Thread.Sleep(delay);
                 }
             }
         }
@@ -137,11 +131,6 @@ namespace DatabaseBenchmark.Core
             }
 
             return rowCount;
-        }
-
-        private void PrintNoQueriesWarning()
-        {
-            _environment.WriteLine("WARNING: No more queries left");
         }
     }
 }

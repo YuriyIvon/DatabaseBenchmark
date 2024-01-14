@@ -1,5 +1,6 @@
 ﻿using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
@@ -37,7 +38,7 @@ namespace DatabaseBenchmark.Tests.Common
         public void GenerateValueStringColumnDefaultRule()
         {
             var randomizationRule = new ValueRandomizationRule();
-            var value = _randomValueProvider.GetRandomValue(_tableName, _distinctColumnName, randomizationRule);
+            var value = _randomValueProvider.GetValue(_tableName, _distinctColumnName, randomizationRule);
 
             Assert.Contains(value, _distinctValues);
         }
@@ -51,7 +52,7 @@ namespace DatabaseBenchmark.Tests.Common
                 GeneratorOptions = new StringGeneratorOptions()
             };
 
-            var value = _randomValueProvider.GetRandomValue(_tableName, _distinctColumnName, randomizationRule);
+            var value = _randomValueProvider.GetValue(_tableName, _distinctColumnName, randomizationRule);
 
             Assert.IsType<string>(value);
         }
@@ -67,7 +68,7 @@ namespace DatabaseBenchmark.Tests.Common
                 GeneratorOptions = new IntegerGeneratorOptions()
             };
 
-            var value = _randomValueProvider.GetRandomValue(_tableName, integerColumn, randomizationRule);
+            var value = _randomValueProvider.GetValue(_tableName, integerColumn, randomizationRule);
 
             Assert.IsType<int>(value);
         }
@@ -83,7 +84,7 @@ namespace DatabaseBenchmark.Tests.Common
                 GeneratorOptions = new FloatGeneratorOptions()
             };
 
-            var value = _randomValueProvider.GetRandomValue(_tableName, doubleColumn, randomizationRule);
+            var value = _randomValueProvider.GetValue(_tableName, doubleColumn, randomizationRule);
 
             Assert.IsType<double>(value);
         }
@@ -99,9 +100,27 @@ namespace DatabaseBenchmark.Tests.Common
                 GeneratorOptions = new DateTimeGeneratorOptions()
             };
 
-            var value = _randomValueProvider.GetRandomValue(_tableName, dateTimeColumn, randomizationRule);
+            var value = _randomValueProvider.GetValue(_tableName, dateTimeColumn, randomizationRule);
 
             Assert.IsType<DateTime>(value);
+        }
+
+        [Fact]
+        public void GenerateValueNoDataAvailable()
+        {
+            const string column = "Category";
+
+            var randomizationRule = new ValueRandomizationRule
+            {
+                UseExistingValues = false,
+                GeneratorOptions = new ListIteratorGeneratorOptions
+                {
+                    Items = []
+                }
+            };
+
+            Assert.Throws<NoDataAvailableException>(() => _randomValueProvider.GetValue(_tableName, column, randomizationRule));
+            Assert.Throws<NoDataAvailableException>(() => _randomValueProvider.Next());
         }
     }
 }

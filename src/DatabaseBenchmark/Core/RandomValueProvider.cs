@@ -1,6 +1,7 @@
 ﻿using Bogus;
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
@@ -28,13 +29,24 @@ namespace DatabaseBenchmark.Core
             _distinctValuesProvider = distinctValuesProvider;
         }
 
-        public object GetRandomValue(string tableName, string columnName, ValueRandomizationRule randomizationRule) =>
-            GetRandomValue(tableName, columnName, randomizationRule, false);
+        public void Next()
+        {
+            foreach (var generator in _generators.Values)
+            {
+                if (!generator.Next())
+                {
+                    throw new NoDataAvailableException();
+                }
+            }
+        }
 
-        public IEnumerable<object> GetRandomValueCollection(string tableName, string columnName, ValueRandomizationRule randomizationRule) =>
-            (IEnumerable<object>)GetRandomValue(tableName, columnName, randomizationRule, true);
+        public object GetValue(string tableName, string columnName, ValueRandomizationRule randomizationRule) =>
+            GetValue(tableName, columnName, randomizationRule, false);
 
-        private object GetRandomValue(string tableName, string columnName, ValueRandomizationRule randomizationRule, bool collection)
+        public IEnumerable<object> GetValueCollection(string tableName, string columnName, ValueRandomizationRule randomizationRule) =>
+            (IEnumerable<object>)GetValue(tableName, columnName, randomizationRule, true);
+
+        private object GetValue(string tableName, string columnName, ValueRandomizationRule randomizationRule, bool collection)
         {
             if (!_generators.TryGetValue((randomizationRule, collection), out var generator))
             {
@@ -72,9 +84,14 @@ namespace DatabaseBenchmark.Core
                 }
 
                 _generators.Add((randomizationRule, collection), generator);
+
+                if (!generator.Next())
+                {
+                    throw new NoDataAvailableException();
+                }
             }
 
-            return generator.Generate();
+            return generator.Current;
         }
 
         private static IGeneratorOptions GetDefaultGeneratorOptions(ColumnType columnType) =>

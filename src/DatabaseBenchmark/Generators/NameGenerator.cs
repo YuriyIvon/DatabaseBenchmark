@@ -11,19 +11,25 @@ namespace DatabaseBenchmark.Generators
         private readonly Faker _faker;
         private readonly NameGeneratorOptions _options;
 
+        public object Current { get; private set; }
+
         public NameGenerator(Faker faker, NameGeneratorOptions options)
         {
             _faker = faker;
             _options = options;
         }
 
-        public object Generate() =>
-            _options.Kind switch
+        public bool Next()
+        {
+            Current = _options.Kind switch
             {
                 GeneratorKind.FirstName => _faker.Name.FirstName(),
                 GeneratorKind.LastName => _faker.Name.LastName(),
                 GeneratorKind.FullName => _faker.Name.FullName(),
                 _ => throw new NotSupportedException()
             };
+
+            return true;
+        }
     }
 }

@@ -18,13 +18,13 @@ foreach ($databaseType in $connectionStrings.Keys)
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   $queryFile = $queryFiles[$databaseType]
-  & $toolPath query --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/SalesTable.json $tableNameParameter --QueryFilePath=Definitions/$queryFile --QueryCount=1 --QueryParallelism=1
+  & $toolPath query --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/SalesTable.json $tableNameParameter --QueryFilePath=Definitions/$queryFile --QueryCount=100 --QueryParallelism=1
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   $rawQueryFile = $rawQueryFiles[$databaseType]
   if ($rawQueryFile -ne $null)
   {
-    & $toolPath raw-query --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableName="Sales" --QueryFilePath=Definitions/$rawQueryFile --QueryParametersFilePath=Definitions/SalesAggregateRawQueryParameters.json --QueryCount=1 --QueryParallelism=1
+    & $toolPath raw-query --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableName="Sales" --QueryFilePath=Definitions/$rawQueryFile --QueryParametersFilePath=Definitions/SalesAggregateRawQueryParameters.json --QueryCount=100 --QueryParallelism=1
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
   }
 

@@ -37,7 +37,8 @@ namespace DatabaseBenchmark.Tests.Generators
                 _faker,
                 new ListItemGeneratorOptions { Items = _items });
 
-            var item = generator.Generate();
+            generator.Next();
+            var item = generator.Current;
 
             Assert.Contains(item, _items);
         }
@@ -49,7 +50,8 @@ namespace DatabaseBenchmark.Tests.Generators
                 _faker,
                 new ListItemGeneratorOptions { WeightedItems = _weightedItems });
 
-            var item = generator.Generate();
+            generator.Next();
+            var item = generator.Current;
 
             var exists = _weightedItems.Any(i => i.Value == item);
             Assert.True(exists);
@@ -66,7 +68,8 @@ namespace DatabaseBenchmark.Tests.Generators
                     WeightedItems = _weightedItems
                 });
 
-            var item = generator.Generate();
+            generator.Next();
+            var item = generator.Current;
 
             Assert.True(_items.Contains(item) || _weightedItems.Any(i => i.Value == item));
         }
@@ -76,7 +79,7 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             var generator = new ListItemGenerator(_faker, new ListItemGeneratorOptions());
 
-            Assert.Throws<InputArgumentException>(generator.Generate);
+            Assert.Throws<InputArgumentException>(() => generator.Next());
         }
 
         [Fact]
@@ -91,7 +94,7 @@ namespace DatabaseBenchmark.Tests.Generators
                     WeightedItems = _weightedItems
                 });
 
-            Assert.Throws<InputArgumentException>(generator.Generate);
+            Assert.Throws<InputArgumentException>(() => generator.Next());
         }
 
         [Fact]
@@ -101,7 +104,8 @@ namespace DatabaseBenchmark.Tests.Generators
                 _faker,
                 new ListItemGeneratorOptions { Items = _items });
 
-            var collection = generator.GenerateCollection(3);
+            generator.NextCollection(3);
+            var collection = generator.CurrentCollection;
 
             var hasDuplicates = collection.GroupBy(v => v).Any(g => g.Count() > 1);
             Assert.False(hasDuplicates);

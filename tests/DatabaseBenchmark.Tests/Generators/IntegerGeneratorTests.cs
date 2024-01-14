@@ -20,7 +20,8 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             var generator = new IntegerGenerator(_faker, _options);
 
-            var value = generator.Generate();
+            generator.Next();
+            var value = generator.Current;
 
             Assert.IsType<int>(value);
 
@@ -36,7 +37,8 @@ namespace DatabaseBenchmark.Tests.Generators
 
             var generator = new IntegerGenerator(_faker, _options);
 
-            var value = generator.Generate();
+            generator.Next();
+            var value = generator.Current;
 
             Assert.IsType<int>(value);
 
@@ -53,7 +55,7 @@ namespace DatabaseBenchmark.Tests.Generators
 
             var generator = new IntegerGenerator(_faker, _options);
 
-            Assert.Throws<InputArgumentException>(generator.Generate);
+            Assert.Throws<InputArgumentException>(() => generator.Next());
         }
 
         [Fact]
@@ -67,9 +69,9 @@ namespace DatabaseBenchmark.Tests.Generators
             int lastValue = _options.MinValue - 1;
             for (int i = 0; i < 10; i++)
             {
-                var value = generator.Generate();
+                generator.Next();
 
-                var intValue = (int)value;
+                var intValue = (int)generator.Current;
                 Assert.True(intValue > lastValue);
                 Assert.Equal(1, intValue - lastValue);
 
@@ -89,13 +91,33 @@ namespace DatabaseBenchmark.Tests.Generators
             int lastValue = 0;
             for (int i = 0; i < 10; i++)
             {
-                var value = generator.Generate();
+                generator.Next();
 
-                var intValue = (int)value;
+                var intValue = (int)generator.Current;
                 Assert.True(intValue > lastValue);
 
                 lastValue = intValue;
             }
+        }
+
+        [Fact]
+        public void GenerateIncreasingValueWithMaxValue()
+        {
+            _options.MinValue = 1;
+            _options.MaxValue = 10;
+            _options.Delta = 1;
+            _options.Increasing = true;
+
+            var generator = new IntegerGenerator(_faker, _options);
+
+            int i = _options.MinValue;
+            for (; i < _options.MaxValue + 10 && generator.Next(); i++)
+            {
+            }
+
+            Assert.Equal(_options.MaxValue, generator.Current);
+            Assert.False(generator.Next());
+            Assert.Equal(_options.MaxValue, generator.Current);
         }
     }
 }

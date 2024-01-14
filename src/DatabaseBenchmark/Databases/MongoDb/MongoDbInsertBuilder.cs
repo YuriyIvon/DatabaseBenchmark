@@ -33,6 +33,11 @@ namespace DatabaseBenchmark.Databases.MongoDb
                 documents.Add(new BsonDocument(document));
             }
 
+            if (!documents.Any())
+            {
+                throw new NoDataAvailableException();
+            }
+
             return documents;
         }
     }

@@ -15,23 +15,25 @@ namespace DatabaseBenchmark.Tests.Generators
         public NullGeneratorTests()
         {
             _baseGenerator = Substitute.For<IGenerator>();
-            _baseGenerator.Generate().Returns(1);
+
+            _baseGenerator.Next();
+            _baseGenerator.Current.Returns(1);
         }
 
         public void GenerateNull()
         {
             var generator = new NullGenerator(_faker, new NullGeneratorOptions { Weight = 1 }, _baseGenerator);
-            var value = generator.Generate();
+            generator.Next();
 
-            Assert.Null(value);
+            Assert.Null(generator.Current);
         }
 
         public void GenerateNotNull()
         {
             var generator = new NullGenerator(_faker, new NullGeneratorOptions { Weight = 0 }, _baseGenerator);
-            var value = generator.Generate();
+            generator.Next();
 
-            Assert.Equal(1, value);
+            Assert.Equal(1, generator.Current);
         }
     }
 }

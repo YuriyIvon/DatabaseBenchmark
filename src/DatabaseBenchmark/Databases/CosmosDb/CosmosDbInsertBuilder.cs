@@ -64,7 +64,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
                 return batch.Value;
             }
 
-            return Enumerable.Empty<IDictionary<string, object>>();
+            throw new NoDataAvailableException();
         }
     }
 }

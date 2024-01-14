@@ -35,3 +35,5 @@ msbuild.wrn
 
 # Visual Studio 2015
 .vs/
+/integration-tests/Definitions/SalesQueryScenario.json
+/integration-tests/Definitions/SalesRawQueryScenario.json

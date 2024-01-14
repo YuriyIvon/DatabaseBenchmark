@@ -14,9 +14,9 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             var generator = new BooleanGenerator(_faker, new BooleanGeneratorOptions());
 
-            var value = generator.Generate();
+            generator.Next();
 
-            Assert.IsType<bool>(value);
+            Assert.IsType<bool>(generator.Current);
         }
     }
 }

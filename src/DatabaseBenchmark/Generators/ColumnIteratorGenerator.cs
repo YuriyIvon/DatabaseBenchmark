@@ -1,26 +1,21 @@
-﻿using Bogus;
-using DatabaseBenchmark.Databases.Common.Interfaces;
+﻿using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Generators
 {
-    public class ColumnItemGenerator : IGenerator, ICollectionGenerator
+    public class ColumnIteratorGenerator : IGenerator
     {
-        private readonly Faker _faker;
-        private readonly ColumnItemGeneratorOptions _options;
+        private readonly ColumnIteratorGeneratorOptions _options;
         private readonly IDatabase _database;
 
-        private ListItemGenerator _itemGenerator = null;
+        private ListIteratorGenerator _itemGenerator = null;
 
         public object Current => _itemGenerator.Current;
 
-        public IEnumerable<object> CurrentCollection => _itemGenerator.CurrentCollection;
-
-        public ColumnItemGenerator(Faker faker, ColumnItemGeneratorOptions options, IDatabase database)
+        public ColumnIteratorGenerator(ColumnIteratorGeneratorOptions options, IDatabase database)
         {
-            _faker = faker;
             _options = options;
             _database = database;
         }
@@ -35,25 +30,14 @@ namespace DatabaseBenchmark.Generators
             return _itemGenerator.Next();
         }
 
-        public bool NextCollection(int length)
-        {
-            if (_itemGenerator == null)
-            {
-                Initialize();
-            }
-
-            return _itemGenerator.NextCollection(length);
-        }
-
         private void Initialize()
         {
-            var listItemGeneratorOptions = new ListItemGeneratorOptions
+            var listIteratorGeneratorOptions = new ListIteratorGeneratorOptions
             {
-                Items = ReadKeys(),
-                WeightedItems = _options.WeightedItems
+                Items = ReadKeys()
             };
 
-            _itemGenerator = new ListItemGenerator(_faker, listItemGeneratorOptions);
+            _itemGenerator = new ListIteratorGenerator(listIteratorGeneratorOptions);
         }
 
         //TODO: Make shared between two generators

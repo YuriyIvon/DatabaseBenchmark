@@ -38,26 +38,21 @@ namespace DatabaseBenchmark.Databases.Sql
 
             var queryText = _queryBuilder.Build();
 
-            if (queryText != null)
+            var command = _connection.CreateCommand();
+            command.CommandText = queryText;
+
+            foreach (var parameter in _parametersBuilder.Parameters)
             {
-                var command = _connection.CreateCommand();
-                command.CommandText = queryText;
-
-                foreach (var parameter in _parametersBuilder.Parameters)
-                {
-                    var dbParameter = command.CreateParameter();
-                    _parameterAdapter.Populate(parameter, dbParameter);
-                    command.Parameters.Add(dbParameter);
-                }
-
-                ApplyTransaction(transaction, command);
-
-                _environment.TraceCommand(command);
-
-                return CreatePreparedStatement(command);
+                var dbParameter = command.CreateParameter();
+                _parameterAdapter.Populate(parameter, dbParameter);
+                command.Parameters.Add(dbParameter);
             }
 
-            return null;
+            ApplyTransaction(transaction, command);
+
+            _environment.TraceCommand(command);
+
+            return CreatePreparedStatement(command);
         }
 
         public void Dispose() => _connection?.Dispose();

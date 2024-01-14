@@ -47,9 +47,8 @@ namespace DatabaseBenchmark.Tests.Databases
             reader.ReadDictionary(SampleInputs.Table.Columns, out var _);
             reader.ReadDictionary(SampleInputs.Table.Columns, out var _);
             reader.ReadDictionary(SampleInputs.Table.Columns, out var _);
-            var documents = queryBuilder.Build();
 
-            Assert.Empty(documents);
+            Assert.Throws<NoDataAvailableException>(queryBuilder.Build);
         }
     }
 }

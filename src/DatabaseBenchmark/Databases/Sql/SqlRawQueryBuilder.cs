@@ -24,6 +24,7 @@ namespace DatabaseBenchmark.Databases.Sql
         public string Build()
         {
             _parametersBuilder.Reset();
+            _randomValueProvider?.Next();
 
             var queryText = _query.Text;
 
@@ -44,8 +45,8 @@ namespace DatabaseBenchmark.Databases.Sql
                 var rawValue = !parameter.RandomizeValue
                     ? parameter.Value
                     : parameter.Collection
-                        ? _randomValueProvider.GetRandomValueCollection(null, parameter.Name, parameter.ValueRandomizationRule)
-                        : _randomValueProvider.GetRandomValue(null, parameter.Name, parameter.ValueRandomizationRule);
+                        ? _randomValueProvider.GetValueCollection(null, parameter.Name, parameter.ValueRandomizationRule)
+                        : _randomValueProvider.GetValue(null, parameter.Name, parameter.ValueRandomizationRule);
 
                 if (rawValue is IEnumerable<object> rawCollection)
                 {

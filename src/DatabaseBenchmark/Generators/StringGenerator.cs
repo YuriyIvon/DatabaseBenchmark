@@ -9,13 +9,19 @@ namespace DatabaseBenchmark.Generators
         private readonly Faker _faker;
         private readonly StringGeneratorOptions _options;
 
+        public object Current { get; private set; }
+
         public StringGenerator(Faker faker, StringGeneratorOptions options)
         {
             _faker = faker;
             _options = options;
         }
 
-        public object Generate() =>
-            _faker.Random.String2(_options.MinLength, _options.MaxLength, _options.AllowedCharacters);
+        public bool Next()
+        {
+            Current = _faker.Random.String2(_options.MinLength, _options.MaxLength, _options.AllowedCharacters);
+
+            return true;
+        }
     }
 }

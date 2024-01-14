@@ -47,6 +47,11 @@ namespace DatabaseBenchmark.Databases.DynamoDb
                 batch.Add(item);
             }
 
+            if (!batch.Any())
+            {
+                throw new NoDataAvailableException();
+            }
+
             return batch;
         }
     }

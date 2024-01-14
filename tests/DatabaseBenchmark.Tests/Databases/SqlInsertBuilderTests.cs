@@ -82,14 +82,13 @@ namespace DatabaseBenchmark.Tests.Databases
             var reader = new DataSourceReader(source);
             var parametersBuilder = new SqlParametersBuilder();
             var options = new InsertBuilderOptions { BatchSize = 1 };
-            var builder = new SqlInsertBuilder(SampleInputs.Table, reader, parametersBuilder, options);
+            var queryBuilder = new SqlInsertBuilder(SampleInputs.Table, reader, parametersBuilder, options);
 
             reader.ReadDictionary(SampleInputs.Table.Columns, out var _);
             reader.ReadDictionary(SampleInputs.Table.Columns, out var _);
             reader.ReadDictionary(SampleInputs.Table.Columns, out var _);
-            var insertQuery = builder.Build();
 
-            Assert.Null(insertQuery);
+            Assert.Throws<NoDataAvailableException>(queryBuilder.Build);
         }
     }
 }

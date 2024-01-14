@@ -24,7 +24,8 @@ namespace DatabaseBenchmark.Tests.Generators
                 new ValueGenerator(),
                 new CollectionGeneratorOptions { MinLength = MinLength, MaxLength = MaxLength });
 
-            var collection = (IEnumerable<object>)collectionGenerator.Generate();
+            collectionGenerator.Next();
+            var collection = (IEnumerable<object>)collectionGenerator.Current;
 
             Assert.True(collection.Count() >= MinLength);
             Assert.True(collection.Count() <= MaxLength);
@@ -39,7 +40,8 @@ namespace DatabaseBenchmark.Tests.Generators
                 new CollectionGenerator(),
                 new CollectionGeneratorOptions { MinLength = MinLength, MaxLength = MaxLength });
 
-            var collection = (IEnumerable<object>)collectionGenerator.Generate();
+            collectionGenerator.Next();
+            var collection = (IEnumerable<object>)collectionGenerator.Current;
 
             Assert.True(collection.Count() >= MinLength);
             Assert.True(collection.Count() <= MaxLength);
@@ -48,15 +50,25 @@ namespace DatabaseBenchmark.Tests.Generators
 
         private class ValueGenerator : IGenerator
         {
-            public object Generate() => SingleValue;
+            public object Current => SingleValue;
+
+            public bool Next() => true;
         }
 
         private class CollectionGenerator : IGenerator, ICollectionGenerator
         {
-            public object Generate() => SingleValue;
+            public object Current => SingleValue;
 
-            public IEnumerable<object> GenerateCollection(int length) =>
-                Enumerable.Repeat(CollectionValue, length);
+            public IEnumerable<object> CurrentCollection { get; private set; }
+
+            public bool Next() => true;
+
+            public bool NextCollection(int length)
+            {
+                CurrentCollection = Enumerable.Repeat(CollectionValue, length);
+
+                return true;
+            }
         }
     }
 }

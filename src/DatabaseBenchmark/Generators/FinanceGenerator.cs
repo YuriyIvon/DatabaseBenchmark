@@ -11,14 +11,17 @@ namespace DatabaseBenchmark.Generators
         private readonly Faker _faker;
         private readonly FinanceGeneratorOptions _options;
 
+        public object Current { get; private set; }
+
         public FinanceGenerator(Faker faker, FinanceGeneratorOptions options)
         {
             _faker = faker;
             _options = options;
         }
 
-        public object Generate() =>
-            _options.Kind switch
+        public bool Next()
+        {
+            Current = _options.Kind switch
             {
                 GeneratorKind.Bic => _faker.Finance.Bic(),
                 GeneratorKind.Iban => _faker.Finance.Iban(),
@@ -29,5 +32,8 @@ namespace DatabaseBenchmark.Generators
                 GeneratorKind.EthereumAddress => _faker.Finance.EthereumAddress(),
                 _ => throw new InputArgumentException($"Unknown finance generator kind \"{_options.Kind}\"")
             };
+
+            return true;
+        }
     }
 }

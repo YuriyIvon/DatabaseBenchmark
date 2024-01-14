@@ -2,6 +2,8 @@
 {
     public interface IGenerator
     {
-        object Generate();
+        object Current { get; }
+
+        bool Next();
     }
 }

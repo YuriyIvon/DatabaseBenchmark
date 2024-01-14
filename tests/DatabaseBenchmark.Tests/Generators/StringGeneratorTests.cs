@@ -21,7 +21,8 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             var generator = new StringGenerator(_faker, _options);
 
-            var value = generator.Generate();
+            generator.Next();
+            var value = generator.Current;
 
             Assert.IsType<string>(value);
 
@@ -37,7 +38,8 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.MaxLength = _options.MinLength;
             var generator = new StringGenerator(_faker, _options);
 
-            var value = generator.Generate();
+            generator.Next();
+            var value = generator.Current;
 
             Assert.IsType<string>(value);
 

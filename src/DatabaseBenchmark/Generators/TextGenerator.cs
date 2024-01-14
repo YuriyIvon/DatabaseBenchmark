@@ -11,14 +11,17 @@ namespace DatabaseBenchmark.Generators
         private readonly Faker _faker;
         private readonly TextGeneratorOptions _options;
 
+        public object Current { get; private set; }
+
         public TextGenerator(Faker faker, TextGeneratorOptions options)
         {
             _faker = faker;
             _options = options;
         }
 
-        public object Generate() =>
-            _options.Kind switch
+        public bool Next()
+        {
+            Current = _options.Kind switch
             {
                 GeneratorKind.Word => _faker.Lorem.Word(),
                 GeneratorKind.Sentence => _faker.Lorem.Sentence(),
@@ -26,5 +29,8 @@ namespace DatabaseBenchmark.Generators
                 GeneratorKind.Text => _faker.Lorem.Text(),
                 _ => throw new InputArgumentException($"Unknown text generator kind \"{_options.Kind}\"")
             };
+
+            return true;
+        }
     }
 }

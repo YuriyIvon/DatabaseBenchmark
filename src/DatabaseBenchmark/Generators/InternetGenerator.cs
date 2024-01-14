@@ -11,14 +11,17 @@ namespace DatabaseBenchmark.Generators
         private readonly Faker _faker;
         private readonly InternetGeneratorOptions _options;
 
+        public object Current { get; private set; }
+
         public InternetGenerator(Faker faker, InternetGeneratorOptions options)
         {
             _faker = faker;
             _options = options;
         }
 
-        public object Generate() =>
-            _options.Kind switch
+        public bool Next()
+        {
+            Current = _options.Kind switch
             {
                 GeneratorKind.DomainName => _faker.Internet.DomainName(),
                 GeneratorKind.Email => _faker.Internet.Email(),
@@ -31,5 +34,8 @@ namespace DatabaseBenchmark.Generators
                 GeneratorKind.UserName => _faker.Internet.UserName(),
                 _ => throw new InputArgumentException($"Unknown internet generator kind \"{_options.Kind}\"")
             };
+
+            return true;
+        }
     }
 }

@@ -33,20 +33,7 @@ namespace DatabaseBenchmark.Databases.Common
 
             try
             {
-                while (true)
-                {
-                    using var preparedInsert = _insertExecutor.Prepare(transaction);
-
-                    if (preparedInsert == null)
-                    {
-                        break;
-                    }
-
-                    var rowsInserted = preparedInsert.Execute();
-                    _progressReporter.Increment(rowsInserted);
-
-                    CollectMetrics(preparedInsert.CustomMetrics, metrics);
-                }
+                ImportInternal(transaction, metrics);
 
                 transaction?.Commit();
             }
@@ -63,6 +50,26 @@ namespace DatabaseBenchmark.Databases.Common
             result.AddMetrics(metrics);
 
             return result;
+        }
+
+        private void ImportInternal(ITransaction transaction, IDictionary<string, double> metrics)
+        {
+            try
+            {
+                while (true)
+                {
+                    using var preparedInsert = _insertExecutor.Prepare(transaction);
+
+                    var rowsInserted = preparedInsert.Execute();
+                    _progressReporter.Increment(rowsInserted);
+
+                    CollectMetrics(preparedInsert.CustomMetrics, metrics);
+                }
+            }
+            catch (NoDataAvailableException)
+            {
+                //No action needed, just exit
+            }
         }
 
         private static void CollectMetrics(IDictionary<string, double> from, IDictionary<string, double> to)
