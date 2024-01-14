@@ -205,7 +205,7 @@ A parameter file must contain a JSON array of objects having the following prope
 * `Value` - parameter value. Is ignored if `RandomizeValue` is `true`.
 * `Collection` - when `RandomizeValue` is `true`, specifies if a random collection should be generated.
 * `RandomizeValue` - specifies if the value should be randomized.
-* `ValueRandomizationRule` - specifies [value randomization rules](#value_randomization_rules).
+* `ValueRandomizationRule` - specifies the [value randomization rule](#value_randomization_rule).
 
 ### Raw query benchmark scenarios<a name="raw_query_benchmark_scenarios"></a>
 
@@ -285,7 +285,7 @@ A primitive condition has the following properties:
 * `Operator` - conditional operator, can be one of `Equals`, `NotEquals`, `In`, `Greater`, `GreaterEquals`, `Lower`, `LowerEquals`, `Contains`, and `StartsWith`.
 * `Value` - specifies the value of the second operand. Is ignored if `RandomizeValue` is `true`. 
 * `RandomizeValue` - specifies if the value should be randomized. Is `false` by default.
-* `ValueRandomizationRule` - specifies [value randomization rules](#value_randomization_rules).
+* `ValueRandomizationRule` - specifies the [value randomization rule](#value_randomization_rule).
 * `RandomizeInclusion` - specifies if this condition should be randomly included in the query. Is `false` by default.
 
 `Aggregate` has the following top-level properties:
