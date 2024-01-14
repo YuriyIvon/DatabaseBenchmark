@@ -1,0 +1,52 @@
+{
+  "Columns": [
+    {
+      "SourceColumnName": "Item Type",
+      "TableColumnName": "ItemType"
+    },
+    {
+      "SourceColumnName": "Sales Channel",
+      "TableColumnName": "SalesChannel"
+    },
+    {
+      "SourceColumnName": "Order Priority",
+      "TableColumnName": "OrderPriority"
+    },
+    {
+      "SourceColumnName": "Order Date",
+      "TableColumnName": "OrderDate"
+    },
+    {
+      "SourceColumnName": "Order ID",
+      "TableColumnName": "OrderID"
+    },
+    {
+      "SourceColumnName": "Ship Date",
+      "TableColumnName": "ShipDate"
+    },
+    {
+      "SourceColumnName": "Units Sold",
+      "TableColumnName": "UnitsSold"
+    },
+    {
+      "SourceColumnName": "Unit Price",
+      "TableColumnName": "UnitPrice"
+    },
+    {
+      "SourceColumnName": "Unit Cost",
+      "TableColumnName": "UnitCost"
+    },
+    {
+      "SourceColumnName": "Total Revenue",
+      "TableColumnName": "TotalRevenue"
+    },
+    {
+      "SourceColumnName": "Total Cost",
+      "TableColumnName": "TotalCost"
+    },
+    {
+      "SourceColumnName": "Total Profit",
+      "TableColumnName": "TotalProfit"
+    }
+  ]
+}
