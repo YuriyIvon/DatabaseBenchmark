@@ -4,8 +4,14 @@
     "Type": "String",
     "RandomizeValue": true,
     "ValueRandomizationRule": {
-      "ExistingValuesSourceTableName": "Sales",
-      "ExistingValuesSourceColumnName": "Country"
+      "UseExistingValues": false,
+      "GeneratorOptions":
+      {
+        "Type": "ColumnItem",
+        "TableName": "Sales",
+        "ColumnName": "Country",
+        "Distinct": true
+      }
     }
   }
 ]

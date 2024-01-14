@@ -10,13 +10,33 @@
         "ColumnName": "OrderDate",
         "Operator": "GreaterEquals",
         "RandomizeValue": true,
-        "ValueRandomizationRule": { "UseExistingValues": false, "MinDateTimeValue": "2015-01-01", "MaxDateTimeValue": "2016-01-01", "DateTimeValueStep": "7.00:00:00" }
+        "ValueRandomizationRule":
+        {
+          "UseExistingValues": false,
+          "GeneratorOptions":
+          {
+            "Type": "DateTime",
+            "MinValue": "2015-01-01",
+            "MaxValue": "2016-01-01",
+            "Delta": "7.00:00:00"
+          }
+        }
       },
       { 
         "ColumnName": "OrderDate",
         "Operator": "Lower",
         "RandomizeValue": true,
-        "ValueRandomizationRule": { "UseExistingValues": false, "MinDateTimeValue": "2017-01-01", "MaxDateTimeValue": "2018-01-01", "DateTimeValueStep": "7.00:00:00" }
+        "ValueRandomizationRule":
+        {
+          "UseExistingValues": false,
+          "GeneratorOptions":
+          {
+            "Type": "DateTime",
+            "MinValue": "2017-01-01",
+            "MaxValue": "2018-01-01",
+            "Delta": "7.00:00:00"
+          }
+        }
       }
     ]
   },
