@@ -4,7 +4,7 @@
       "Name": "Id",
       "GeneratorOptions": { 
         "Type": "Integer",
-        "Increasing": true,
+        "Direction": "Ascending",
         "MinValue": 1,
         "MaxValue": 2147483647,
         "Delta": 1
@@ -37,7 +37,7 @@
       "Name": "CreatedAt",
       "GeneratorOptions": { 
         "Type": "DateTime",
-        "Increasing": true,
+        "Direction": "Ascending",
         "MinValue": "2020-01-01T13:00:00",
         "Delta": "00:05:00",
         "RandomizeDelta": true

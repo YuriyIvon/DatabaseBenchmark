@@ -22,16 +22,18 @@ namespace DatabaseBenchmark.Generators
 
         public bool Next()
         {
-            if (_options.Increasing)
+            if (_options.Direction != Direction.None)
             {
                 if (_options.Delta.TotalMilliseconds == 0)
                 {
-                    throw new InputArgumentException("Delta must be set for the \"Increasing\" generator mode");
+                    throw new InputArgumentException("Delta must be set if the direction is not \"None\"");
                 }
 
                 if (_lastValue == null)
                 {
-                    _lastValue = _options.MinValue;
+                    _lastValue = _options.Direction == Direction.Ascending
+                        ? _options.MinValue
+                        : _options.MaxValue;
                 }
                 else
                 {
@@ -44,9 +46,11 @@ namespace DatabaseBenchmark.Generators
                         delta = TimeSpan.FromMilliseconds(randomMilliseconds);
                     }
 
-                    var value = _lastValue + delta;
+                    var isAscending = _options.Direction == Direction.Ascending;
+                    var value = _lastValue + (isAscending ? delta : -delta);
 
-                    if (value > _options.MaxValue)
+                    if ((isAscending && value > _options.MaxValue) ||
+                        (!isAscending && value < _options.MinValue))
                     {
                         return false;
                     }

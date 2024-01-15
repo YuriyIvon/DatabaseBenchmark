@@ -75,9 +75,9 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateIncreasingValueNoDelta()
+        public void GenerateAscendingValuesNoDelta()
         {
-            _options.Increasing = true;
+            _options.Direction = Direction.Ascending;
 
             var generator = new DateTimeGenerator(_faker, _options);
 
@@ -85,10 +85,10 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateIncreasingValueWithConstantDelta()
+        public void GenerateAscendingValuesWithConstantDelta()
         {
             _options.Delta = TimeSpan.FromDays(1);
-            _options.Increasing = true;
+            _options.Direction = Direction.Ascending;
 
             var generator = new DateTimeGenerator(_faker, _options);
 
@@ -106,10 +106,31 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateIncreasingValueWithRandomDelta()
+        public void GenerateDescendingValuesWithConstantDelta()
         {
             _options.Delta = TimeSpan.FromDays(1);
-            _options.Increasing = true;
+            _options.Direction = Direction.Descending;
+
+            var generator = new DateTimeGenerator(_faker, _options);
+
+            DateTime lastValue = _options.MaxValue.AddDays(1);
+            for (int i = 0; i < 10; i++)
+            {
+                generator.Next();
+
+                var dtValue = (DateTime)generator.Current;
+                Assert.True(dtValue < lastValue);
+                Assert.Equal(TimeSpan.FromDays(1), lastValue - dtValue);
+
+                lastValue = dtValue;
+            }
+        }
+
+        [Fact]
+        public void GenerateAscendingValuesWithRandomDelta()
+        {
+            _options.Delta = TimeSpan.FromDays(1);
+            _options.Direction = Direction.Ascending;
             _options.RandomizeDelta = true;
 
             var generator = new DateTimeGenerator(_faker, _options);
@@ -127,12 +148,12 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateIncreasingValueWithMaxValue()
+        public void GenerateAscendingValuesWithMaxValue()
         {
             _options.MinValue = DateTime.Now;
             _options.MaxValue = _options.MinValue.AddDays(10);
             _options.Delta = TimeSpan.FromDays(1);
-            _options.Increasing = true;
+            _options.Direction = Direction.Ascending;
 
             var generator = new DateTimeGenerator(_faker, _options);
 
@@ -144,6 +165,26 @@ namespace DatabaseBenchmark.Tests.Generators
             Assert.Equal(_options.MaxValue, generator.Current);
             Assert.False(generator.Next());
             Assert.Equal(_options.MaxValue, generator.Current);
+        }
+
+        [Fact]
+        public void GenerateDescendingValuesWithMinValue()
+        {
+            _options.MinValue = DateTime.Now;
+            _options.MaxValue = _options.MinValue.AddDays(10);
+            _options.Delta = TimeSpan.FromDays(1);
+            _options.Direction = Direction.Descending;
+
+            var generator = new DateTimeGenerator(_faker, _options);
+
+            DateTime i = _options.MaxValue;
+            for (; i > _options.MinValue.AddDays(-10) && generator.Next(); i = i.AddDays(-1))
+            {
+            }
+
+            Assert.Equal(_options.MinValue, generator.Current);
+            Assert.False(generator.Next());
+            Assert.Equal(_options.MinValue, generator.Current);
         }
     }
 }

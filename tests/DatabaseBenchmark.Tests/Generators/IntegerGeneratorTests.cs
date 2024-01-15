@@ -49,9 +49,9 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateIncreasingValueNoDelta()
+        public void GenerateAscendingValuesNoDelta()
         {
-            _options.Increasing = true;
+            _options.Direction = Direction.Ascending;
 
             var generator = new IntegerGenerator(_faker, _options);
 
@@ -59,10 +59,10 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateIncreasingValueWithConstantDelta()
+        public void GenerateAscendingValuesWithConstantDelta()
         {
             _options.Delta = 1;
-            _options.Increasing = true;
+            _options.Direction = Direction.Ascending;
 
             var generator = new IntegerGenerator(_faker, _options);
 
@@ -80,10 +80,31 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateIncreasingValueWithRandomDelta()
+        public void GenerateDescendingValuesWithConstantDelta()
         {
             _options.Delta = 1;
-            _options.Increasing = true;
+            _options.Direction = Direction.Descending;
+
+            var generator = new IntegerGenerator(_faker, _options);
+
+            int lastValue = _options.MaxValue + 1;
+            for (int i = 0; i < 10; i++)
+            {
+                generator.Next();
+
+                var intValue = (int)generator.Current;
+                Assert.True(intValue < lastValue);
+                Assert.Equal(1, lastValue - intValue);
+
+                lastValue = intValue;
+            }
+        }
+
+        [Fact]
+        public void GenerateAscendingValuesWithRandomDelta()
+        {
+            _options.Delta = 1;
+            _options.Direction = Direction.Ascending;
             _options.RandomizeDelta = true;
 
             var generator = new IntegerGenerator(_faker, _options);
@@ -101,12 +122,12 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateIncreasingValueWithMaxValue()
+        public void GenerateAscendingValuesWithMaxValue()
         {
             _options.MinValue = 1;
             _options.MaxValue = 10;
             _options.Delta = 1;
-            _options.Increasing = true;
+            _options.Direction = Direction.Ascending;
 
             var generator = new IntegerGenerator(_faker, _options);
 
@@ -118,6 +139,26 @@ namespace DatabaseBenchmark.Tests.Generators
             Assert.Equal(_options.MaxValue, generator.Current);
             Assert.False(generator.Next());
             Assert.Equal(_options.MaxValue, generator.Current);
+        }
+
+        [Fact]
+        public void GenerateDescendingValuesWithMinValue()
+        {
+            _options.MinValue = 1;
+            _options.MaxValue = 10;
+            _options.Delta = 1;
+            _options.Direction = Direction.Descending;
+
+            var generator = new IntegerGenerator(_faker, _options);
+
+            int i = _options.MaxValue;
+            for (; i > _options.MinValue - 10 && generator.Next(); i--)
+            {
+            }
+
+            Assert.Equal(_options.MinValue, generator.Current);
+            Assert.False(generator.Next());
+            Assert.Equal(_options.MinValue, generator.Current);
         }
     }
 }

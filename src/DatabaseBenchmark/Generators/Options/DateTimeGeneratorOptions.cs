@@ -8,7 +8,7 @@
 
         public DateTime MaxValue { get; set; } = DateTime.Now.AddYears(1);
 
-        public bool Increasing { get; set; } = false;
+        public Direction Direction { get; set; } = Direction.None;
 
         public TimeSpan Delta { get; set; } = TimeSpan.Zero;
 

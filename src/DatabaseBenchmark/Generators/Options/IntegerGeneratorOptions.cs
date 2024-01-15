@@ -8,7 +8,7 @@
 
         public int MaxValue { get; set; } = 100;
 
-        public bool Increasing { get; set; } = false;
+        public Direction Direction { get; set; } = Direction.None;
 
         public int Delta { get; set; } = 0;
 
