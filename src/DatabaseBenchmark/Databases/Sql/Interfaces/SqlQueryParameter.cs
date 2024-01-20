@@ -1,6 +1,6 @@
 ﻿using DatabaseBenchmark.Model;
 
-namespace DatabaseBenchmark.Databases.Sql
+namespace DatabaseBenchmark.Databases.Sql.Interfaces
 {
     public record SqlQueryParameter
     {

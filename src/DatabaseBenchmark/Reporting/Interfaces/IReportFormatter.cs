@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace DatabaseBenchmark.Interfaces.Reporting
+namespace DatabaseBenchmark.Reporting.Interfaces
 {
     public interface IReportFormatter
     {

@@ -2,7 +2,6 @@
 using Amazon.DynamoDBv2.Model;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common.Interfaces;
-using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using System.Text;
 

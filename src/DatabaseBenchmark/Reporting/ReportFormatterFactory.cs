@@ -1,6 +1,6 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Interfaces.Reporting;
+using DatabaseBenchmark.Reporting.Interfaces;
 
 namespace DatabaseBenchmark.Reporting
 {

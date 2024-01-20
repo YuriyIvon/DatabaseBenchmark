@@ -1,5 +1,4 @@
 ﻿using DatabaseBenchmark.Common;
-using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 using Snowflake.Data.Client;

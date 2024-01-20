@@ -7,8 +7,7 @@ namespace DatabaseBenchmark.Generators
     public class ListIteratorGenerator : IGenerator
     {
         private readonly ListIteratorGeneratorOptions _options;
-
-        private IEnumerator _enumerator;
+        private readonly IEnumerator _enumerator;
 
         public object Current => _enumerator.Current;
 

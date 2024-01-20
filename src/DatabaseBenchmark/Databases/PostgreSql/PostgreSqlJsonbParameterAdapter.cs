@@ -1,4 +1,4 @@
-﻿using DatabaseBenchmark.Databases.Sql;
+﻿using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Data;
 

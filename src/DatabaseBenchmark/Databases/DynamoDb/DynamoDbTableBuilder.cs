@@ -52,7 +52,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
             };
         }
 
-        private AttributeDefinition BuildAttribute(Column column) =>
+        private static AttributeDefinition BuildAttribute(Column column) =>
             new ()
             {
                 AttributeName = column.Name,

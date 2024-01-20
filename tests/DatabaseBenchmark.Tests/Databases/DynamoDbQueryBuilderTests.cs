@@ -1,6 +1,7 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Databases.DynamoDb;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
 using Xunit;

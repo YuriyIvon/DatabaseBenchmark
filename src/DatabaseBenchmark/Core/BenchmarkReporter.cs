@@ -1,5 +1,4 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Interfaces.Reporting;
 using DatabaseBenchmark.Reporting;
 using DatabaseBenchmark.Reporting.Interfaces;
 

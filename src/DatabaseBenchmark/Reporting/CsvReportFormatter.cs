@@ -1,5 +1,5 @@
 ﻿using CsvHelper;
-using DatabaseBenchmark.Interfaces.Reporting;
+using DatabaseBenchmark.Reporting.Interfaces;
 using System.Data;
 using System.Globalization;
 

@@ -1,5 +1,6 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
