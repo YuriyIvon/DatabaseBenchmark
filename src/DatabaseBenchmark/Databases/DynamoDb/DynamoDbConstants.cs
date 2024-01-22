@@ -2,8 +2,8 @@
 {
     public static class DynamoDbConstants
     {
-        public const string CapacityUnitsMetric = "CU";
-        public const string DummyPartitionKeyName = "partitionKey";
-        public const string DummyPartitionKeyValue = "A";
+        public static readonly string CapacityUnitsMetric = "CU";
+        public static readonly string DummyPartitionKeyName = "partitionKey";
+        public static readonly string DummyPartitionKeyValue = "A";
     }
 }

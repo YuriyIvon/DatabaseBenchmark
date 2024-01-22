@@ -62,7 +62,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                 .Customize<ISqlParameterAdapter, PostgreSqlJsonbParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
-            throw new NotImplementedException();
+            throw new NotSupportedException();
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
              new SqlInsertExecutorFactory<NpgsqlConnection>(this, table, source, batchSize, _environment)

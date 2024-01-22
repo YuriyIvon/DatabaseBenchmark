@@ -2,7 +2,7 @@
 {
     public static class Metrics
     {
-        public const string TotalStorageBytes = "Total Storage Bytes";
-        public const string TotalRequestCharge = "Total Request Units";
+        public static readonly string TotalStorageBytes = "Total Storage Bytes";
+        public static readonly string TotalRequestCharge = "Total Request Units";
     }
 }

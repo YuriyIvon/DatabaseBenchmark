@@ -2,6 +2,6 @@
 {
     public static class MongoDbConstants
     {
-        public const string RequestUnitsMetric = "RU";
+        public static readonly string RequestUnitsMetric = "RU";
     }
 }

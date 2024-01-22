@@ -2,8 +2,8 @@
 {
     public static class CosmosDbConstants
     {
-        public const string RequestUnitsMetric = "RU";
-        public const string DummyPartitionKeyName = "partitionKey";
-        public const string DummyPartitionKeyValue = "A";
+        public static readonly string RequestUnitsMetric = "RU";
+        public static readonly string DummyPartitionKeyName = "partitionKey";
+        public static readonly string DummyPartitionKeyValue = "A";
     }
 }

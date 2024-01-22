@@ -2,6 +2,6 @@
 {
     public static class PostgreSqlJsonbConstants
     {
-        public const string JsonbColumnName = "attributes";
+        public static readonly string JsonbColumnName = "attributes";
     }
 }
