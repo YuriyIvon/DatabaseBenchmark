@@ -1,12 +1,11 @@
 ﻿using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
 using DatabaseBenchmark.Databases.Common.Interfaces;
+using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using Nest;
-using DatabaseBenchmark.Generators.Interfaces;
-using DatabaseBenchmark.Generators;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
 {
@@ -22,7 +21,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<Query>(query);
             Container.RegisterSingleton<IColumnPropertiesProvider, TableColumnPropertiesProvider>();
-            Container.RegisterSingleton<IGeneratorFactory, GeneratorFactory>();
+            Container.RegisterSingleton<IGeneratorFactory, DummyGeneratorFactory>();
             Container.RegisterSingleton<IRandomPrimitives, RandomPrimitives>();
             Container.RegisterSingleton<ICache, MemoryCache>();
             Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);

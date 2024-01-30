@@ -44,7 +44,7 @@ namespace DatabaseBenchmark.Databases.SqlServer
             var transaction = connection.BeginTransaction();
             try
             {
-                using var dataReaderAdapter = new DataReaderAdapter(_source, _table);
+                using var dataReaderAdapter = new DataReaderAdapter(_table, _source);
                 using var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction);
                 bulkCopy.DestinationTableName = _table.Name;
                 bulkCopy.BatchSize = _batchSize;

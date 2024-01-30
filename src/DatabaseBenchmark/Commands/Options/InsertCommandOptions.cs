@@ -4,7 +4,7 @@ using DatabaseBenchmark.Core.Interfaces;
 
 namespace DatabaseBenchmark.Commands.Options
 {
-    internal class InsertCommandOptions :
+    public class InsertCommandOptions :
         IStructuredTargetOptions,
         IDataSourceOptions,
         IQueryExecutionOptions,
@@ -22,6 +22,8 @@ namespace DatabaseBenchmark.Commands.Options
         public string DataSourceType { get; set; }
 
         public string DataSourceFilePath { get; set; }
+
+        public string DataSourceCulture { get; set; }
 
         public int DataSourceMaxRows { get; set; } = 0;
 

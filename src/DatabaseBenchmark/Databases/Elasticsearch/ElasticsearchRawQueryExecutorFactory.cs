@@ -3,7 +3,6 @@ using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
-using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
 using Elasticsearch.Net;
 using Nest;
@@ -21,7 +20,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             Container.RegisterInstance<IDatabase>(database);
             Container.RegisterInstance<RawQuery>(query);
             Container.RegisterSingleton<IColumnPropertiesProvider, RawQueryColumnPropertiesProvider>();
-            Container.RegisterSingleton<IGeneratorFactory, GeneratorFactory>();
+            Container.RegisterSingleton<IGeneratorFactory, DummyGeneratorFactory>();
             Container.RegisterSingleton<IRandomPrimitives, RandomPrimitives>();
             Container.RegisterSingleton<ICache, MemoryCache>();
             Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);

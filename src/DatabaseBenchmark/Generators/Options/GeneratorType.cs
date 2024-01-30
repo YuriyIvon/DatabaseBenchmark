@@ -1,11 +1,15 @@
-﻿namespace DatabaseBenchmark.Generators.Options
+﻿using System.Text.Json.Serialization;
+
+namespace DatabaseBenchmark.Generators.Options
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum GeneratorType
     {
         Address,
         Boolean,
         Collection, //Not exposed through the factory yet
         Company,
+        DataSourceIterator,
         DateTime,
         Finance,
         Float,

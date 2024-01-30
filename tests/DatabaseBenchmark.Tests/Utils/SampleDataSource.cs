@@ -45,7 +45,7 @@ namespace DatabaseBenchmark.Tests.Utils
 
         private readonly IEnumerator<Dictionary<string, object>> _rowIterator = _rows.GetEnumerator();
 
-        public object GetValue(Type type, string name) => Convert.ChangeType(_rowIterator.Current[name], type);
+        public object GetValue(string name) => _rowIterator.Current[name];
 
         public bool Read() => _rowIterator.MoveNext();
 

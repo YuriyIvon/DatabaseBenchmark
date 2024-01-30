@@ -5,6 +5,11 @@ using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
+using DatabaseBenchmark.Databases.Common.Interfaces;
+using DatabaseBenchmark.DataSources.Interfaces;
+using DatabaseBenchmark.DataSources;
+using DatabaseBenchmark.Generators.Interfaces;
+using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Reporting;
@@ -44,7 +49,12 @@ namespace DatabaseBenchmark.Commands
                 query.Parameters = JsonUtils.DeserializeFile<RawQueryParameter[]>(options.QueryParametersFilePath, new GeneratorOptionsConverter());
             }
 
-            var executorFactory = database.CreateRawQueryExecutorFactory(query);
+            var executorFactory = database.CreateRawQueryExecutorFactory(query)
+                .Customize<IGeneratorFactory, GeneratorFactory>()
+                .Customize<IDatabaseFactory>(() => databaseFactory)
+                .Customize<IOptionsProvider>(() => _optionsProvider)
+                .Customize<IDataSourceFactory, DataSourceFactory>();
+
             benchmark.Benchmark(executorFactory, options);
 
             ReportUtils.PrintReport(resultsBuilder, metricsCollector, options, _environment);

@@ -20,7 +20,7 @@ namespace DatabaseBenchmark.DataSources
             {
                 ["Csv"] = filePath => new CsvDataSource(filePath, optionsProvider),
                 ["Database"] = filePath => new DatabaseDataSource(filePath, databaseFactory),
-                ["Generator"] = filePath => new GeneratorDataSource(filePath, currentDatabase)
+                ["Generator"] = filePath => new GeneratorDataSource(filePath, this, currentDatabase)
             };
         }
 

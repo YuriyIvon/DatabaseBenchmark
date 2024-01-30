@@ -1,6 +1,7 @@
 ﻿using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Oracle;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.DataSources;
 using DatabaseBenchmark.Tests.Utils;
 using Xunit;
 
@@ -11,7 +12,9 @@ namespace DatabaseBenchmark.Tests.Databases
         [Fact]
         public void BuildInsertMultipleRowsNoParameters()
         {
-            var source = new SampleDataSource();
+            var source = new DataSourceDecorator(new SampleDataSource())
+                .TypedColumns(SampleInputs.Table.Columns, null)
+                .DataSource;
             var reader = new DataSourceReader(source);
             var parametersBuilder = new SqlNoParametersBuilder();
             var options = new InsertBuilderOptions { BatchSize = 3 };

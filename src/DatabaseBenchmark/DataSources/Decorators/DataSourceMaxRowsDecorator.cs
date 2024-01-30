@@ -14,7 +14,7 @@ namespace DatabaseBenchmark.DataSources.Decorators
             _remainingRows = maxRows;
         }
 
-        public object GetValue(Type type, string name) => _dataSource.GetValue(type, name);
+        public object GetValue(string name) => _dataSource.GetValue(name);
 
         public bool Read()
         {

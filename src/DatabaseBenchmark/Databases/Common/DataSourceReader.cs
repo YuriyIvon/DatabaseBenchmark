@@ -28,7 +28,7 @@ namespace DatabaseBenchmark.Databases.Common
                     .Where(c => !c.DatabaseGenerated)
                     .ToDictionary(
                         c => c.Name,
-                        c => _source.GetValue(c.GetNativeType(), c.Name));
+                        c => _source.GetValue(c.Name));
 
                 return true;
             }
@@ -46,8 +46,7 @@ namespace DatabaseBenchmark.Databases.Common
 
                 values = columns
                     .Where(c => !c.DatabaseGenerated)
-                    .Select(c => _source.GetValue(c.GetNativeType(), c.Name))
-                    .ToArray();
+                    .Select(c => _source.GetValue(c.Name)).ToArray();
 
                 return true;
             }

@@ -48,7 +48,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
                     foreach (var column in columns)
                     {
-                        var value = _source.GetValue(column.GetNativeType(), column.Name);
+                        var value = _source.GetValue(column.Name);
                         writer.Write(value);
                     }
 

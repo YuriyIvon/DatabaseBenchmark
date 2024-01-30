@@ -1,5 +1,4 @@
 ﻿using DatabaseBenchmark.Common;
-using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
@@ -22,7 +21,7 @@ namespace DatabaseBenchmark.DataSources.Database
             _databaseFactory = databaseFactory;
         }
 
-        public object GetValue(Type type, string name) => _query.Results.GetValue(name);
+        public object GetValue(string name) => _query.Results.GetValue(name);
 
         public bool Read()
         {

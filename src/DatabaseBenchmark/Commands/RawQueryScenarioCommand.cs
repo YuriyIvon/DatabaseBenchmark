@@ -4,6 +4,11 @@ using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
+using DatabaseBenchmark.Databases.Common.Interfaces;
+using DatabaseBenchmark.DataSources.Interfaces;
+using DatabaseBenchmark.DataSources;
+using DatabaseBenchmark.Generators.Interfaces;
+using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Reporting;
@@ -45,7 +50,9 @@ namespace DatabaseBenchmark.Commands
 
             try
             {
-                var queryScenarioFolder = Path.GetDirectoryName(options.QueryScenarioFilePath);
+                using var currentDirectoryHolder = new CurrentDirectoryHolder();
+                var queryScenarioFolder = Path.GetDirectoryName(Path.GetFullPath(options.QueryScenarioFilePath));
+                Directory.SetCurrentDirectory(queryScenarioFolder);
 
                 foreach (var rawScenarioStep in scenarioSteps)
                 {
@@ -56,16 +63,20 @@ namespace DatabaseBenchmark.Commands
                     var database = databaseFactory.Create(scenarioStep.DatabaseType, scenarioStep.ConnectionString);
                     var query = new RawQuery
                     {
-                        Text = File.ReadAllText(PathUtils.CombinePaths(queryScenarioFolder, scenarioStep.QueryFilePath)),
+                        Text = File.ReadAllText(scenarioStep.QueryFilePath),
                         TableName = scenarioStep.TableName,
                     };
 
                     if (scenarioStep.QueryParametersFilePath != null)
                     {
-                        query.Parameters = JsonUtils.DeserializeFile<RawQueryParameter[]>(PathUtils.CombinePaths(queryScenarioFolder, scenarioStep.QueryParametersFilePath), new GeneratorOptionsConverter());
+                        query.Parameters = JsonUtils.DeserializeFile<RawQueryParameter[]>(scenarioStep.QueryParametersFilePath, new GeneratorOptionsConverter());
                     }
 
-                    var executorFactory = database.CreateRawQueryExecutorFactory(query);
+                    var executorFactory = database.CreateRawQueryExecutorFactory(query)
+                        .Customize<IGeneratorFactory, GeneratorFactory>()
+                        .Customize<IDatabaseFactory>(() => databaseFactory)
+                        .Customize<IOptionsProvider>(() => _optionsProvider)
+                        .Customize<IDataSourceFactory, DataSourceFactory>();
 
                     benchmark.Benchmark(executorFactory, scenarioStep);
                 }

@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace DatabaseBenchmark.Commands
 {
-    internal class OptionDescriptor
+    public class OptionDescriptor
     {
         public PropertyInfo Property { get; }
 

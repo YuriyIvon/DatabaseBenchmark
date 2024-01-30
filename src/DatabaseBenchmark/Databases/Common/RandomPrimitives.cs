@@ -1,7 +1,7 @@
 ﻿using Bogus;
-using DatabaseBenchmark.Generators.Interfaces;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 
-namespace DatabaseBenchmark.Generators
+namespace DatabaseBenchmark.Databases.Common
 {
     public class RandomPrimitives : IRandomPrimitives
     {

@@ -1,6 +1,6 @@
 ﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Elasticsearch;
-using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Tests.Utils;
 using Nest;
 using NSubstitute;

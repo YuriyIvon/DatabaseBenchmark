@@ -1,6 +1,7 @@
 ﻿using Bogus;
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
+using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
@@ -11,9 +12,11 @@ namespace DatabaseBenchmark.Generators
     {
         private readonly Faker _faker;
         private readonly IDatabase _database;
+        private readonly DataSourceIteratorGeneratorFactory _dataSourceIteratorGeneratorFactory;
 
-        public GeneratorFactory(IDatabase database)
+        public GeneratorFactory(IDataSourceFactory dataSourceFactory, IDatabase database)
         {
+            _dataSourceIteratorGeneratorFactory = new DataSourceIteratorGeneratorFactory(dataSourceFactory);
             _database = database;
 
             //TODO: pass locale from outside
@@ -27,6 +30,7 @@ namespace DatabaseBenchmark.Generators
                 AddressGeneratorOptions o => new AddressGenerator(_faker, o),
                 BooleanGeneratorOptions o => new BooleanGenerator(_faker, o),
                 CompanyGeneratorOptions o => new CompanyGenerator(_faker, o),
+                DataSourceIteratorGeneratorOptions o => _dataSourceIteratorGeneratorFactory.Create(o),
                 DateTimeGeneratorOptions o => new DateTimeGenerator(_faker, o),
                 FinanceGeneratorOptions o => new FinanceGenerator(_faker, o),
                 FloatGeneratorOptions o => new FloatGenerator(_faker, o),

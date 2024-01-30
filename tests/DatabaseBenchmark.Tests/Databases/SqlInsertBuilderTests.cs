@@ -1,6 +1,7 @@
 ﻿using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
+using DatabaseBenchmark.DataSources;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
 using System;
@@ -13,7 +14,9 @@ namespace DatabaseBenchmark.Tests.Databases
         [Fact]
         public void BuildInsertSingleRowNoParameters()
         {
-            var source = new SampleDataSource();
+            var source = new DataSourceDecorator(new SampleDataSource())
+                .TypedColumns(SampleInputs.Table.Columns, null)
+                .DataSource;
             var reader = new DataSourceReader(source);
             var parametersBuilder = new SqlNoParametersBuilder();
             var options = new InsertBuilderOptions { BatchSize = 1 };
@@ -30,7 +33,9 @@ namespace DatabaseBenchmark.Tests.Databases
         [Fact]
         public void BuildInsertSingleRowWithParameters()
         {
-            var source = new SampleDataSource();
+            var source = new DataSourceDecorator(new SampleDataSource())
+                .TypedColumns(SampleInputs.Table.Columns, null)
+                .DataSource;
             var reader = new DataSourceReader(source);
             var parametersBuilder = new SqlParametersBuilder();
             var options = new InsertBuilderOptions { BatchSize = 1 };
@@ -60,7 +65,9 @@ namespace DatabaseBenchmark.Tests.Databases
         [Fact]
         public void BuildInsertMultipleRowsNoParameters()
         {
-            var source = new SampleDataSource();
+            var source = new DataSourceDecorator(new SampleDataSource())
+                .TypedColumns(SampleInputs.Table.Columns, null)
+                .DataSource;
             var reader = new DataSourceReader(source);
             var parametersBuilder = new SqlNoParametersBuilder();
             var options = new InsertBuilderOptions { BatchSize = 3 };
@@ -79,7 +86,9 @@ namespace DatabaseBenchmark.Tests.Databases
         [Fact]
         public void BuildInsertNoMoreData()
         {
-            var source = new SampleDataSource();
+            var source = new DataSourceDecorator(new SampleDataSource())
+                .TypedColumns(SampleInputs.Table.Columns, null)
+                .DataSource;
             var reader = new DataSourceReader(source);
             var parametersBuilder = new SqlParametersBuilder();
             var options = new InsertBuilderOptions { BatchSize = 1 };

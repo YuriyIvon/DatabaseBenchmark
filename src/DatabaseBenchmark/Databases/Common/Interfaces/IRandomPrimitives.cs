@@ -1,4 +1,4 @@
-﻿namespace DatabaseBenchmark.Generators.Interfaces
+﻿namespace DatabaseBenchmark.Databases.Common.Interfaces
 {
     public interface IRandomPrimitives
     {

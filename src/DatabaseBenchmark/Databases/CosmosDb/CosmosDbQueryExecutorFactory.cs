@@ -4,7 +4,6 @@ using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
-using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using Microsoft.Azure.Cosmos;
@@ -27,7 +26,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             Container.RegisterInstance<IExecutionEnvironment>(environment);
             Container.RegisterInstance<IOptionsProvider>(optionsProvider);
             Container.RegisterSingleton<IColumnPropertiesProvider, TableColumnPropertiesProvider>();
-            Container.RegisterSingleton<IGeneratorFactory, GeneratorFactory>();
+            Container.RegisterSingleton<IGeneratorFactory, DummyGeneratorFactory>();
             Container.RegisterSingleton<IRandomPrimitives, RandomPrimitives>();
             Container.RegisterSingleton<ICache, MemoryCache>();
             Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);

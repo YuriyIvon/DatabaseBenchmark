@@ -5,7 +5,6 @@ using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
-using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using SimpleInjector;
@@ -24,7 +23,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
             Container.RegisterInstance<RawQuery>(query);
             Container.RegisterInstance<IExecutionEnvironment>(environment);
             Container.RegisterSingleton<IColumnPropertiesProvider, RawQueryColumnPropertiesProvider>();
-            Container.RegisterSingleton<IGeneratorFactory, GeneratorFactory>();
+            Container.RegisterSingleton<IGeneratorFactory, DummyGeneratorFactory>();
             Container.RegisterSingleton<IRandomPrimitives, RandomPrimitives>();
             Container.RegisterSingleton<ICache, MemoryCache>();
             Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);

@@ -50,14 +50,14 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                         .Where(c => c.Queryable)
                         .ToDictionary(
                             c => c.Name,
-                            c => _source.GetValue(c.GetNativeType(), c.Name));
+                            c => _source.GetValue(c.Name));
                     writer.StartRow();
 
                     writer.Write(JsonSerializer.Serialize(jsonbValues), NpgsqlTypes.NpgsqlDbType.Jsonb);
 
                     foreach (var column in nonQueryableColumns)
                     {
-                        var value = _source.GetValue(column.GetNativeType(), column.Name);
+                        var value = _source.GetValue(column.Name);
                         writer.Write(value);
                     }
 

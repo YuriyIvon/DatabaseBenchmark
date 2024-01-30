@@ -25,6 +25,7 @@ namespace DatabaseBenchmark.Generators.Options
                     GeneratorType.Address => optionsJson.Deserialize<AddressGeneratorOptions>(options),
                     GeneratorType.Boolean => optionsJson.Deserialize<BooleanGeneratorOptions>(options),
                     GeneratorType.Company => optionsJson.Deserialize<CompanyGeneratorOptions>(options),
+                    GeneratorType.DataSourceIterator => optionsJson.Deserialize<DataSourceIteratorGeneratorOptions>(options),
                     GeneratorType.DateTime => optionsJson.Deserialize<DateTimeGeneratorOptions>(options),
                     GeneratorType.Finance => optionsJson.Deserialize<FinanceGeneratorOptions>(options),
                     GeneratorType.Float => optionsJson.Deserialize<FloatGeneratorOptions>(options),
@@ -50,7 +51,7 @@ namespace DatabaseBenchmark.Generators.Options
 
         public override void Write(Utf8JsonWriter writer, IGeneratorOptions value, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
     }
 }

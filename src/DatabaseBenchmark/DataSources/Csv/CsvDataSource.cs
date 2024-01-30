@@ -12,6 +12,7 @@ namespace DatabaseBenchmark.DataSources.Csv
         private readonly string _filePath;
         private readonly IOptionsProvider _optionsProvider;
 
+        private bool _treatBlankAsNull;
         private StreamReader _streamReader;
         private CsvReader _reader;
 
@@ -19,7 +20,7 @@ namespace DatabaseBenchmark.DataSources.Csv
             string filePath,
             IOptionsProvider optionsProvider)
         {
-            _filePath = filePath;
+            _filePath = Path.GetFullPath(filePath);
             _optionsProvider = optionsProvider;
         }
 
@@ -29,8 +30,12 @@ namespace DatabaseBenchmark.DataSources.Csv
             _streamReader?.Dispose();
         }
 
-        public object GetValue(Type type, string name) =>
-            NaNToNull(_reader.GetField(type, name));
+        public object GetValue(string name)
+        {
+            var value = _reader.GetField(name);
+
+            return _treatBlankAsNull && value == string.Empty ? null : value;
+        }
 
         public bool Read()
         {
@@ -45,12 +50,9 @@ namespace DatabaseBenchmark.DataSources.Csv
         private void Open()
         {
             var options = _optionsProvider.GetOptions<CsvDataSourceOptions>();
+            _treatBlankAsNull = options.TreatBlankAsNull;
 
-            var culture = options.Culture != null 
-                ? CultureInfo.GetCultureInfo(options.Culture) 
-                : CultureInfo.CurrentCulture;
-
-            var configuration = new CsvConfiguration(culture);
+            var configuration = new CsvConfiguration(CultureInfo.InvariantCulture);
 
             if (options.Delimiter != null)
             {
@@ -63,8 +65,5 @@ namespace DatabaseBenchmark.DataSources.Csv
             _reader.Read();
             _reader.ReadHeader();
         }
-
-        public static object NaNToNull(object value) =>
-            value is double doubleValue && double.IsNaN(doubleValue) ? null : value;
     }
 }

@@ -8,8 +8,6 @@ namespace DatabaseBenchmark.Core
     {
         private readonly TextTableReportFormatter _tableFormatter = new();
 
-        public IOptionsProvider OptionsProvider { get; }
-
         public bool TraceQueries { get; }
 
         public bool TraceResults { get; }

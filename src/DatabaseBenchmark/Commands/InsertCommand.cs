@@ -5,7 +5,6 @@ using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
 using DatabaseBenchmark.DataSources;
-using DatabaseBenchmark.DataSources.Decorators;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Reporting;
 
@@ -40,20 +39,11 @@ namespace DatabaseBenchmark.Commands
             }
 
             var dataSourceFactory = new DataSourceFactory(database, databaseFactory, _optionsProvider);
-            var dataSource = dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath);
-
-            if (options.DataSourceMaxRows > 0)
-            {
-                dataSource = new DataSourceMaxRowsDecorator(dataSource, options.DataSourceMaxRows);
-            }
-
-            if(!string.IsNullOrEmpty(options.MappingFilePath))
-            {
-                dataSource = new DataSourceMappingDecorator(dataSource, JsonUtils.DeserializeFile<ColumnMappingCollection>(options.MappingFilePath));
-            }
-
-            //Is needed to guarantee the disposal of the data source
-            using var dataSourceHolder = dataSource;
+            using var dataSource = new DataSourceDecorator(dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath))
+                .MaxRows(options.DataSourceMaxRows)
+                .Mapping(options.MappingFilePath)
+                .TypedColumns(table.Columns, options.DataSourceCulture)
+                .DataSource;
 
             var executorFactory = database.CreateInsertExecutorFactory(table, dataSource, options.BatchSize);
             benchmark.Benchmark(executorFactory, options);

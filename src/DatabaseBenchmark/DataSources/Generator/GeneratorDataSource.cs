@@ -15,7 +15,7 @@ namespace DatabaseBenchmark.DataSources.Generator
 
         private object[] _currentRow;
 
-        public GeneratorDataSource(string filePath, IDatabase database)
+        public GeneratorDataSource(string filePath, IDataSourceFactory dataSourceFactory, IDatabase database)
         {
             _options = JsonUtils.DeserializeFile<GeneratorDataSourceOptions>(filePath, new GeneratorOptionsConverter());
 
@@ -23,27 +23,20 @@ namespace DatabaseBenchmark.DataSources.Generator
                 .Select((c, i) => new { c.Name, Index = i })
                 .ToDictionary(c => c.Name, c => c.Index);
 
-            var generatorFactory = new GeneratorFactory(database);
+            using var currentDirectoryHolder = new CurrentDirectoryHolder();
+            var optionsDirectory = Path.GetDirectoryName(Path.GetFullPath(filePath));
+            Directory.SetCurrentDirectory(optionsDirectory);
+
+            var generatorFactory = new GeneratorFactory(dataSourceFactory, database);
             _generators = _options.Columns
                 .Select(c => generatorFactory.Create(c.GeneratorOptions))
                 .ToArray();
         }
 
-        public object GetValue(Type type, string name)
+        public object GetValue(string name)
         {
             var index = _columnIndexes[name];
             var value = _currentRow[index];
-
-            if (value != null)
-            {
-                var valueType = value.GetType();
-
-                //TODO: handle other type inconsistencies
-                if (valueType != type && type == typeof(string))
-                {
-                     return value.ToString();
-                }
-            }
 
             return value;
         }
@@ -69,6 +62,13 @@ namespace DatabaseBenchmark.DataSources.Generator
 
         public void Dispose()
         {
+            foreach (var generator in _generators)
+            {
+                if (generator is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
         }
     }
 }

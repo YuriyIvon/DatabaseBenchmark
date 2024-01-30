@@ -3,7 +3,7 @@ using DatabaseBenchmark.Common;
 
 namespace DatabaseBenchmark.Commands.Options
 {
-    internal class RawQueryCommandOptions :
+    public class RawQueryCommandOptions :
         RawQueryBenchmarkOptions,
         IReportOptions,
         IQueryTraceOptions,

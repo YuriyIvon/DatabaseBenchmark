@@ -2,7 +2,7 @@
 {
     public interface IDataSource : IDisposable
     {
-        object GetValue(Type type, string name);
+        object GetValue(string name);
 
         bool Read();
     }

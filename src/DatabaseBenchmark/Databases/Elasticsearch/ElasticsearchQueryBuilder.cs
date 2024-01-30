@@ -1,7 +1,7 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
-using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Model;
 using Nest;
 
