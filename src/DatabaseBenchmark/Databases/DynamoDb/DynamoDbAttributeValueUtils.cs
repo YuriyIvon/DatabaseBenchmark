@@ -25,7 +25,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
             {
                 return type switch
                 {
-                    ColumnType.Boolean => new AttributeValue { BOOL = (bool)value, IsBOOLSet = true },
+                    ColumnType.Boolean => new AttributeValue { IsBOOLSet = true, BOOL = (bool)value },
                     ColumnType.Double => new AttributeValue { N = value.ToString() },
                     ColumnType.Integer => new AttributeValue { N = value.ToString() },
                     ColumnType.Long => new AttributeValue { N = value.ToString() },
