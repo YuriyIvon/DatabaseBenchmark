@@ -70,8 +70,9 @@ DatabaseBenchmark create --DatabaseType=MongoDb --ConnectionString="mongodb://lo
 
 Connection string samples for each of the database engines can be found in the [corresponding section](#connection_strings).
 
-There is a parameter specific to the `create` command:
+There are a few parameters specific to the `create` command:
 * `DropExisting` - specifies whether to re-create the table if it already exists.
+* `PostScriptFilePath` - path to a database script to be executed after the table has been created. Can be used to automate index creation when a table is re-created during the benchmark.
 
 This command also has a few database-specific parameters:
 * `ClickHouse.Engine` - table engine. Default is `MergeTree()`.
@@ -104,7 +105,8 @@ More information on all data source types and their parameters can be found in t
 
 Other optional parameters of the import command are:
 * `MappingFilePath` - in case column names in the data source don't match table columns (like in the example above, where CSV headers contain space characters), this parameter can be used to point to a JSON file with column mappings. An object in this file must have `Columns` array where each item consists of two fields - `SourceColumnName` and `TableColumnName`.
-* `DataSourceCulture` - a culture identifier (e.g., "en-GB") used for parsing input string values if a string value is mapped to a non-string column. The current system culture is used by default.
+* `DataSourceCulture` - culture identifier (e.g., "en-GB") used for parsing input string values if a string value is mapped to a non-string column. The current system culture is used by default.
+* `DataSourceMaxRows` - the maximum number of rows that the data source can return.
 
 This command also has a database-specific parameter:
 * `MongoDb.CollectCosmosDbRequestUnits` - allows collecting request charge metric in case of Azure Cosmos DB API for MongoDB (may affect query timing).
