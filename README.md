@@ -269,6 +269,7 @@ Where each column definition has the following properties:
 
 A query definition has the following top-level properties:
 
+* `Distinct` - specifies whether to apply "distinct" to the query results. Is `false` by default.
 * `Columns` - an array of columns to be returned by the query. If `Aggregate` is specified, it may contain only columns present in its `GroupColumnNames` array.  
 * `Condition` - an object representing the query condition.
 * `Aggregate` - an object representing the aggregation to be done.
