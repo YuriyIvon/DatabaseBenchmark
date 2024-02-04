@@ -7,7 +7,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
     {
         private readonly ISearchResponse<Dictionary<string, object>> _response;
 
-        private int _documentIndex;
+        private int _documentIndex = -1;
 
         public IEnumerable<string> ColumnNames => _response.Documents.ElementAt(_documentIndex).Keys;
 
