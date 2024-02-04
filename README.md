@@ -102,7 +102,9 @@ Here file [SalesSqlServerDataSource.json](https://github.com/YuriyIvon/DatabaseB
 
 More information on all data source types and their parameters can be found in the [corresponding section](#data_sources).
 
-If column names in the data source don't match table columns (like in the example above, where CSV headers contain space characters), a mapping can be applied by specifying `MappingFilePath` parameter pointing to a JSON file with column mappings. An object in this file must have `Columns` array where each item consists of two fields - `SourceColumnName` and `TableColumnName`.
+Other optional parameters of the import command are:
+* `MappingFilePath` - in case column names in the data source don't match table columns (like in the example above, where CSV headers contain space characters), this parameter can be used to point to a JSON file with column mappings. An object in this file must have `Columns` array where each item consists of two fields - `SourceColumnName` and `TableColumnName`.
+* `DataSourceCulture` - a culture identifier (e.g., "en-GB") used for parsing input string values if a string value is mapped to a non-string column. The current system culture is used by default.
 
 This command also has a database-specific parameter:
 * `MongoDb.CollectCosmosDbRequestUnits` - allows collecting request charge metric in case of Azure Cosmos DB API for MongoDB (may affect query timing).
@@ -226,7 +228,7 @@ DatabaseBenchmark insert --DatabaseType=SqlServer --ConnectionString="Data Sourc
 Reads data from a CSV file specified by the `DataSourceFilePath` parameter. Supports the following extra parameters:
 
 * `DataSource.Csv.Delimiter` - overrides the default value delimiter.
-* `DataSource.Csv.Culture` - overrides the default system culture used for parsing the input CSV file.
+* `DataSource.Csv.TreatBlankAsNull` - specifies whether to treat blank values as null. Is `true` by default.
 
 #### Database
 Reads data from any database engine supported by the tool. The file specified by the `DataSourceFilePath` parameter must contain a valid JSON object with the following attributes:
@@ -378,6 +380,14 @@ The available attributes are:
 * `ColumnName` - a name of the source column.
 * `ColumnType` - a source column type.
 * `Distinct` - specifies whether to apply a distinct value filter when retrieving data from the source column.
+
+#### DataSourceIterator
+Sequentially returns values of a column from the specified data source. Multiple generator instances with the same data source type and file path share the same iterator, thus allowing to fetch entire rows from the data source. It can be useful in scenarios when the source data needs to be enriched with randomly generated columns: in this case, `DataSourceIterator` will be used to fetch the raw data while others can add extra generated columns to the target data set.
+
+The available attributes are:
+* `DataSourceType` - a [data source](#data_sources) type.
+* `DataSourceFilePath` - a path to the [data source](#data_sources) file.
+* `ColumnName` - a name of the column to be returned.
 
 #### Guid
 Generates a random GUID.

@@ -7,21 +7,23 @@ namespace DatabaseBenchmark.Databases.Sql
     {
         public IEnumerable<SqlQueryParameter> Parameters { get; } = Enumerable.Empty<SqlQueryParameter>();
 
-        public string Append(object value, ColumnType type)
-        {
-            if (value != null)
+        public string Append(object value, ColumnType type) =>
+            value switch
             {
-                var stringValue = value is DateTime dateTimeValue ? dateTimeValue.ToString("o") : value.ToString();
-
-                return (value is bool || value is int || value is long || value is double)
-                    ? stringValue : $"'{stringValue.Replace("'", "''")}'";
-            }
-
-            return "NULL";
-        }
+                null => "NULL",
+                bool boolValue => boolValue.ToString().ToLower(), //Different databases may accept different Boolean format
+                int intValue => intValue.ToString(),
+                long longValue => longValue.ToString(),
+                double doubleValue => doubleValue.ToString(),
+                DateTime dateTimeValue => Quote(dateTimeValue.ToString("o")),
+                Guid guidValue => Quote(guidValue.ToString()), //Different databases may accept different UUID format
+                _ => Quote(value.ToString().Replace("'", "''"))
+            };
 
         public void Reset()
         {
         }
+
+        private static string Quote(string value) => "'" + value + "'";
     }
 }
