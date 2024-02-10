@@ -4,7 +4,7 @@ using DatabaseBenchmark.Generators.Options;
 
 namespace DatabaseBenchmark.Generators
 {
-    public class NullGenerator : IGenerator
+    public class NullGenerator : IGenerator, IDisposable
     {
         private readonly Faker _faker;
         private readonly NullGeneratorOptions _options;
@@ -36,6 +36,14 @@ namespace DatabaseBenchmark.Generators
             }
 
             return true;
+        }
+
+        public void Dispose()
+        {
+            if (_sourceGenerator is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
         }
     }
 }

@@ -41,6 +41,7 @@ namespace DatabaseBenchmark.Generators.Options
                     GeneratorType.Phone => optionsJson.Deserialize<PhoneGeneratorOptions>(options),
                     GeneratorType.String => optionsJson.Deserialize<StringGeneratorOptions>(options),
                     GeneratorType.Text => optionsJson.Deserialize<TextGeneratorOptions>(options),
+                    GeneratorType.Unique => optionsJson.Deserialize<UniqueGeneratorOptions>(options),
                     GeneratorType.Vehicle => optionsJson.Deserialize<VehicleGeneratorOptions>(options),
                     _ => throw new InputArgumentException($"Unknown generator type \"{generatorType}\"")
                 };

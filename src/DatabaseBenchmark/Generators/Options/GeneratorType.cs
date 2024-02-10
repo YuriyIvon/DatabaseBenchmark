@@ -25,6 +25,7 @@ namespace DatabaseBenchmark.Generators.Options
         Phone,
         String,
         Text,
+        Unique,
         Vehicle
     }
 }

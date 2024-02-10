@@ -46,6 +46,7 @@ namespace DatabaseBenchmark.Generators
                 PhoneGeneratorOptions o => new PhoneGenerator(_faker, o),
                 StringGeneratorOptions o => new StringGenerator(_faker, o),
                 TextGeneratorOptions o => new TextGenerator(_faker, o),
+                UniqueGeneratorOptions o => new UniqueGenerator(o, Create(o.SourceGeneratorOptions)),
                 VehicleGeneratorOptions o => new VehicleGenerator(_faker, o),
                 _ => throw new InputArgumentException($"Unknown generator options type \"{options.GetType()}\"")
             };
