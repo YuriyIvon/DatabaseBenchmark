@@ -45,11 +45,13 @@ namespace DatabaseBenchmark.Tests.Generators
         [Fact]
         public void GenerateFromWeightedItems()
         {
+            //Enforce the total weight to be equal to 1
+            _weightedItems[0].Weight = 0.3f;
+
             var generator = new ListItemGenerator(
                 _faker,
                 new ListItemGeneratorOptions 
                 {
-                    Items = _items,
                     WeightedItems = _weightedItems
                 });
 
