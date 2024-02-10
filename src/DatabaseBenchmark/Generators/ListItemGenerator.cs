@@ -32,9 +32,7 @@ namespace DatabaseBenchmark.Generators
                 Initialize();
             }
 
-            var useWeighted = _items == null || !_items.Any() || _faker.Random.Bool(_totalWeight);
-
-            Current = useWeighted
+            Current = _weightedItems != null
                 ? _faker.Random.WeightedRandom(_weightedItems, _weights)
                 : _faker.Random.ArrayElement(_items);
 
@@ -67,9 +65,9 @@ namespace DatabaseBenchmark.Generators
 
             if (_options.WeightedItems?.Any() == true)
             {
-                _weightedItems = _options.WeightedItems.Select(i => i.Value).ToArray();
-                _weights = _options.WeightedItems.Select(i => i.Weight).ToArray();
-                _totalWeight = _weights.Sum();
+                var weightedItems = _options.WeightedItems.Select(i => i.Value).ToList();
+                var weights = _options.WeightedItems.Select(i => i.Weight).ToList();
+                _totalWeight = weights.Sum();
 
                 if (_totalWeight > 1)
                 {
@@ -78,8 +76,23 @@ namespace DatabaseBenchmark.Generators
 
                 if (_options.Items?.Any() == true)
                 {
-                    _items = _options.Items.Except(_weightedItems).ToArray();
+                    _items = _options.Items.Except(weightedItems).ToArray();
                 }
+
+                if (_totalWeight < 1)
+                {
+                    if (_items?.Any() != true)
+                    {
+                        throw new InputArgumentException("The total weight is lower than 1, but there are no non-weighted items provided");
+                    }
+
+                    var remainingItemWeight = (1 - _totalWeight) / _items.Length;
+                    weightedItems.AddRange(_items);
+                    weights.AddRange(Enumerable.Repeat(remainingItemWeight, _items.Length));
+                }
+
+                _weightedItems = weightedItems.ToArray();
+                _weights = weights.ToArray();
             }
             else
             {

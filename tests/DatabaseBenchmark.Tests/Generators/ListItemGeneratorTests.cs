@@ -18,7 +18,6 @@ namespace DatabaseBenchmark.Tests.Generators
             "item3",
             "item4",
             "item5"
-
         ];
 
         private readonly WeightedListItem[] _weightedItems =
@@ -48,7 +47,11 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             var generator = new ListItemGenerator(
                 _faker,
-                new ListItemGeneratorOptions { WeightedItems = _weightedItems });
+                new ListItemGeneratorOptions 
+                {
+                    Items = _items,
+                    WeightedItems = _weightedItems
+                });
 
             generator.Next();
             var item = generator.Current;
@@ -75,29 +78,6 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateNoItemsError()
-        {
-            var generator = new ListItemGenerator(_faker, new ListItemGeneratorOptions());
-
-            Assert.Throws<InputArgumentException>(() => generator.Next());
-        }
-
-        [Fact]
-        public void GenerateWeightedItemsError()
-        {
-            _weightedItems[0].Weight = 1;
-
-            var generator = new ListItemGenerator(
-                _faker,
-                new ListItemGeneratorOptions
-                {
-                    WeightedItems = _weightedItems
-                });
-
-            Assert.Throws<InputArgumentException>(() => generator.Next());
-        }
-
-        [Fact]
         public void GenerateCollectionFromItems()
         {
             var generator = new ListItemGenerator(
@@ -111,6 +91,68 @@ namespace DatabaseBenchmark.Tests.Generators
             Assert.False(hasDuplicates);
             Assert.Equal(3, collection.Count());
             Assert.True(collection.All(i => _items.Contains(i)));
+        }
+
+        [Fact]
+        public void GenerateFromItemsAndWeightedItemsWithWeightOverride()
+        {
+            var weightedItems = _weightedItems.Concat(new[] 
+                { 
+                    new WeightedListItem { Value = _items[0], Weight = 0 }
+                })
+                .ToArray();
+
+            var generator = new ListItemGenerator(
+                _faker,
+                new ListItemGeneratorOptions
+                {
+                    Items = _items,
+                    WeightedItems = weightedItems
+                });
+
+            //Make sure that the same item added to the weighted list with zero probability overrides the one from the plain items list
+            for (var i = 0; i < 50; i++)
+            {
+                generator.Next();
+                Assert.NotEqual(_items[0], generator.Current);
+            }
+        }
+
+        [Fact]
+        public void GenerateNoItemsError()
+        {
+            var generator = new ListItemGenerator(_faker, new ListItemGeneratorOptions());
+
+            Assert.Throws<InputArgumentException>(() => generator.Next());
+        }
+
+        [Fact]
+        public void GenerateWeightedItemsTooHighTotalError()
+        {
+            _weightedItems[0].Weight = 1;
+
+            var generator = new ListItemGenerator(
+                _faker,
+                new ListItemGeneratorOptions
+                {
+                    Items = _items,
+                    WeightedItems = _weightedItems
+                });
+
+            Assert.Throws<InputArgumentException>(() => generator.Next());
+        }
+
+        [Fact]
+        public void GenerateWeightedItemsNoItemsError()
+        {
+            var generator = new ListItemGenerator(
+                _faker,
+                new ListItemGeneratorOptions
+                {
+                    WeightedItems = _weightedItems
+                });
+
+            Assert.Throws<InputArgumentException>(() => generator.Next());
         }
     }
 }
