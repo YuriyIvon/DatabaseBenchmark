@@ -18,10 +18,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.301.7" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.301.9" />
     <PackageReference Include="Bogus" Version="35.4.0" />
-    <PackageReference Include="CsvHelper" Version="30.1.0" />
-    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.38.0" />
+    <PackageReference Include="CsvHelper" Version="31.0.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.38.1" />
     <PackageReference Include="MonetDB" Version="2.1.2" />
     <PackageReference Include="MongoDB.Driver" Version="2.23.1" />
     <PackageReference Include="MySqlConnector" Version="2.3.5" />
