@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Generators.Interfaces;
+﻿using BloomFilter;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
 
 namespace DatabaseBenchmark.Generators
@@ -7,7 +8,7 @@ namespace DatabaseBenchmark.Generators
     {
         private readonly UniqueGeneratorOptions _options;
         private readonly IGenerator _sourceGenerator;
-        private readonly HashSet<object> _existingValues = [];
+        private readonly IBloomFilter _bloomFilter;
 
         public object Current { get; private set; }
 
@@ -15,6 +16,7 @@ namespace DatabaseBenchmark.Generators
         {
             _options = options;
             _sourceGenerator = sourceGenerator;
+            _bloomFilter = FilterBuilder.Build(options.MaxValues, 0.01);
         }
 
         public bool Next()
@@ -23,7 +25,7 @@ namespace DatabaseBenchmark.Generators
             {
                 _sourceGenerator.Next();
 
-                if (_existingValues.Add(_sourceGenerator.Current))
+                if (AppendFilter(_sourceGenerator.Current))
                 {
                     Current = _sourceGenerator.Current;
                     return true;
@@ -39,6 +41,18 @@ namespace DatabaseBenchmark.Generators
             {
                 disposable.Dispose();
             }
+
+            _bloomFilter.Dispose();
         }
+
+        public bool AppendFilter(object value) =>
+            value switch
+            {
+                int intValue => _bloomFilter.Add(intValue),
+                long longValue => _bloomFilter.Add(longValue),
+                double doubleValue => _bloomFilter.Add(doubleValue),
+                DateTime dateTimeValue => _bloomFilter.Add(dateTimeValue),
+                _ => _bloomFilter.Add(value.ToString())
+            };
     }
 }

@@ -13,8 +13,5 @@
         public double Delta { get; set; } = 0;
 
         public bool RandomizeDelta { get; set; } = false;
-
-        //TODO: implement logic
-        public bool Unique { get; set; } = false;
     }
 }
