@@ -49,7 +49,7 @@ namespace DatabaseBenchmark.Generators
         {
             var listItemGeneratorOptions = new ListItemGeneratorOptions
             {
-                Items = ReadKeys(),
+                Items = ReadValues(),
                 WeightedItems = _options.WeightedItems
             };
 
@@ -57,7 +57,7 @@ namespace DatabaseBenchmark.Generators
         }
 
         //TODO: Make shared between two generators
-        private object[] ReadKeys()
+        private object[] ReadValues()
         {
             var table = new Table
             {
@@ -84,14 +84,21 @@ namespace DatabaseBenchmark.Generators
             preparedQuery.Execute();
 
             var results = preparedQuery.Results;
-            var keys = new List<object>();
+            var values = new List<object>();
 
-            while (results.Read())
+            int index = 0;
+            while (results.Read() && (_options.MaxRows <= 0 || values.Count < _options.MaxRows))
             {
-                keys.Add(results.GetValue(_options.ColumnName));
+                if (_options.SkipRows <= 0 || index % (_options.SkipRows + 1) == 0)
+                {
+                    values.Add(results.GetValue(_options.ColumnName));
+                }
+
+                index++;
             }
 
-            return keys.ToArray();
+            //TODO: Avoid copying
+            return values.ToArray();
         }
     }
 }

@@ -5,14 +5,14 @@ using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Generators
 {
-    public class ColumnIteratorGenerator : IGenerator
+    public class ColumnIteratorGenerator : IGenerator, IDisposable
     {
         private readonly ColumnIteratorGeneratorOptions _options;
         private readonly IDatabase _database;
 
-        private ListIteratorGenerator _itemGenerator = null;
+        private IPreparedQuery _query;
 
-        public object Current => _itemGenerator.Current;
+        public object Current => _query.Results.GetValue(_options.ColumnName);
 
         public ColumnIteratorGenerator(ColumnIteratorGeneratorOptions options, IDatabase database)
         {
@@ -22,26 +22,17 @@ namespace DatabaseBenchmark.Generators
 
         public bool Next()
         {
-            if (_itemGenerator == null)
+            if (_query == null)
             {
                 Initialize();
             }
 
-            return _itemGenerator.Next();
+            return _query.Results.Read();
         }
+
+        public void Dispose() => _query.Dispose();
 
         private void Initialize()
-        {
-            var listIteratorGeneratorOptions = new ListIteratorGeneratorOptions
-            {
-                Items = ReadKeys()
-            };
-
-            _itemGenerator = new ListIteratorGenerator(listIteratorGeneratorOptions);
-        }
-
-        //TODO: Make shared between two generators
-        private object[] ReadKeys()
         {
             var table = new Table
             {
@@ -64,18 +55,8 @@ namespace DatabaseBenchmark.Generators
 
             var executorFactory = _database.CreateQueryExecutorFactory(table, query);
             var executor = executorFactory.Create();
-            var preparedQuery = executor.Prepare();
-            preparedQuery.Execute();
-
-            var results = preparedQuery.Results;
-            var keys = new List<object>();
-
-            while (results.Read())
-            {
-                keys.Add(results.GetValue(_options.ColumnName));
-            }
-
-            return keys.ToArray();
+            _query = executor.Prepare();
+            _query.Execute();
         }
     }
 }

@@ -16,5 +16,9 @@ namespace DatabaseBenchmark.Generators.Options
         public ColumnType ColumnType { get; set; }
 
         public WeightedListItem[] WeightedItems { get; set; }
+
+        public int MaxRows { get; set; } = 0;
+
+        public int SkipRows { get; set; } = 0;
     }
 }
