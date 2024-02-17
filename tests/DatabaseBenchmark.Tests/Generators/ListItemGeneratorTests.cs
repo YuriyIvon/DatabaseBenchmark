@@ -129,7 +129,7 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateWeightedItemsTooHighTotalError()
+        public void GenerateFromWeightedItemsTooHighTotalError()
         {
             _weightedItems[0].Weight = 1;
 
@@ -145,7 +145,7 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateWeightedItemsNoItemsError()
+        public void GenerateFromWeightedItemsNoItemsError()
         {
             var generator = new ListItemGenerator(
                 _faker,

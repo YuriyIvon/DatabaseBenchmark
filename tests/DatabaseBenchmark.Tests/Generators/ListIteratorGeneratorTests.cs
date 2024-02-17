@@ -17,7 +17,7 @@ namespace DatabaseBenchmark.Tests.Generators
         ];
 
         [Fact]
-        public void Generate()
+        public void GenerateValue()
         {
             var generator = new ListIteratorGenerator(
                 new ListIteratorGeneratorOptions { Items = _items });

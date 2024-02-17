@@ -17,8 +17,8 @@ namespace DatabaseBenchmark.Generators.Options
 
         public WeightedListItem[] WeightedItems { get; set; }
 
-        public int MaxRows { get; set; } = 0;
+        public int MaxSourceRows { get; set; } = 0;
 
-        public int SkipRows { get; set; } = 0;
+        public int SkipSourceRows { get; set; } = 0;
     }
 }

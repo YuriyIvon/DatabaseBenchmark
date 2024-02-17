@@ -32,6 +32,7 @@ namespace DatabaseBenchmark.Generators
 
         public void Dispose() => _query.Dispose();
 
+        //TODO: Make shared between two generators
         private void Initialize()
         {
             var table = new Table

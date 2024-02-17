@@ -87,9 +87,9 @@ namespace DatabaseBenchmark.Generators
             var values = new List<object>();
 
             int index = 0;
-            while (results.Read() && (_options.MaxRows <= 0 || values.Count < _options.MaxRows))
+            while (results.Read() && (_options.MaxSourceRows <= 0 || values.Count < _options.MaxSourceRows))
             {
-                if (_options.SkipRows <= 0 || index % (_options.SkipRows + 1) == 0)
+                if (_options.SkipSourceRows <= 0 || index % (_options.SkipSourceRows + 1) == 0)
                 {
                     values.Add(results.GetValue(_options.ColumnName));
                 }

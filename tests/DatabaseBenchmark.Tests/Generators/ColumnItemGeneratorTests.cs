@@ -34,7 +34,7 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateValueFromItems()
+        public void GenerateValue()
         {
             var generator = new ColumnItemGenerator(_faker, _options, _database);
 
@@ -46,7 +46,7 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void GenerateCollectionFromItems()
+        public void GenerateCollection()
         {
             var generator = new ColumnItemGenerator(_faker, _options, _database);
 
@@ -55,6 +55,20 @@ namespace DatabaseBenchmark.Tests.Generators
 
             Assert.Equal(3, collection.Count());
             Assert.True(collection.All(i => TestQueryResults.Values.Contains((int)i)));
+            _database.CreateQueryExecutorFactory(Arg.Any<Table>(), Arg.Any<Query>()).Received(1);
+        }
+
+        [Fact]
+        public void GenerateValueWithMaxSourceRows()
+        {
+            _options.MaxSourceRows = 1;
+
+            var generator = new ColumnItemGenerator(_faker, _options, _database);
+
+            generator.Next();
+            var value = generator.Current;
+
+            Assert.Equal((int)value, TestQueryResults.Values[0]);
             _database.CreateQueryExecutorFactory(Arg.Any<Table>(), Arg.Any<Query>()).Received(1);
         }
 

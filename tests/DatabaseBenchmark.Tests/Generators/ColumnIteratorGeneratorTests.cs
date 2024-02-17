@@ -33,7 +33,7 @@ namespace DatabaseBenchmark.Tests.Generators
         }
 
         [Fact]
-        public void Generate()
+        public void GenerateValue()
         {
             var generator = new ColumnIteratorGenerator(_options, _database);
             var items = new List<object>();
