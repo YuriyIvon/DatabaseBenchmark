@@ -42,16 +42,19 @@ namespace DatabaseBenchmark.Generators
                 ListItemGeneratorOptions o => new ListItemGenerator(_faker, o),
                 ListIteratorGeneratorOptions o => new ListIteratorGenerator(o),
                 NameGeneratorOptions o => new NameGenerator(_faker, o),
-                NullGeneratorOptions o => new NullGenerator(_faker, o, Create(o.SourceGeneratorOptions)),
+                NullGeneratorOptions o => new NullGenerator(_faker, o, CreateSourceGenerator(o.SourceGeneratorOptions, nameof(NullGenerator))),
                 PhoneGeneratorOptions o => new PhoneGenerator(_faker, o),
                 StringGeneratorOptions o => new StringGenerator(_faker, o),
                 TextGeneratorOptions o => new TextGenerator(_faker, o),
-                UniqueGeneratorOptions o => new UniqueGenerator(o, Create(o.SourceGeneratorOptions)),
+                UniqueGeneratorOptions o => new UniqueGenerator(o, CreateSourceGenerator(o.SourceGeneratorOptions, nameof(UniqueGenerator))),
                 VehicleGeneratorOptions o => new VehicleGenerator(_faker, o),
                 _ => throw new InputArgumentException($"Unknown generator options type \"{options.GetType()}\"")
             };
 
             return generator;
         }
+
+        private IGenerator CreateSourceGenerator(IGeneratorOptions options, string parentGeneratorName) =>
+            options != null ? Create(options) : throw new InputArgumentException($"Source generator options are not specified for {parentGeneratorName}");
     }
 }
