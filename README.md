@@ -370,11 +370,13 @@ Generates random floating-point numbers. The available attributes are:
 Randomly picks a value from a list retrieved from a table column in the target database. Uses the same logic as the [ListItem generator](#listitem_generator), but a different primary source.
 
 The available attributes are:
-* `TableName` - a name of the source table.
-* `ColumnName` - a name of the source column.
-* `ColumnType` - a source column type.
+* `TableName` - name of the source table.
+* `ColumnName` - name of the source column.
+* `ColumnType` - source column type.
 * `Distinct` - specifies whether to apply a distinct value filter when retrieving data from the source column.
 * `WeightedItems` - see [ListItem generator](#listitem_generator) for more details.
+* `MaxSourceRows` - specifies the maximum number of rows to collect from the source table. It is useful when dealing with a source table that contains a large number of rows, but there is no need to process the entire dataset. Setting this parameter helps reduce memory usage and decrease the startup time for the tool. The default value is `0` meaning that there is no limit.
+* `SkipSourceRows` - specifies the number of rows to skip in the data source after collecting each row. This may be useful when the subset of source rows, limited by the `MaxSourceRows` parameter, needs to be distributed across the source dataset. If set to `0`, all rows are retrieved consecutively.
 
 #### ColumnIterator
 Sequentially returns each item from a list retrieved from a table column in the target database. Uses the same logic as the [ListIterator generator](#listiterator_generator), but a different primary source.
@@ -417,7 +419,7 @@ Randomly picks a value from the provided list. The available attributes are:
 * `Items` - a list of values from which one must be randomly picked.
 * `WeightedItems` - a list of objects providing values along with their probabilities, from which one must be randomly picked. Each object has two attributes, where `Value` is a value and `Weight` is its probability in the range between 0 and 1.
 
-At least one of the attributes from above must be provided. The sum of probabilities in the `WeightedItems` attribute must not exceed 1. If both attributes are specified, the generator calculates the total probability in `WeightedItems` and chooses to go with `WeightedItems` based on this total. Therefore, the probability of using the `Items` collection is 1 minus the total probability in the `WeightedItems`. Both collections can be used when there are many available values, where only a small subset need to be made more frequent among the generated values. In this case all items can be listed in the `Items` collection, and the "boosted" values - in `WeightedItems` along with their respective probabilities.
+At least one of the attributes from above must be provided. The sum of probabilities in the `WeightedItems` attribute must not exceed 1. If both attributes are specified, the generator calculates the total probability in `WeightedItems`, subtracts it from 1, and evenly distributes the result between elements of the `Items` collection. Therefore, if all probabilities in the `WeightedItems` collection add up to 1, no values from the `Items` collection will ever be produced. Using both attributes provides a way to boost the probability of a few terms from a large list.
 
 #### ListIterator<a name="listiterator_generator"></a>
 Sequentially returns each item from the provided list. Once the end of the list is reached, the data generation process stops, so that no generated queries or data source rows can be further produced.
@@ -436,7 +438,7 @@ A nested generator designed to integrate the functionality of any other generato
 
 The available attributes are:
 * `Weight` - the probability of a null value. The allowed range for this parameter is between 0 and 1. Default value is `0.5`.
-* `GeneratorOptions` - the underlying generator options - can be any of the other types.
+* `SourceGeneratorOptions` - the underlying generator options - can be any of the other types.
 
 #### Phone
 Generates random phone numbers. The following values are available for its  `Kind`  attribute:
@@ -454,6 +456,14 @@ Generates random pieces of text. The following values are available for its `Kin
 * `Sentence`
 * `Paragraph`
 * `Text`
+
+#### Unique
+Enforces uniqueness of values produced by the underlying generator. Most of the generators provided here do not have uniqueness guarantees. This generator wraps any other generator and tracks the values it produces. If a newly generated value has been seen before, it calls the underlying generator again until a new unique value is produced or the number of attempts is exhausted.
+
+The available attributes are:
+* `AttemptCount` - the number of attempts to produce a unique value from the underlying generator. The default value is `100`.
+* `MaxValues` - the maximum expected number of unique values to be generated. This parameter is needed to properly set up the Bloom filter used to handle the uniqueness checks. The default value is `1000000`, so if you are generating datasets with more than a million rows, this parameter should be explicitly specified.
+* `SourceGeneratorOptions` - the underlying generator options - can be any of the other types.
 
 #### Vehicle
 Generates vehicle-related pieces of information. The following values are available for its  `Kind`  attribute:
