@@ -1,0 +1,99 @@
+{
+  "Columns": [
+    { 
+      "Name": "Id",
+      "GeneratorOptions": { 
+        "Type": "DataSourceIterator",
+        "DataSourceType": "Database",
+        "DataSourceFilePath": "UsersDatabaseDataSource.json",
+        "ColumnName": "Id"
+      }
+    },
+    { 
+      "Name": "CreatedAt",
+      "GeneratorOptions": { 
+        "Type": "DataSourceIterator",
+        "DataSourceType": "Database",
+        "DataSourceFilePath": "UsersDatabaseDataSource.json",
+        "ColumnName": "CreatedAt"
+      }
+    },
+    { 
+      "Name": "IsActive",
+      "GeneratorOptions": { 
+        "Type": "DataSourceIterator",
+        "DataSourceType": "Database",
+        "DataSourceFilePath": "UsersDatabaseDataSource.json",
+        "ColumnName": "IsActive"
+      }
+    },
+    { 
+      "Name": "Login",
+      "GeneratorOptions": { 
+        "Type": "DataSourceIterator",
+        "DataSourceType": "Database",
+        "DataSourceFilePath": "UsersDatabaseDataSource.json",
+        "ColumnName": "Login"
+      }
+    },
+    { 
+      "Name": "FirstName",
+      "GeneratorOptions": { 
+        "Type": "DataSourceIterator",
+        "DataSourceType": "Database",
+        "DataSourceFilePath": "UsersDatabaseDataSource.json",
+        "ColumnName": "FirstName"
+      }
+    },
+    { 
+      "Name": "LastName",
+      "GeneratorOptions": { 
+        "Type": "DataSourceIterator",
+        "DataSourceType": "Database",
+        "DataSourceFilePath": "UsersDatabaseDataSource.json",
+        "ColumnName": "LastName"
+      }
+    },
+    { 
+      "Name": "Birth",
+      "GeneratorOptions": { 
+        "Type": "DataSourceIterator",
+        "DataSourceType": "Database",
+        "DataSourceFilePath": "UsersDatabaseDataSource.json",
+        "ColumnName": "Birth"
+      }
+    },
+    { 
+      "Name": "PostalCode",
+      "GeneratorOptions": { 
+        "Type": "DataSourceIterator",
+        "DataSourceType": "Database",
+        "DataSourceFilePath": "UsersDatabaseDataSource.json",
+        "ColumnName": "PostalCode"
+      }
+    },
+    { 
+      "Name": "CountryCode",
+      "GeneratorOptions": { 
+        "Type": "DataSourceIterator",
+        "DataSourceType": "Database",
+        "DataSourceFilePath": "UsersDatabaseDataSource.json",
+        "ColumnName": "CountryCode"
+      }
+    },
+    { 
+      "Name": "Address",
+      "GeneratorOptions": { 
+        "Type": "Address",
+        "Kind": "StreetAddress"
+      }
+    },
+    { 
+      "Name": "Phone",
+      "GeneratorOptions": { 
+        "Type": "Phone",
+        "Kind": "PhoneNumber"
+      }
+    }
+  ]
+}

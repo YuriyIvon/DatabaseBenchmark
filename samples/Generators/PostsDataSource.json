@@ -1,0 +1,43 @@
+{
+  "Columns": [
+    { 
+      "Name": "Id",
+      "GeneratorOptions": { 
+        "Type": "Guid"
+      }
+    },
+    { 
+      "Name": "CreatedAt",
+      "GeneratorOptions": { 
+        "Type": "DateTime",
+        "Direction": "Ascending",
+        "MinValue": "2019-01-01T13:00:00",
+        "Delta": "00:05:00",
+        "RandomizeDelta": true
+      }
+    },
+    { 
+      "Name": "IsVisible",
+      "GeneratorOptions": { 
+        "Type": "Boolean",
+        "Weight": 0.9
+      }
+    },
+    { 
+      "Name": "UserId",
+      "GeneratorOptions": { 
+        "Type": "ColumnItem",
+        "TableName": "Users",
+        "ColumnName": "Id",
+        "ColumnType": "Guid"
+      }
+    },
+    { 
+      "Name": "Message",
+      "GeneratorOptions": { 
+        "Type": "Text",
+        "Kind": "Text"
+      }
+    }
+  ]
+}

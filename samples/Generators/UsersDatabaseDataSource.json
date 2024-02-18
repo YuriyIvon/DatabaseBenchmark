@@ -1,0 +1,5 @@
+{
+  "DatabaseType": "Postgres",
+  "ConnectionString": "Host=localhost;Port=5432;Database=benchmark;Username=postgres;Password=password",
+  "QueryFilePath": "UsersDatabaseDataSourceQuery.sql"
+}

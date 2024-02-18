@@ -1,0 +1,10 @@
+{
+  "Name": "Posts",
+  "Columns": [
+    { "Name": "Id", "Type": "Guid", "Nullable": false, "Queryable": false },
+    { "Name": "CreatedAt", "Type": "DateTime", "Nullable": false, "Queryable": true },
+    { "Name": "IsVisible", "Type": "Boolean", "Nullable": false, "Queryable": true },
+    { "Name": "UserId", "Type": "Guid", "Nullable": false, "Queryable": true },
+    { "Name": "Message", "Type": "Text", "Nullable": false, "Queryable": true }
+  ]
+}

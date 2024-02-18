@@ -1,0 +1,14 @@
+{
+  "Name": "Users",
+  "Columns": [
+    { "Name": "Id", "Type": "Guid", "Nullable": false, "Queryable": false },
+    { "Name": "CreatedAt", "Type": "DateTime", "Nullable": false, "Queryable": true },
+    { "Name": "IsActive", "Type": "Boolean", "Nullable": false, "Queryable": true },
+    { "Name": "Login", "Type": "String", "Nullable": false, "Queryable": true },
+    { "Name": "FirstName", "Type": "String", "Queryable": true },
+    { "Name": "LastName", "Type": "String", "Queryable": true },
+    { "Name": "Birth", "Type": "DateTime", "Queryable": true },
+    { "Name": "CountryCode", "Type": "String", "Queryable": true },
+    { "Name": "PostalCode", "Type": "String", "Queryable": true }
+  ]
+}
