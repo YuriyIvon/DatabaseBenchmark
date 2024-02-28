@@ -5,8 +5,8 @@ namespace DatabaseBenchmark.Databases.Common
 {
     public class RandomPrimitives : IRandomPrimitives
     {
-        private readonly Faker _faker = new();
+        private readonly Randomizer _randomizer = new();
 
-        public bool GetRandomBoolean() => _faker.Random.Bool();
+        public bool GetRandomBoolean() => _randomizer.Bool();
     }
 }

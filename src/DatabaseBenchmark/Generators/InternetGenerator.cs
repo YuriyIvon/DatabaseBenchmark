@@ -1,4 +1,4 @@
-﻿using Bogus;
+﻿using Bogus.DataSets;
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
@@ -8,30 +8,30 @@ namespace DatabaseBenchmark.Generators
 {
     public class InternetGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly Internet _internetFaker;
         private readonly InternetGeneratorOptions _options;
 
         public object Current { get; private set; }
 
-        public InternetGenerator(Faker faker, InternetGeneratorOptions options)
+        public InternetGenerator(InternetGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
+            _internetFaker = string.IsNullOrEmpty(options.Locale) ? new Internet() : new Internet(locale: options.Locale);
         }
 
         public bool Next()
         {
             Current = _options.Kind switch
             {
-                GeneratorKind.DomainName => _faker.Internet.DomainName(),
-                GeneratorKind.Email => _faker.Internet.Email(),
-                GeneratorKind.Ip => _faker.Internet.Ip(),
-                GeneratorKind.Ipv6 => _faker.Internet.Ipv6(),
-                GeneratorKind.Mac => _faker.Internet.Mac(),
-                GeneratorKind.Port => _faker.Internet.Port(),
-                GeneratorKind.Url => _faker.Internet.Url(),
-                GeneratorKind.UserAgent => _faker.Internet.UserAgent(),
-                GeneratorKind.UserName => _faker.Internet.UserName(),
+                GeneratorKind.DomainName => _internetFaker.DomainName(),
+                GeneratorKind.Email => _internetFaker.Email(),
+                GeneratorKind.Ip => _internetFaker.Ip(),
+                GeneratorKind.Ipv6 => _internetFaker.Ipv6(),
+                GeneratorKind.Mac => _internetFaker.Mac(),
+                GeneratorKind.Port => _internetFaker.Port(),
+                GeneratorKind.Url => _internetFaker.Url(),
+                GeneratorKind.UserAgent => _internetFaker.UserAgent(),
+                GeneratorKind.UserName => _internetFaker.UserName(),
                 _ => throw new InputArgumentException($"Unknown internet generator kind \"{_options.Kind}\"")
             };
 

@@ -1,4 +1,4 @@
-﻿using Bogus;
+﻿using Bogus.DataSets;
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
@@ -8,22 +8,22 @@ namespace DatabaseBenchmark.Generators
 {
     public class PhoneGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly PhoneNumbers _phoneFaker;
         private readonly PhoneGeneratorOptions _options;
 
         public object Current {  get; private set; }
 
-        public PhoneGenerator(Faker faker, PhoneGeneratorOptions options)
+        public PhoneGenerator(PhoneGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
+            _phoneFaker = string.IsNullOrEmpty(options.Locale) ? new PhoneNumbers() : new PhoneNumbers(locale: options.Locale);
         }
 
         public bool Next()
         {
             Current = _options.Kind switch
             {
-                GeneratorKind.PhoneNumber => _faker.Phone.PhoneNumber(),
+                GeneratorKind.PhoneNumber => _phoneFaker.PhoneNumber(),
                 _ => throw new InputArgumentException($"Unknown phone generator kind \"{_options.Kind}\"")
             };
 

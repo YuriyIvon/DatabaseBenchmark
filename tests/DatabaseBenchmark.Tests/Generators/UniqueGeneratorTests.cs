@@ -1,5 +1,4 @@
-﻿using Bogus;
-using DatabaseBenchmark.Generators;
+﻿using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Options;
 using System.Collections.Generic;
 using Xunit;
@@ -8,8 +7,6 @@ namespace DatabaseBenchmark.Tests.Generators
 {
     public class UniqueGeneratorTests
     {
-        private readonly Faker _faker = new();
-
         private readonly object[] _items =
         [
             "item1",
@@ -23,7 +20,7 @@ namespace DatabaseBenchmark.Tests.Generators
         public void GenerateValueFromList()
         {
             var generator = new UniqueGenerator(new UniqueGeneratorOptions(),
-                new ListItemGenerator(_faker, new ListItemGeneratorOptions 
+                new ListItemGenerator(new ListItemGeneratorOptions 
                 {
                     Items = _items
                 }));

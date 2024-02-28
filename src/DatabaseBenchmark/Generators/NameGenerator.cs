@@ -1,4 +1,4 @@
-﻿using Bogus;
+﻿using Bogus.DataSets;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
 using GeneratorKind = DatabaseBenchmark.Generators.Options.NameGeneratorOptions.GeneratorKind;
@@ -8,24 +8,24 @@ namespace DatabaseBenchmark.Generators
     //TODO: conceptually linked person properties
     public class NameGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly Name _nameFaker;
         private readonly NameGeneratorOptions _options;
 
         public object Current { get; private set; }
 
-        public NameGenerator(Faker faker, NameGeneratorOptions options)
+        public NameGenerator(NameGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
+            _nameFaker = string.IsNullOrEmpty(options.Locale) ? new Name() : new Name(locale: options.Locale);
         }
 
         public bool Next()
         {
             Current = _options.Kind switch
             {
-                GeneratorKind.FirstName => _faker.Name.FirstName(),
-                GeneratorKind.LastName => _faker.Name.LastName(),
-                GeneratorKind.FullName => _faker.Name.FullName(),
+                GeneratorKind.FirstName => _nameFaker.FirstName(),
+                GeneratorKind.LastName => _nameFaker.LastName(),
+                GeneratorKind.FullName => _nameFaker.FullName(),
                 _ => throw new NotSupportedException()
             };
 

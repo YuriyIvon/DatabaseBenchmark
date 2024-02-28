@@ -8,12 +8,11 @@ namespace DatabaseBenchmark.Generators
 {
     public class PatternGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly Randomizer _randomizer = new();
         private readonly PatternGeneratorOptions _options;
 
-        public PatternGenerator(Faker faker, PatternGeneratorOptions options)
+        public PatternGenerator(PatternGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
         }
 
@@ -28,7 +27,7 @@ namespace DatabaseBenchmark.Generators
 
             Current = _options.Kind switch
             {
-                GeneratorKind.Simple => _faker.Random.Replace(_options.Pattern),
+                GeneratorKind.Simple => _randomizer.Replace(_options.Pattern),
                 _ => throw new InputArgumentException($"Unknown pattern generator kind \"{_options.Kind}\"")
             };
 

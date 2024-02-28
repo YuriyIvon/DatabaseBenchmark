@@ -1,4 +1,4 @@
-﻿using Bogus;
+﻿using Bogus.DataSets;
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
@@ -8,14 +8,13 @@ namespace DatabaseBenchmark.Generators
 {
     public class FinanceGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly Finance _financeFaker = new();
         private readonly FinanceGeneratorOptions _options;
 
         public object Current { get; private set; }
 
-        public FinanceGenerator(Faker faker, FinanceGeneratorOptions options)
+        public FinanceGenerator(FinanceGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
         }
 
@@ -23,13 +22,13 @@ namespace DatabaseBenchmark.Generators
         {
             Current = _options.Kind switch
             {
-                GeneratorKind.Bic => _faker.Finance.Bic(),
-                GeneratorKind.Iban => _faker.Finance.Iban(),
-                GeneratorKind.CreditCardCvv => _faker.Finance.CreditCardCvv(),
-                GeneratorKind.CreditCardNumber => _faker.Finance.CreditCardNumber(),
-                GeneratorKind.Currency => _faker.Finance.Currency(),
-                GeneratorKind.BitcoinAddress => _faker.Finance.BitcoinAddress(),
-                GeneratorKind.EthereumAddress => _faker.Finance.EthereumAddress(),
+                GeneratorKind.Bic => _financeFaker.Bic(),
+                GeneratorKind.Iban => _financeFaker.Iban(),
+                GeneratorKind.CreditCardCvv => _financeFaker.CreditCardCvv(),
+                GeneratorKind.CreditCardNumber => _financeFaker.CreditCardNumber(),
+                GeneratorKind.Currency => _financeFaker.Currency(),
+                GeneratorKind.BitcoinAddress => _financeFaker.BitcoinAddress(),
+                GeneratorKind.EthereumAddress => _financeFaker.EthereumAddress(),
                 _ => throw new InputArgumentException($"Unknown finance generator kind \"{_options.Kind}\"")
             };
 

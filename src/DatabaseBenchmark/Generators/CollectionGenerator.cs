@@ -6,7 +6,7 @@ namespace DatabaseBenchmark.Generators
 {
     public class CollectionGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly Randomizer _randomizer = new();
         private readonly CollectionGeneratorOptions _options;
         private readonly IGenerator _sourceGenerator;
         private readonly ICollectionGenerator _sourceCollectionGenerator;
@@ -14,11 +14,9 @@ namespace DatabaseBenchmark.Generators
         public object Current { get; private set; }
 
         public CollectionGenerator(
-            Faker faker,
             IGenerator sourceGenerator,
             CollectionGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
             _sourceGenerator = sourceGenerator;
             _sourceCollectionGenerator = sourceGenerator as ICollectionGenerator;
@@ -26,7 +24,7 @@ namespace DatabaseBenchmark.Generators
 
         public bool Next()
         {
-            var length = _faker.Random.Int(_options.MinLength, _options.MaxLength);
+            var length = _randomizer.Int(_options.MinLength, _options.MaxLength);
 
             if (_sourceCollectionGenerator != null)
             {

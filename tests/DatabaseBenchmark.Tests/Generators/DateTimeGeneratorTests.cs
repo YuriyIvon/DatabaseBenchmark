@@ -1,5 +1,4 @@
-﻿using Bogus;
-using DatabaseBenchmark.Common;
+﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Options;
 using System;
@@ -9,7 +8,6 @@ namespace DatabaseBenchmark.Tests.Generators
 {
     public class DateTimeGeneratorTests
     {
-        private readonly Faker _faker = new();
         private readonly DateTimeGeneratorOptions _options = new()
         {
             MinValue = DateTime.Now,
@@ -19,7 +17,7 @@ namespace DatabaseBenchmark.Tests.Generators
         [Fact]
         public void GenerateValueNoDelta()
         {
-            var generator = new DateTimeGenerator(_faker, _options);
+            var generator = new DateTimeGenerator(_options);
 
             generator.Next();
             var value = generator.Current;
@@ -45,9 +43,9 @@ namespace DatabaseBenchmark.Tests.Generators
                     Delta = delta
                 };
 
-            var dailyGenerator = new DateTimeGenerator(_faker, BuildGeneratorOptions(TimeSpan.FromDays(1)));
-            var hourlyGenerator = new DateTimeGenerator(_faker, BuildGeneratorOptions(TimeSpan.FromHours(1)));
-            var minutelyGenerator = new DateTimeGenerator(_faker, BuildGeneratorOptions(TimeSpan.FromMinutes(1)));
+            var dailyGenerator = new DateTimeGenerator(BuildGeneratorOptions(TimeSpan.FromDays(1)));
+            var hourlyGenerator = new DateTimeGenerator(BuildGeneratorOptions(TimeSpan.FromHours(1)));
+            var minutelyGenerator = new DateTimeGenerator(BuildGeneratorOptions(TimeSpan.FromMinutes(1)));
 
             dailyGenerator.Next();
             hourlyGenerator.Next();
@@ -79,7 +77,7 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             _options.Direction = Direction.Ascending;
 
-            var generator = new DateTimeGenerator(_faker, _options);
+            var generator = new DateTimeGenerator(_options);
 
             Assert.Throws<InputArgumentException>(() => generator.Next());
         }
@@ -90,7 +88,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Delta = TimeSpan.FromDays(1);
             _options.Direction = Direction.Ascending;
 
-            var generator = new DateTimeGenerator(_faker, _options);
+            var generator = new DateTimeGenerator(_options);
 
             DateTime lastValue = _options.MinValue.AddDays(-1);
             for (int i = 0; i < 10; i++)
@@ -111,7 +109,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Delta = TimeSpan.FromDays(1);
             _options.Direction = Direction.Descending;
 
-            var generator = new DateTimeGenerator(_faker, _options);
+            var generator = new DateTimeGenerator(_options);
 
             DateTime lastValue = _options.MaxValue.AddDays(1);
             for (int i = 0; i < 10; i++)
@@ -133,7 +131,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Direction = Direction.Ascending;
             _options.RandomizeDelta = true;
 
-            var generator = new DateTimeGenerator(_faker, _options);
+            var generator = new DateTimeGenerator(_options);
 
             DateTime lastValue = DateTime.MinValue;
             for (int i = 0; i < 10; i++)
@@ -155,7 +153,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Delta = TimeSpan.FromDays(1);
             _options.Direction = Direction.Ascending;
 
-            var generator = new DateTimeGenerator(_faker, _options);
+            var generator = new DateTimeGenerator(_options);
 
             DateTime i = _options.MinValue;
             for (; i < _options.MaxValue.AddDays(10) && generator.Next(); i = i.AddDays(1))
@@ -175,7 +173,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Delta = TimeSpan.FromDays(1);
             _options.Direction = Direction.Descending;
 
-            var generator = new DateTimeGenerator(_faker, _options);
+            var generator = new DateTimeGenerator(_options);
 
             DateTime i = _options.MaxValue;
             for (; i > _options.MinValue.AddDays(-10) && generator.Next(); i = i.AddDays(-1))

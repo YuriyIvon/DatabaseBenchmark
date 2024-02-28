@@ -5,18 +5,13 @@ namespace DatabaseBenchmark.Generators
 {
     public class GuidGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly Randomizer _randomizer = new();
 
         public object Current { get; private set; }
 
-        public GuidGenerator(Faker faker)
-        {
-            _faker = faker;
-        }
-
         public bool Next()
         {
-            Current = _faker.Random.Guid();
+            Current = _randomizer.Guid();
 
             return true;
         }

@@ -1,5 +1,4 @@
-﻿using Bogus;
-using DatabaseBenchmark.Generators.Interfaces;
+﻿using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,13 +13,10 @@ namespace DatabaseBenchmark.Tests.Generators
         private const int MinLength = 3;
         private const int MaxLength = 7;
 
-        private readonly Faker _faker = new();
-
         [Fact]
         public void GenerateCollectionWithValueGenerator()
         {
             var collectionGenerator = new DatabaseBenchmark.Generators.CollectionGenerator(
-                _faker, 
                 new ValueGenerator(),
                 new CollectionGeneratorOptions { MinLength = MinLength, MaxLength = MaxLength });
 
@@ -36,7 +32,6 @@ namespace DatabaseBenchmark.Tests.Generators
         public void GenerateCollectionWithCollectionGenerator()
         {
             var collectionGenerator = new DatabaseBenchmark.Generators.CollectionGenerator(
-                _faker,
                 new CollectionGenerator(),
                 new CollectionGeneratorOptions { MinLength = MinLength, MaxLength = MaxLength });
 

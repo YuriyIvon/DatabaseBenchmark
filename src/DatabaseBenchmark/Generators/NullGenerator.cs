@@ -6,22 +6,21 @@ namespace DatabaseBenchmark.Generators
 {
     public class NullGenerator : IGenerator, IDisposable
     {
-        private readonly Faker _faker;
+        private readonly Randomizer _randomizer = new();
         private readonly NullGeneratorOptions _options;
         private readonly IGenerator _sourceGenerator;
 
         public object Current { get; private set; }
 
-        public NullGenerator(Faker faker, NullGeneratorOptions options, IGenerator sourceGenerator)
+        public NullGenerator(NullGeneratorOptions options, IGenerator sourceGenerator)
         {
-            _faker = faker;
             _options = options;
             _sourceGenerator = sourceGenerator;
         }
 
         public bool Next()
         {
-            if (_faker.Random.Bool(_options.Weight))
+            if (_randomizer.Bool(_options.Weight))
             {
                 Current = null;
             }

@@ -7,16 +7,15 @@ namespace DatabaseBenchmark.Generators
 {
     public class FloatGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly Randomizer _randomizer = new();
         private readonly FloatGeneratorOptions _options;
 
         private double? _lastValue;
 
         public object Current { get; private set; }
 
-        public FloatGenerator(Faker faker, FloatGeneratorOptions options)
+        public FloatGenerator(FloatGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
         }
 
@@ -41,7 +40,7 @@ namespace DatabaseBenchmark.Generators
 
                     if (_options.RandomizeDelta)
                     {
-                        delta = _faker.Random.Double(0, delta); //assuming the result will never be equal to zero
+                        delta = _randomizer.Double(0, delta); //assuming the result will never be equal to zero
                     }
 
                     var isAscending = _options.Direction == Direction.Ascending;
@@ -63,7 +62,7 @@ namespace DatabaseBenchmark.Generators
             else if (_options.Delta != 0)
             {
                 var totalSegments = (int)((_options.MaxValue - _options.MinValue) / _options.Delta);
-                var randomSegment = _faker.Random.Int(0, totalSegments);
+                var randomSegment = _randomizer.Int(0, totalSegments);
 
                 Current = _options.MinValue + (_options.Delta * randomSegment);
 
@@ -71,7 +70,7 @@ namespace DatabaseBenchmark.Generators
             }
             else
             {
-                Current = _faker.Random.Double(_options.MinValue, _options.MaxValue);
+                Current = _randomizer.Double(_options.MinValue, _options.MaxValue);
 
                 return true;
             }

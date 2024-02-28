@@ -1,4 +1,4 @@
-﻿using Bogus;
+﻿using Bogus.DataSets;
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
@@ -8,25 +8,25 @@ namespace DatabaseBenchmark.Generators
 {
     public class TextGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly Lorem _textFaker;
         private readonly TextGeneratorOptions _options;
 
         public object Current { get; private set; }
 
-        public TextGenerator(Faker faker, TextGeneratorOptions options)
+        public TextGenerator(TextGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
+            _textFaker = string.IsNullOrEmpty(options.Locale) ? new Lorem() : new Lorem(locale: options.Locale);
         }
 
         public bool Next()
         {
             Current = _options.Kind switch
             {
-                GeneratorKind.Word => _faker.Lorem.Word(),
-                GeneratorKind.Sentence => _faker.Lorem.Sentence(),
-                GeneratorKind.Paragraph => _faker.Lorem.Paragraph(),
-                GeneratorKind.Text => _faker.Lorem.Text(),
+                GeneratorKind.Word => _textFaker.Word(),
+                GeneratorKind.Sentence => _textFaker.Sentence(),
+                GeneratorKind.Paragraph => _textFaker.Paragraph(),
+                GeneratorKind.Text => _textFaker.Text(),
                 _ => throw new InputArgumentException($"Unknown text generator kind \"{_options.Kind}\"")
             };
 

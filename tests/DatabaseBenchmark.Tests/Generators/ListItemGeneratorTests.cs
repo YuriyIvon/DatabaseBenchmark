@@ -1,5 +1,4 @@
-﻿using Bogus;
-using DatabaseBenchmark.Common;
+﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Options;
 using System.Linq;
@@ -9,8 +8,6 @@ namespace DatabaseBenchmark.Tests.Generators
 {
     public class ListItemGeneratorTests
     {
-        private readonly Faker _faker = new();
-
         private readonly object[] _items =
         [
             "item1",
@@ -33,7 +30,6 @@ namespace DatabaseBenchmark.Tests.Generators
         public void GenerateFromItems()
         {
             var generator = new ListItemGenerator(
-                _faker,
                 new ListItemGeneratorOptions { Items = _items });
 
             generator.Next();
@@ -49,7 +45,6 @@ namespace DatabaseBenchmark.Tests.Generators
             _weightedItems[0].Weight = 0.3f;
 
             var generator = new ListItemGenerator(
-                _faker,
                 new ListItemGeneratorOptions 
                 {
                     WeightedItems = _weightedItems
@@ -66,7 +61,6 @@ namespace DatabaseBenchmark.Tests.Generators
         public void GenerateFromItemsAndWeightedItems()
         {
             var generator = new ListItemGenerator(
-                _faker,
                 new ListItemGeneratorOptions
                 {
                     Items = _items,
@@ -83,7 +77,6 @@ namespace DatabaseBenchmark.Tests.Generators
         public void GenerateCollectionFromItems()
         {
             var generator = new ListItemGenerator(
-                _faker,
                 new ListItemGeneratorOptions { Items = _items });
 
             generator.NextCollection(3);
@@ -105,7 +98,6 @@ namespace DatabaseBenchmark.Tests.Generators
                 .ToArray();
 
             var generator = new ListItemGenerator(
-                _faker,
                 new ListItemGeneratorOptions
                 {
                     Items = _items,
@@ -123,7 +115,7 @@ namespace DatabaseBenchmark.Tests.Generators
         [Fact]
         public void GenerateNoItemsError()
         {
-            var generator = new ListItemGenerator(_faker, new ListItemGeneratorOptions());
+            var generator = new ListItemGenerator(new ListItemGeneratorOptions());
 
             Assert.Throws<InputArgumentException>(() => generator.Next());
         }
@@ -134,7 +126,6 @@ namespace DatabaseBenchmark.Tests.Generators
             _weightedItems[0].Weight = 1;
 
             var generator = new ListItemGenerator(
-                _faker,
                 new ListItemGeneratorOptions
                 {
                     Items = _items,
@@ -148,7 +139,6 @@ namespace DatabaseBenchmark.Tests.Generators
         public void GenerateFromWeightedItemsNoItemsError()
         {
             var generator = new ListItemGenerator(
-                _faker,
                 new ListItemGeneratorOptions
                 {
                     WeightedItems = _weightedItems

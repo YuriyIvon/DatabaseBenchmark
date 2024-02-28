@@ -6,20 +6,19 @@ namespace DatabaseBenchmark.Generators
 {
     public class StringGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly Randomizer _randomizer = new();
         private readonly StringGeneratorOptions _options;
 
         public object Current { get; private set; }
 
-        public StringGenerator(Faker faker, StringGeneratorOptions options)
+        public StringGenerator(StringGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
         }
 
         public bool Next()
         {
-            Current = _faker.Random.String2(_options.MinLength, _options.MaxLength, _options.AllowedCharacters);
+            Current = _randomizer.String2(_options.MinLength, _options.MaxLength, _options.AllowedCharacters);
 
             return true;
         }

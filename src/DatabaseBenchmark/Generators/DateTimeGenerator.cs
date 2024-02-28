@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using Bogus.DataSets;
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
@@ -7,16 +8,16 @@ namespace DatabaseBenchmark.Generators
 {
     public class DateTimeGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly Randomizer _randomizer = new();
+        private readonly Date _dateFaker = new();
         private readonly DateTimeGeneratorOptions _options;
 
         private DateTime? _lastValue;
 
         public object Current { get; private set; }
 
-        public DateTimeGenerator(Faker faker, DateTimeGeneratorOptions options)
+        public DateTimeGenerator(DateTimeGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
         }
 
@@ -42,7 +43,7 @@ namespace DatabaseBenchmark.Generators
                     if (_options.RandomizeDelta)
                     {
                         var milliseconds = _options.Delta.TotalMilliseconds;
-                        var randomMilliseconds = _faker.Random.Long(1, (long)milliseconds);
+                        var randomMilliseconds = _randomizer.Long(1, (long)milliseconds);
                         delta = TimeSpan.FromMilliseconds(randomMilliseconds);
                     }
 
@@ -67,7 +68,7 @@ namespace DatabaseBenchmark.Generators
                 var deltaMilliseconds = _options.Delta.TotalMilliseconds;
                 var rangeMilliseconds = (_options.MaxValue - _options.MinValue).TotalMilliseconds;
                 var totalSegments = (long)(rangeMilliseconds / deltaMilliseconds);
-                var randomSegment = _faker.Random.Long(0, totalSegments);
+                var randomSegment = _randomizer.Long(0, totalSegments);
 
                 Current = _options.MinValue.AddMilliseconds(deltaMilliseconds * randomSegment);
 
@@ -75,7 +76,7 @@ namespace DatabaseBenchmark.Generators
             }
             else
             {
-                Current = _faker.Date.Between(_options.MinValue, _options.MaxValue);
+                Current = _dateFaker.Between(_options.MinValue, _options.MaxValue);
 
                 return true;
             }

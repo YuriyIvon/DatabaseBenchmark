@@ -9,6 +9,8 @@ namespace DatabaseBenchmark.Generators.Options
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GeneratorKind Kind { get; set; } = GeneratorKind.Sentence;
 
+        public string Locale { get; set; }
+
         public enum GeneratorKind
         {
             Word,

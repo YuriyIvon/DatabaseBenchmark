@@ -1,5 +1,4 @@
-﻿using Bogus;
-using DatabaseBenchmark.Generators;
+﻿using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
 using NSubstitute;
@@ -9,7 +8,6 @@ namespace DatabaseBenchmark.Tests.Generators
 {
     public class NullGeneratorTests
     {
-        private readonly Faker _faker = new();
         private readonly IGenerator _baseGenerator;
 
         public NullGeneratorTests()
@@ -22,7 +20,7 @@ namespace DatabaseBenchmark.Tests.Generators
 
         public void GenerateNull()
         {
-            var generator = new NullGenerator(_faker, new NullGeneratorOptions { Weight = 1 }, _baseGenerator);
+            var generator = new NullGenerator(new NullGeneratorOptions { Weight = 1 }, _baseGenerator);
             generator.Next();
 
             Assert.Null(generator.Current);
@@ -30,7 +28,7 @@ namespace DatabaseBenchmark.Tests.Generators
 
         public void GenerateNotNull()
         {
-            var generator = new NullGenerator(_faker, new NullGeneratorOptions { Weight = 0 }, _baseGenerator);
+            var generator = new NullGenerator(new NullGeneratorOptions { Weight = 0 }, _baseGenerator);
             generator.Next();
 
             Assert.Equal(1, generator.Current);

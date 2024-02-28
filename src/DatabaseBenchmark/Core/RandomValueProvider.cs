@@ -11,8 +11,6 @@ namespace DatabaseBenchmark.Core
 {
     public class RandomValueProvider : IRandomValueProvider
     {
-        //TODO: what to do with the faker
-        private readonly Faker _faker = new();
         private readonly Dictionary<(ValueRandomizationRule, bool), IGenerator> _generators = [];
 
         private readonly IGeneratorFactory _generatorFactory;
@@ -74,7 +72,6 @@ namespace DatabaseBenchmark.Core
                 if (collection)
                 {
                     generator = new CollectionGenerator(
-                        _faker,
                         generator, 
                         new CollectionGeneratorOptions
                         {

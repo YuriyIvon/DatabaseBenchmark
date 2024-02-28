@@ -1,5 +1,4 @@
-﻿using Bogus;
-using DatabaseBenchmark.Databases.Common.Interfaces;
+﻿using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
@@ -8,7 +7,6 @@ namespace DatabaseBenchmark.Generators
 {
     public class ColumnItemGenerator : IGenerator, ICollectionGenerator
     {
-        private readonly Faker _faker;
         private readonly ColumnItemGeneratorOptions _options;
         private readonly IDatabase _database;
 
@@ -18,9 +16,8 @@ namespace DatabaseBenchmark.Generators
 
         public IEnumerable<object> CurrentCollection => _itemGenerator.CurrentCollection;
 
-        public ColumnItemGenerator(Faker faker, ColumnItemGeneratorOptions options, IDatabase database)
+        public ColumnItemGenerator(ColumnItemGeneratorOptions options, IDatabase database)
         {
-            _faker = faker;
             _options = options;
             _database = database;
         }
@@ -53,7 +50,7 @@ namespace DatabaseBenchmark.Generators
                 WeightedItems = _options.WeightedItems
             };
 
-            _itemGenerator = new ListItemGenerator(_faker, listItemGeneratorOptions);
+            _itemGenerator = new ListItemGenerator(listItemGeneratorOptions);
         }
 
         //TODO: Make shared between two generators

@@ -1,5 +1,4 @@
-﻿using Bogus;
-using DatabaseBenchmark.Common;
+﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Options;
 using Xunit;
@@ -8,7 +7,6 @@ namespace DatabaseBenchmark.Tests.Generators
 {
     public class IntegerGeneratorTests
     {
-        private readonly Faker _faker = new();
         private readonly IntegerGeneratorOptions _options = new()
         {
             MinValue = 11,
@@ -18,7 +16,7 @@ namespace DatabaseBenchmark.Tests.Generators
         [Fact]
         public void GenerateValueNoDelta()
         {
-            var generator = new IntegerGenerator(_faker, _options);
+            var generator = new IntegerGenerator(_options);
 
             generator.Next();
             var value = generator.Current;
@@ -35,7 +33,7 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             _options.Delta = 2;
 
-            var generator = new IntegerGenerator(_faker, _options);
+            var generator = new IntegerGenerator(_options);
 
             generator.Next();
             var value = generator.Current;
@@ -53,7 +51,7 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             _options.Direction = Direction.Ascending;
 
-            var generator = new IntegerGenerator(_faker, _options);
+            var generator = new IntegerGenerator(_options);
 
             Assert.Throws<InputArgumentException>(() => generator.Next());
         }
@@ -64,7 +62,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Delta = 1;
             _options.Direction = Direction.Ascending;
 
-            var generator = new IntegerGenerator(_faker, _options);
+            var generator = new IntegerGenerator(_options);
 
             int lastValue = _options.MinValue - 1;
             for (int i = 0; i < 10; i++)
@@ -85,7 +83,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Delta = 1;
             _options.Direction = Direction.Descending;
 
-            var generator = new IntegerGenerator(_faker, _options);
+            var generator = new IntegerGenerator(_options);
 
             int lastValue = _options.MaxValue + 1;
             for (int i = 0; i < 10; i++)
@@ -107,7 +105,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Direction = Direction.Ascending;
             _options.RandomizeDelta = true;
 
-            var generator = new IntegerGenerator(_faker, _options);
+            var generator = new IntegerGenerator(_options);
 
             int lastValue = 0;
             for (int i = 0; i < 10; i++)
@@ -129,7 +127,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Delta = 1;
             _options.Direction = Direction.Ascending;
 
-            var generator = new IntegerGenerator(_faker, _options);
+            var generator = new IntegerGenerator(_options);
 
             int i = _options.MinValue;
             for (; i < _options.MaxValue + 10 && generator.Next(); i++)
@@ -149,7 +147,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Delta = 1;
             _options.Direction = Direction.Descending;
 
-            var generator = new IntegerGenerator(_faker, _options);
+            var generator = new IntegerGenerator(_options);
 
             int i = _options.MaxValue;
             for (; i > _options.MinValue - 10 && generator.Next(); i--)

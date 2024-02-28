@@ -1,5 +1,4 @@
-﻿using Bogus;
-using DatabaseBenchmark.Generators;
+﻿using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Options;
 using System.Linq;
 using Xunit;
@@ -8,7 +7,6 @@ namespace DatabaseBenchmark.Tests.Generators
 {
     public class StringGeneratorTests
     {
-        private readonly Faker _faker = new();
         private readonly StringGeneratorOptions _options = new()
         {
             MinLength = 11,
@@ -19,7 +17,7 @@ namespace DatabaseBenchmark.Tests.Generators
         [Fact]
         public void GenerateValue()
         {
-            var generator = new StringGenerator(_faker, _options);
+            var generator = new StringGenerator(_options);
 
             generator.Next();
             var value = generator.Current;
@@ -36,7 +34,7 @@ namespace DatabaseBenchmark.Tests.Generators
         public void GenerateFixedLengthValue()
         {
             _options.MaxLength = _options.MinLength;
-            var generator = new StringGenerator(_faker, _options);
+            var generator = new StringGenerator(_options);
 
             generator.Next();
             var value = generator.Current;

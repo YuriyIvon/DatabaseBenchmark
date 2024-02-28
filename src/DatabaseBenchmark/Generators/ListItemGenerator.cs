@@ -7,7 +7,7 @@ namespace DatabaseBenchmark.Generators
 {
     public class ListItemGenerator : IGenerator, ICollectionGenerator
     {
-        private readonly Faker _faker;
+        private readonly Randomizer _randomizer = new();
         private readonly ListItemGeneratorOptions _options;
 
         private float _totalWeight;
@@ -19,9 +19,8 @@ namespace DatabaseBenchmark.Generators
 
         public IEnumerable<object> CurrentCollection { get; private set; }
 
-        public ListItemGenerator(Faker faker, ListItemGeneratorOptions options)
+        public ListItemGenerator(ListItemGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
         }
 
@@ -33,8 +32,8 @@ namespace DatabaseBenchmark.Generators
             }
 
             Current = _weightedItems != null
-                ? _faker.Random.WeightedRandom(_weightedItems, _weights)
-                : _faker.Random.ArrayElement(_items);
+                ? _randomizer.WeightedRandom(_weightedItems, _weights)
+                : _randomizer.ArrayElement(_items);
 
             return true;
         }
@@ -51,7 +50,7 @@ namespace DatabaseBenchmark.Generators
                 throw new InputArgumentException("Generating a collection based on item weights is not supported");
             }
 
-            CurrentCollection = _faker.Random.ArrayElements(_items, length);
+            CurrentCollection = _randomizer.ArrayElements(_items, length);
 
             return true;
         }

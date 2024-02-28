@@ -1,4 +1,4 @@
-﻿using Bogus;
+﻿using Bogus.DataSets;
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
@@ -8,14 +8,13 @@ namespace DatabaseBenchmark.Generators
 {
     public class VehicleGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly Vehicle _vehicleFaker = new();
         private readonly VehicleGeneratorOptions _options;
 
         public object Current { get; private set; }
 
-        public VehicleGenerator(Faker faker, VehicleGeneratorOptions options)
+        public VehicleGenerator(VehicleGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
         }
 
@@ -23,11 +22,11 @@ namespace DatabaseBenchmark.Generators
         {
             Current = _options.Kind switch
             {
-                GeneratorKind.Manufacturer => _faker.Vehicle.Manufacturer(),
-                GeneratorKind.Model => _faker.Vehicle.Model(),
-                GeneratorKind.Vin => _faker.Vehicle.Vin(),
-                GeneratorKind.Fuel => _faker.Vehicle.Fuel(),
-                GeneratorKind.Type => _faker.Vehicle.Type(),
+                GeneratorKind.Manufacturer => _vehicleFaker.Manufacturer(),
+                GeneratorKind.Model => _vehicleFaker.Model(),
+                GeneratorKind.Vin => _vehicleFaker.Vin(),
+                GeneratorKind.Fuel => _vehicleFaker.Fuel(),
+                GeneratorKind.Type => _vehicleFaker.Type(),
                 _ => throw new InputArgumentException($"Unknown vehicle generator kind \"{_options.Kind}\"")
             };
 

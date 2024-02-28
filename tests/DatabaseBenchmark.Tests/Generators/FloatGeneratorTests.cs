@@ -1,15 +1,12 @@
-﻿using Bogus;
-using DatabaseBenchmark.Common;
+﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Options;
-using System;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Generators
 {
     public class FloatGeneratorTests
     {
-        private readonly Faker _faker = new();
         private readonly FloatGeneratorOptions _options = new()
         {
             MinValue = 11,
@@ -19,7 +16,7 @@ namespace DatabaseBenchmark.Tests.Generators
         [Fact]
         public void GenerateValueNoDelta()
         {
-            var generator = new FloatGenerator(_faker, _options);
+            var generator = new FloatGenerator(_options);
 
             generator.Next();
             var value = generator.Current;
@@ -36,7 +33,7 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             _options.Delta = 2;
 
-            var generator = new FloatGenerator(_faker, _options);
+            var generator = new FloatGenerator(_options);
 
             generator.Next();
             var value = generator.Current;
@@ -54,7 +51,7 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             _options.Direction = Direction.Ascending;
 
-            var generator = new FloatGenerator(_faker, _options);
+            var generator = new FloatGenerator(_options);
 
             Assert.Throws<InputArgumentException>(() => generator.Next());
         }
@@ -65,7 +62,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Delta = 1;
             _options.Direction = Direction.Ascending;
 
-            var generator = new FloatGenerator(_faker, _options);
+            var generator = new FloatGenerator(_options);
 
             double lastValue = _options.MinValue - 1;
             for (int i = 0; i < 10; i++)
@@ -86,7 +83,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Delta = 1;
             _options.Direction = Direction.Descending;
 
-            var generator = new FloatGenerator(_faker, _options);
+            var generator = new FloatGenerator(_options);
 
             double lastValue = _options.MaxValue + 1;
             for (int i = 0; i < 10; i++)
@@ -108,7 +105,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Direction = Direction.Ascending;
             _options.RandomizeDelta = true;
 
-            var generator = new FloatGenerator(_faker, _options);
+            var generator = new FloatGenerator(_options);
 
             double lastValue = 0;
             for (int i = 0; i < 10; i++)
@@ -130,7 +127,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Delta = 1;
             _options.Direction = Direction.Ascending;
 
-            var generator = new FloatGenerator(_faker, _options);
+            var generator = new FloatGenerator(_options);
 
             double i = _options.MinValue;
             for (; i < _options.MaxValue + 10 && generator.Next(); i++)
@@ -150,7 +147,7 @@ namespace DatabaseBenchmark.Tests.Generators
             _options.Delta = 1;
             _options.Direction = Direction.Descending;
 
-            var generator = new FloatGenerator(_faker, _options);
+            var generator = new FloatGenerator(_options);
 
             double i = _options.MaxValue;
             for (; i > _options.MinValue - 10 && generator.Next(); i--)

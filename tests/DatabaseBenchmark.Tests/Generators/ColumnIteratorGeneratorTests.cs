@@ -1,5 +1,4 @@
-﻿using Bogus;
-using DatabaseBenchmark.Databases.Common.Interfaces;
+﻿using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;

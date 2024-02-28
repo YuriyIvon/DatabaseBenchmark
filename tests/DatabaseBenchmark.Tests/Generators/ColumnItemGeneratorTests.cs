@@ -1,5 +1,4 @@
-﻿using Bogus;
-using DatabaseBenchmark.Databases.Common.Interfaces;
+﻿using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
@@ -12,7 +11,6 @@ namespace DatabaseBenchmark.Tests.Generators
 {
     public class ColumnItemGeneratorTests
     {
-        private readonly Faker _faker = new();
         private readonly IDatabase _database;
         private readonly ColumnItemGeneratorOptions _options = new()
         {
@@ -36,7 +34,7 @@ namespace DatabaseBenchmark.Tests.Generators
         [Fact]
         public void GenerateValue()
         {
-            var generator = new ColumnItemGenerator(_faker, _options, _database);
+            var generator = new ColumnItemGenerator(_options, _database);
 
             generator.Next();
             var value = generator.Current;
@@ -48,7 +46,7 @@ namespace DatabaseBenchmark.Tests.Generators
         [Fact]
         public void GenerateCollection()
         {
-            var generator = new ColumnItemGenerator(_faker, _options, _database);
+            var generator = new ColumnItemGenerator(_options, _database);
 
             generator.NextCollection(3);
             var collection = generator.CurrentCollection;
@@ -63,7 +61,7 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             _options.MaxSourceRows = 1;
 
-            var generator = new ColumnItemGenerator(_faker, _options, _database);
+            var generator = new ColumnItemGenerator(_options, _database);
 
             generator.Next();
             var value = generator.Current;

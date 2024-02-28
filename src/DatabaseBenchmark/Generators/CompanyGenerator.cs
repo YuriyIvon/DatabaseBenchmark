@@ -1,4 +1,4 @@
-﻿using Bogus;
+﻿using Bogus.DataSets;
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
@@ -8,23 +8,23 @@ namespace DatabaseBenchmark.Generators
 {
     public class CompanyGenerator : IGenerator
     {
-        private readonly Faker _faker;
+        private readonly Company _companyFaker;
         private readonly CompanyGeneratorOptions _options;
 
         public object Current { get; private set; }
 
-        public CompanyGenerator(Faker faker, CompanyGeneratorOptions options)
+        public CompanyGenerator(CompanyGeneratorOptions options)
         {
-            _faker = faker;
             _options = options;
+            _companyFaker = string.IsNullOrEmpty(options.Locale) ? new Company() : new Company(locale: _options.Locale);
         }
 
         public bool Next()
         {
             Current = _options.Kind switch
             {
-                GeneratorKind.CompanySuffix => _faker.Company.CompanySuffix(),
-                GeneratorKind.CompanyName => _faker.Company.CompanyName(),
+                GeneratorKind.CompanySuffix => _companyFaker.CompanySuffix(),
+                GeneratorKind.CompanyName => _companyFaker.CompanyName(),
                 _ => throw new InputArgumentException($"Unknown company generator kind \"{_options.Kind}\"")
             };
 
