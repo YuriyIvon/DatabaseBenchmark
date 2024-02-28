@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Common;
+﻿using Bogus;
+using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Generators;
@@ -27,7 +28,9 @@ namespace DatabaseBenchmark.DataSources.Generator
             var optionsDirectory = Path.GetDirectoryName(Path.GetFullPath(filePath));
             Directory.SetCurrentDirectory(optionsDirectory);
 
-            var generatorFactory = new GeneratorFactory(dataSourceFactory, database);
+            var faker = !string.IsNullOrEmpty(_options.Locale) ? new Faker(_options.Locale) : new Faker(); 
+
+            var generatorFactory = new GeneratorFactory(faker, dataSourceFactory, database);
             _generators = _options.Columns
                 .Select(c => generatorFactory.Create(c.GeneratorOptions))
                 .ToArray();

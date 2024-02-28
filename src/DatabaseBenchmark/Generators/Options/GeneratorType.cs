@@ -9,6 +9,7 @@ namespace DatabaseBenchmark.Generators.Options
         Boolean,
         Collection, //Not exposed through the factory yet
         Company,
+        Constant,
         DataSourceIterator,
         DateTime,
         Finance,
@@ -22,6 +23,7 @@ namespace DatabaseBenchmark.Generators.Options
         ListIterator,
         Name,
         Null,
+        Pattern,
         Phone,
         String,
         Text,

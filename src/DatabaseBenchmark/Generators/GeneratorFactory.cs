@@ -14,13 +14,11 @@ namespace DatabaseBenchmark.Generators
         private readonly IDatabase _database;
         private readonly DataSourceIteratorGeneratorFactory _dataSourceIteratorGeneratorFactory;
 
-        public GeneratorFactory(IDataSourceFactory dataSourceFactory, IDatabase database)
+        public GeneratorFactory(Faker faker, IDataSourceFactory dataSourceFactory, IDatabase database)
         {
             _dataSourceIteratorGeneratorFactory = new DataSourceIteratorGeneratorFactory(dataSourceFactory);
             _database = database;
-
-            //TODO: pass locale from outside
-            _faker = new Faker();
+            _faker = faker;
         }
 
         public IGenerator Create(IGeneratorOptions options)
@@ -30,6 +28,7 @@ namespace DatabaseBenchmark.Generators
                 AddressGeneratorOptions o => new AddressGenerator(_faker, o),
                 BooleanGeneratorOptions o => new BooleanGenerator(_faker, o),
                 CompanyGeneratorOptions o => new CompanyGenerator(_faker, o),
+                ConstantGeneratorOptions o => new ConstantGenerator(o),
                 DataSourceIteratorGeneratorOptions o => _dataSourceIteratorGeneratorFactory.Create(o),
                 DateTimeGeneratorOptions o => new DateTimeGenerator(_faker, o),
                 FinanceGeneratorOptions o => new FinanceGenerator(_faker, o),
@@ -43,6 +42,7 @@ namespace DatabaseBenchmark.Generators
                 ListIteratorGeneratorOptions o => new ListIteratorGenerator(o),
                 NameGeneratorOptions o => new NameGenerator(_faker, o),
                 NullGeneratorOptions o => new NullGenerator(_faker, o, CreateSourceGenerator(o.SourceGeneratorOptions, nameof(NullGenerator))),
+                PatternGeneratorOptions o => new PatternGenerator(_faker, o),
                 PhoneGeneratorOptions o => new PhoneGenerator(_faker, o),
                 StringGeneratorOptions o => new StringGenerator(_faker, o),
                 TextGeneratorOptions o => new TextGenerator(_faker, o),
