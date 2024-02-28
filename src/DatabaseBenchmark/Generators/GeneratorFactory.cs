@@ -14,11 +14,11 @@ namespace DatabaseBenchmark.Generators
         private readonly IDatabase _database;
         private readonly DataSourceIteratorGeneratorFactory _dataSourceIteratorGeneratorFactory;
 
-        public GeneratorFactory(Faker faker, IDataSourceFactory dataSourceFactory, IDatabase database)
+        public GeneratorFactory(IDataSourceFactory dataSourceFactory, IDatabase database)
         {
             _dataSourceIteratorGeneratorFactory = new DataSourceIteratorGeneratorFactory(dataSourceFactory);
             _database = database;
-            _faker = faker;
+            _faker = new Faker(); //TODO: pass faker or a locale from outside
         }
 
         public IGenerator Create(IGeneratorOptions options)

@@ -28,9 +28,9 @@ namespace DatabaseBenchmark.DataSources.Generator
             var optionsDirectory = Path.GetDirectoryName(Path.GetFullPath(filePath));
             Directory.SetCurrentDirectory(optionsDirectory);
 
-            var faker = !string.IsNullOrEmpty(_options.Locale) ? new Faker(_options.Locale) : new Faker(); 
+            //var faker = !string.IsNullOrEmpty(_options.Locale) ? new Faker(_options.Locale) : new Faker(); 
 
-            var generatorFactory = new GeneratorFactory(faker, dataSourceFactory, database);
+            var generatorFactory = new GeneratorFactory(/*faker, */dataSourceFactory, database);
             _generators = _options.Columns
                 .Select(c => generatorFactory.Create(c.GeneratorOptions))
                 .ToArray();
