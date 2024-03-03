@@ -339,12 +339,45 @@ The `Locale` parameter specifies the locale to be used for address generation. A
 #### Boolean
 Generates a random Boolean. Its `Weight` attribute specifies the probability of the `true` value in the range between 0 and 1.
 
+#### ColumnItem
+Randomly picks a value from a list retrieved from a table column in the target database. Uses the same logic as the [ListItem generator](#listitem_generator), but a different primary source.
+
+The available attributes are:
+* `TableName` - name of the source table.
+* `ColumnName` - name of the source column.
+* `ColumnType` - source column type.
+* `Distinct` - specifies whether to apply a distinct value filter when retrieving data from the source column.
+* `WeightedItems` - see [ListItem generator](#listitem_generator) for more details.
+* `MaxSourceRows` - specifies the maximum number of rows to collect from the source table. It is useful when dealing with a source table that contains a large number of rows, but there is no need to process the entire dataset. Setting this parameter helps reduce memory usage and decrease the startup time for the tool. The default value is `0` meaning that there is no limit.
+* `SkipSourceRows` - specifies the number of rows to skip in the data source after collecting each row. This may be useful when the subset of source rows, limited by the `MaxSourceRows` parameter, needs to be distributed across the source dataset. If set to `0`, all rows are retrieved consecutively.
+
+#### ColumnIterator
+Sequentially returns each item from a list retrieved from a table column in the target database. Uses the same logic as the [ListIterator generator](#listiterator_generator), but a different primary source.
+
+The available attributes are:
+* `TableName` - a name of the source table.
+* `ColumnName` - a name of the source column.
+* `ColumnType` - a source column type.
+* `Distinct` - specifies whether to apply a distinct value filter when retrieving data from the source column.
+
 #### Company
 Generates some company attributes. The following values are available for its `Kind` attribute:
 * `CompanySuffix`
 * `CompanyName`
 
 The `Locale` parameter specifies the locale to be used for address generation. A list of supported values can be found on [the Bogus library page](https://github.com/bchavez/Bogus?tab=readme-ov-file#locales).
+
+#### Constant
+
+Returns a fixed constant specified by the `Value` parameter.
+
+#### DataSourceIterator
+Sequentially returns values of a column from the specified data source. Multiple generator instances with the same data source type and file path share the same iterator, thus allowing to fetch entire rows from the data source. It can be useful in scenarios when the source data needs to be enriched with randomly generated columns: in this case, `DataSourceIterator` will be used to fetch the raw data while others can add extra generated columns to the target data set.
+
+The available attributes are:
+* `DataSourceType` - a [data source](#data_sources) type.
+* `DataSourceFilePath` - a path to the [data source](#data_sources) file.
+* `ColumnName` - a name of the column to be returned.
 
 #### DateTime
 Generates random date/time value. The available attributes are:
@@ -369,39 +402,6 @@ Generates random floating-point numbers. The available attributes are:
 * `MaxValue` - maximum value. Default is `100`.
 * `Direction` - specifies the growth direction for generated values - `None`, `Ascending`, or `Descending`. If set to `Ascending`, the sequence of generated values starts from `MinValue` and grows until `MaxValue`. With `Descending`, it starts from `MaxValue` and goes in the opposite direction until `MinValue`. Default is `None`.
 * `Delta` - when `Direction` is not `None`, this parameter determines the increment for each subsequently generated value or the maximum increment if `RandomizeDelta` is also enabled. If `Direction` is `None`, it specifies the fixed interval between all possible generated values. For instance, with a `MinValue` of 10, a `MaxValue` of 30, and a `Delta` of 5, the utility will generate the values 10, 15, 20, 25, and 30 in random order. The value of `0` is allowed only if `Direction` is `None` and means no restriction on the set of generated values apart from minimum and maximum. The default value is `0`.
-
-#### ColumnItem
-Randomly picks a value from a list retrieved from a table column in the target database. Uses the same logic as the [ListItem generator](#listitem_generator), but a different primary source.
-
-The available attributes are:
-* `TableName` - name of the source table.
-* `ColumnName` - name of the source column.
-* `ColumnType` - source column type.
-* `Distinct` - specifies whether to apply a distinct value filter when retrieving data from the source column.
-* `WeightedItems` - see [ListItem generator](#listitem_generator) for more details.
-* `MaxSourceRows` - specifies the maximum number of rows to collect from the source table. It is useful when dealing with a source table that contains a large number of rows, but there is no need to process the entire dataset. Setting this parameter helps reduce memory usage and decrease the startup time for the tool. The default value is `0` meaning that there is no limit.
-* `SkipSourceRows` - specifies the number of rows to skip in the data source after collecting each row. This may be useful when the subset of source rows, limited by the `MaxSourceRows` parameter, needs to be distributed across the source dataset. If set to `0`, all rows are retrieved consecutively.
-
-#### ColumnIterator
-Sequentially returns each item from a list retrieved from a table column in the target database. Uses the same logic as the [ListIterator generator](#listiterator_generator), but a different primary source.
-
-The available attributes are:
-* `TableName` - a name of the source table.
-* `ColumnName` - a name of the source column.
-* `ColumnType` - a source column type.
-* `Distinct` - specifies whether to apply a distinct value filter when retrieving data from the source column.
-
-#### Constant
-
-Returns a fixed constant specified by the `Value` parameter.
-
-#### DataSourceIterator
-Sequentially returns values of a column from the specified data source. Multiple generator instances with the same data source type and file path share the same iterator, thus allowing to fetch entire rows from the data source. It can be useful in scenarios when the source data needs to be enriched with randomly generated columns: in this case, `DataSourceIterator` will be used to fetch the raw data while others can add extra generated columns to the target data set.
-
-The available attributes are:
-* `DataSourceType` - a [data source](#data_sources) type.
-* `DataSourceFilePath` - a path to the [data source](#data_sources) file.
-* `ColumnName` - a name of the column to be returned.
 
 #### Guid
 Generates a random GUID.
