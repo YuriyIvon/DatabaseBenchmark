@@ -11,6 +11,8 @@ namespace DatabaseBenchmark.Generators
 
         public object Current { get; private set; }
 
+        public bool IsBounded => false;
+
         public BooleanGenerator(BooleanGeneratorOptions options)
         {
             _options = options;

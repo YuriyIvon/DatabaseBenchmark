@@ -1,5 +1,4 @@
-﻿using Bogus;
-using DatabaseBenchmark.Common;
+﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Generators;
@@ -8,7 +7,7 @@ using DatabaseBenchmark.Generators.Options;
 
 namespace DatabaseBenchmark.DataSources.Generator
 {
-    public sealed class GeneratorDataSource : IDataSource
+    public sealed class GeneratorDataSource : IDataSource, IMaxRowsAwareDataSource
     {
         private readonly GeneratorDataSourceOptions _options;
         private readonly Dictionary<string, int> _columnIndexes;
@@ -69,6 +68,20 @@ namespace DatabaseBenchmark.DataSources.Generator
                 {
                     disposable.Dispose();
                 }
+            }
+        }
+
+        public void SetMaxRows(int maxRows)
+        {
+            if (maxRows == 0 && _generators.All(g => !g.IsBounded))
+            {
+                throw new InputArgumentException("The maximum number of rows must be explicitly provided for the generator data source because its configuration has only unbounded generators");
+            }
+
+            //Currently only unique generator needs this, so not extracting a dedicated interface
+            foreach (var uniqueGenerator in _generators.OfType<UniqueGenerator>())
+            {
+                uniqueGenerator.SetMaxValues(maxRows);
             }
         }
     }

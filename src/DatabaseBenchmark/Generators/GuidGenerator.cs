@@ -9,6 +9,8 @@ namespace DatabaseBenchmark.Generators
 
         public object Current { get; private set; }
 
+        public bool IsBounded => false;
+
         public bool Next()
         {
             Current = _randomizer.Guid();

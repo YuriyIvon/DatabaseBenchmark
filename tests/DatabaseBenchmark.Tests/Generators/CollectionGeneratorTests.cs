@@ -47,12 +47,16 @@ namespace DatabaseBenchmark.Tests.Generators
         {
             public object Current => SingleValue;
 
+            public bool IsBounded => false;
+
             public bool Next() => true;
         }
 
         private class CollectionGenerator : IGenerator, ICollectionGenerator
         {
             public object Current => SingleValue;
+
+            public bool IsBounded => false;
 
             public IEnumerable<object> CurrentCollection { get; private set; }
 

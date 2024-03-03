@@ -13,6 +13,8 @@ namespace DatabaseBenchmark.Generators
 
         public object Current {  get; private set; }
 
+        public bool IsBounded => false;
+
         public PhoneGenerator(PhoneGeneratorOptions options)
         {
             _options = options;

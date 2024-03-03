@@ -12,10 +12,17 @@ namespace DatabaseBenchmark.DataSources
 
         public DataSourceDecorator(IDataSource dataSource) => DataSource = dataSource;
 
-        public DataSourceDecorator MaxRows(int maxRows) =>
-            maxRows > 0
+        public DataSourceDecorator MaxRows(int maxRows)
+        {
+            if (DataSource is IMaxRowsAwareDataSource maxRowsAware)
+            {
+                maxRowsAware.SetMaxRows(maxRows);
+            }
+
+            return maxRows > 0
                 ? new DataSourceDecorator(new DataSourceMaxRowsDecorator(DataSource, maxRows))
                 : this;
+        }
 
         public DataSourceDecorator Mapping(string mappingFilePath) =>
             string.IsNullOrEmpty(mappingFilePath)

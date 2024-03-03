@@ -14,6 +14,8 @@ namespace DatabaseBenchmark.Generators
 
         public object Current => _query.Results.GetValue(_options.ColumnName);
 
+        public bool IsBounded => true;
+
         public ColumnIteratorGenerator(ColumnIteratorGeneratorOptions options, IDatabase database)
         {
             _options = options;

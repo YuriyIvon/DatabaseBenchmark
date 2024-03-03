@@ -9,6 +9,8 @@ namespace DatabaseBenchmark.Generators
 
         public object Current => _options.Value;
 
+        public bool IsBounded => false;
+
         public ConstantGenerator(ConstantGeneratorOptions options)
         {
             _options = options;

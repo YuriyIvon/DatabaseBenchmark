@@ -1,0 +1,19 @@
+{
+  "Columns": [
+    {
+      "Name": "Id",
+      "GeneratorOptions": {
+        "Type": "Guid"
+      }
+    },
+    {
+      "Name": "CreatedAt",
+      "GeneratorOptions": {
+        "Type": "DateTime",
+        "Direction": "None",
+        "MinValue": "2020-01-01T13:00:00",
+        "MaxValue": "2022-01-01T13:00:00"
+      }
+    }
+  ]
+}

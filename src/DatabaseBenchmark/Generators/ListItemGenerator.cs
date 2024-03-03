@@ -17,6 +17,8 @@ namespace DatabaseBenchmark.Generators
 
         public object Current { get; private set; }
 
+        public bool IsBounded => false;
+
         public IEnumerable<object> CurrentCollection { get; private set; }
 
         public ListItemGenerator(ListItemGeneratorOptions options)

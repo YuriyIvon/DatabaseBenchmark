@@ -5,5 +5,7 @@
         object Current { get; }
 
         bool Next();
+
+        bool IsBounded { get; }
     }
 }

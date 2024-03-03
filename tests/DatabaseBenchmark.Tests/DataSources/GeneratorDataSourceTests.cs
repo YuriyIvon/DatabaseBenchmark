@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.DataSources.Generator;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.DataSources.Generator;
 using System;
 using Xunit;
 
@@ -6,25 +7,19 @@ namespace DatabaseBenchmark.Tests.DataSources
 {
     public class GeneratorDataSourceTests
     {
-        private readonly GeneratorDataSource _dataSource;
-
-        public GeneratorDataSourceTests()
-        {
-            _dataSource = new GeneratorDataSource("DataSources/GeneratorDataSourceOptions.json", null, null);
-        }
-
         [Fact]
         public void GenerateValues()
         {
+            var dataSource = new GeneratorDataSource("DataSources/GeneratorDataSourceOptions.json", null, null);
             int id = 1;
             var createdAt = new DateTime(2020, 1, 1, 13, 0, 0);
 
             for (int i = 0; i < 10; i++)
             {
-                _dataSource.Read();
+                dataSource.Read();
 
-                var generatedId = _dataSource.GetValue("Id");
-                var generatedCreatedAt = _dataSource.GetValue("CreatedAt");
+                var generatedId = dataSource.GetValue("Id");
+                var generatedCreatedAt = dataSource.GetValue("CreatedAt");
 
                 Assert.IsType<int>(generatedId);
                 Assert.IsType<DateTime>(generatedCreatedAt);
@@ -34,6 +29,14 @@ namespace DatabaseBenchmark.Tests.DataSources
                 id++;
                 createdAt = createdAt.AddDays(1);
             }
+        }
+
+        [Fact]
+        public void GenerateValuesNoMaxRows()
+        {
+            var dataSource = new GeneratorDataSource("DataSources/UnboundedGeneratorDataSourceOptions.json", null, null);
+            
+            Assert.Throws<InputArgumentException>(() => dataSource.SetMaxRows(0));
         }
     }
 }

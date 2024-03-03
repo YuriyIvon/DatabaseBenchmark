@@ -14,6 +14,8 @@ namespace DatabaseBenchmark.Generators
 
         public object Current { get; private set; }
 
+        public bool IsBounded => _options.Direction != Direction.None;
+
         public IntegerGenerator(IntegerGeneratorOptions options)
         {
             _options = options;

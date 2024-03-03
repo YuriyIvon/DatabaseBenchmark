@@ -11,6 +11,8 @@ namespace DatabaseBenchmark.Generators
 
         public object Current => _enumerator.Current;
 
+        public bool IsBounded => true;
+
         public ListIteratorGenerator(ListIteratorGeneratorOptions options)
         {
             _options = options;

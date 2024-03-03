@@ -33,7 +33,8 @@ namespace DatabaseBenchmark.Commands
             }
 
             var dataSourceFactory = new DataSourceFactory(database, databaseFactory, _optionsProvider);
-            using var dataSource = new DataSourceDecorator(dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath))
+            var baseDataSource = dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath);
+            using var dataSource = new DataSourceDecorator(baseDataSource)
                 .MaxRows(options.DataSourceMaxRows)
                 .Mapping(options.MappingFilePath)
                 .TypedColumns(table.Columns, options.DataSourceCulture)

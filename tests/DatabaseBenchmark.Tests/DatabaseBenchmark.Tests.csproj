@@ -41,6 +41,9 @@
     <None Update="DataSources\GeneratorDataSourceOptions.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="DataSources\UnboundedGeneratorDataSourceOptions.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

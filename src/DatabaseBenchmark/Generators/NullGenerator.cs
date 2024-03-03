@@ -12,6 +12,8 @@ namespace DatabaseBenchmark.Generators
 
         public object Current { get; private set; }
 
+        public bool IsBounded => _sourceGenerator.IsBounded;
+
         public NullGenerator(NullGeneratorOptions options, IGenerator sourceGenerator)
         {
             _options = options;

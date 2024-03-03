@@ -14,6 +14,8 @@ namespace DatabaseBenchmark.Generators
 
         public object Current => _itemGenerator.Current;
 
+        public bool IsBounded => false;
+
         public IEnumerable<object> CurrentCollection => _itemGenerator.CurrentCollection;
 
         public ColumnItemGenerator(ColumnItemGeneratorOptions options, IDatabase database)

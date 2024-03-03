@@ -8,15 +8,18 @@ namespace DatabaseBenchmark.Generators
     {
         private readonly UniqueGeneratorOptions _options;
         private readonly IGenerator _sourceGenerator;
-        private readonly IBloomFilter _bloomFilter;
+
+        private int _maxValues = 1000000;
+        private IBloomFilter _bloomFilter;
 
         public object Current { get; private set; }
+
+        public bool IsBounded => _sourceGenerator.IsBounded;
 
         public UniqueGenerator(UniqueGeneratorOptions options, IGenerator sourceGenerator) 
         {
             _options = options;
             _sourceGenerator = sourceGenerator;
-            _bloomFilter = FilterBuilder.Build(options.MaxValues, 0.01);
         }
 
         public bool Next()
@@ -45,8 +48,11 @@ namespace DatabaseBenchmark.Generators
             _bloomFilter.Dispose();
         }
 
-        public bool AppendFilter(object value) =>
-            value switch
+        public bool AppendFilter(object value)
+        {
+            _bloomFilter ??= FilterBuilder.Build(_maxValues, 0.01);
+
+            return value switch
             {
                 int intValue => _bloomFilter.Add(intValue),
                 long longValue => _bloomFilter.Add(longValue),
@@ -54,5 +60,8 @@ namespace DatabaseBenchmark.Generators
                 DateTime dateTimeValue => _bloomFilter.Add(dateTimeValue),
                 _ => _bloomFilter.Add(value.ToString())
             };
+        }
+
+        public void SetMaxValues(int maxValues) => _maxValues = maxValues;
     }
 }

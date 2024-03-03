@@ -13,6 +13,8 @@ namespace DatabaseBenchmark.Generators
 
         public object Current { get; private set; }
 
+        public bool IsBounded => false;
+
         public FinanceGenerator(FinanceGeneratorOptions options)
         {
             _options = options;

@@ -11,12 +11,14 @@ namespace DatabaseBenchmark.Generators
         private readonly Randomizer _randomizer = new();
         private readonly PatternGeneratorOptions _options;
 
+        public object Current { get; private set; }
+
+        public bool IsBounded => false;
+
         public PatternGenerator(PatternGeneratorOptions options)
         {
             _options = options;
         }
-
-        public object Current { get; private set; }
 
         public bool Next()
         {

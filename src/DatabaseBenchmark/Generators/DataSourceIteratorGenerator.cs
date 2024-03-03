@@ -12,6 +12,8 @@ namespace DatabaseBenchmark.Generators
 
         public object Current { get; private set; }
 
+        public bool IsBounded => true;
+
         public DataSourceIteratorGenerator(DataSourceIteratorGeneratorOptions options, IDataSource dataSource, bool skipNavigation)
         {
             _options = options;
