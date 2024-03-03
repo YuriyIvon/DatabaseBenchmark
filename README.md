@@ -334,6 +334,8 @@ Generates geographical attributes. The following values are available for its `K
 * `StreetName`
 * `ZipCode`
 
+The `Locale` parameter specifies the locale to be used for address generation. A list of supported values can be found on [the Bogus library page](https://github.com/bchavez/Bogus?tab=readme-ov-file#locales).
+
 #### Boolean
 Generates a random Boolean. Its `Weight` attribute specifies the probability of the `true` value in the range between 0 and 1.
 
@@ -341,6 +343,8 @@ Generates a random Boolean. Its `Weight` attribute specifies the probability of 
 Generates some company attributes. The following values are available for its `Kind` attribute:
 * `CompanySuffix`
 * `CompanyName`
+
+The `Locale` parameter specifies the locale to be used for address generation. A list of supported values can be found on [the Bogus library page](https://github.com/bchavez/Bogus?tab=readme-ov-file#locales).
 
 #### DateTime
 Generates random date/time value. The available attributes are:
@@ -387,6 +391,10 @@ The available attributes are:
 * `ColumnType` - a source column type.
 * `Distinct` - specifies whether to apply a distinct value filter when retrieving data from the source column.
 
+#### Constant
+
+Returns a fixed constant specified by the `Value` parameter.
+
 #### DataSourceIterator
 Sequentially returns values of a column from the specified data source. Multiple generator instances with the same data source type and file path share the same iterator, thus allowing to fetch entire rows from the data source. It can be useful in scenarios when the source data needs to be enriched with randomly generated columns: in this case, `DataSourceIterator` will be used to fetch the raw data while others can add extra generated columns to the target data set.
 
@@ -413,6 +421,8 @@ Generates Internet-related pieces of information. The following values are avail
 * `UserAgent`
 * `UserName`
 
+The `Locale` parameter specifies the locale to be used for address generation. A list of supported values can be found on [the Bogus library page](https://github.com/bchavez/Bogus?tab=readme-ov-file#locales).
+
 #### ListItem<a name="listitem_generator"></a>
 Randomly picks a value from the provided list. The available attributes are:
 
@@ -433,6 +443,8 @@ Generates random names. The following values are available for its  `Kind`  attr
 * `LastName`
 * `FullName`
 
+The `Locale` parameter specifies the locale to be used for address generation. A list of supported values can be found on [the Bogus library page](https://github.com/bchavez/Bogus?tab=readme-ov-file#locales).
+
 #### Null
 A nested generator designed to integrate the functionality of any other generator with the capability to generate null values.
 
@@ -440,9 +452,21 @@ The available attributes are:
 * `Weight` - the probability of a null value. The allowed range for this parameter is between 0 and 1. Default value is `0.5`.
 * `SourceGeneratorOptions` - the underlying generator options - can be any of the other types.
 
+#### Pattern
+
+Generates a string according to a pattern specified by the `Pattern` parameter. The pattern can use any of the following three wildcard characters:
+
+* `#` - a digit.
+* `?` - a capital letter.
+* `*` - either a digit or a capital letter.
+
+For example, the pattern `??-####` will generate values like `JK-3276`.
+
 #### Phone
 Generates random phone numbers. The following values are available for its  `Kind`  attribute:
 * `PhoneNumber`
+
+The `Locale` parameter specifies the locale to be used for address generation. A list of supported values can be found on [the Bogus library page](https://github.com/bchavez/Bogus?tab=readme-ov-file#locales).
 
 #### String
 Generates random strings. The available attributes are:
@@ -457,12 +481,13 @@ Generates random pieces of text. The following values are available for its `Kin
 * `Paragraph`
 * `Text`
 
+The `Locale` parameter specifies the locale to be used for address generation. A list of supported values can be found on [the Bogus library page](https://github.com/bchavez/Bogus?tab=readme-ov-file#locales).
+
 #### Unique
 Enforces uniqueness of values produced by the underlying generator. Most of the generators provided here do not have uniqueness guarantees. This generator wraps any other generator and tracks the values it produces. If a newly generated value has been seen before, it calls the underlying generator again until a new unique value is produced or the number of attempts is exhausted.
 
 The available attributes are:
 * `AttemptCount` - the number of attempts to produce a unique value from the underlying generator. The default value is `100`.
-* `MaxValues` - the maximum expected number of unique values to be generated. This parameter is needed to properly set up the Bloom filter used to handle the uniqueness checks. The default value is `1000000`, so if you are generating datasets with more than a million rows, this parameter should be explicitly specified.
 * `SourceGeneratorOptions` - the underlying generator options - can be any of the other types.
 
 #### Vehicle
