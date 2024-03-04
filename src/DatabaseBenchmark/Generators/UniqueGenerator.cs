@@ -1,4 +1,5 @@
 ﻿using BloomFilter;
+using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
 
@@ -62,6 +63,14 @@ namespace DatabaseBenchmark.Generators
             };
         }
 
-        public void SetMaxValues(int maxValues) => _maxValues = maxValues;
+        public void SetMaxValues(int maxValues)
+        {
+            if (maxValues == 0)
+            {
+                throw new InputArgumentException("The maximum number of rows must be explicitly provided when using the unique generator");
+            }
+
+            _maxValues = maxValues;
+        }
     }
 }
