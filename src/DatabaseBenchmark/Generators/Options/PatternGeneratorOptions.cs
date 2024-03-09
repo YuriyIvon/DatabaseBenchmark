@@ -13,7 +13,8 @@ namespace DatabaseBenchmark.Generators.Options
 
         public enum GeneratorKind
         {
-            Simple
+            Simple,
+            Regex
         }
     }
 }

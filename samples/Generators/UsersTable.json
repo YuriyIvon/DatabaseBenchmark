@@ -9,6 +9,7 @@
     { "Name": "LastName", "Type": "String", "Queryable": true },
     { "Name": "Birth", "Type": "DateTime", "Queryable": true },
     { "Name": "CountryCode", "Type": "String", "Queryable": true },
-    { "Name": "PostalCode", "Type": "String", "Queryable": true }
+    { "Name": "PostalCode", "Type": "String", "Queryable": true },
+    { "Name": "DiscountCode", "Type": "String", "Queryable": true }
   ]
 }

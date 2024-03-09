@@ -5,7 +5,7 @@ using DatabaseBenchmark.Generators.Options;
 
 namespace DatabaseBenchmark.Generators
 {
-    public class UniqueGenerator : IGenerator, IDisposable
+    public sealed class UniqueGenerator : IGenerator, IDisposable
     {
         private readonly UniqueGeneratorOptions _options;
         private readonly IGenerator _sourceGenerator;

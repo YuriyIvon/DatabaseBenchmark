@@ -82,6 +82,15 @@
       }
     },
     { 
+      "Name": "DiscountCode",
+      "GeneratorOptions": { 
+        "Type": "DataSourceIterator",
+        "DataSourceType": "Database",
+        "DataSourceFilePath": "UsersDatabaseDataSource.json",
+        "ColumnName": "DiscountCode"
+      }
+    },
+    { 
       "Name": "Address",
       "GeneratorOptions": { 
         "Type": "Address",

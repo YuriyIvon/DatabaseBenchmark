@@ -27,7 +27,6 @@
       "Name": "Login",
       "GeneratorOptions": {
         "Type": "Unique",
-        "MaxValues": 100000000,
         "SourceGeneratorOptions": {
           "Type": "Internet",
           "Kind": "Email"
@@ -80,6 +79,18 @@
              { "Value": "CN", "Weight": 0.2 },
              { "Value": "GB", "Weight": 0.1 }
           ]
+        }
+      }
+    },
+    {
+      "Name": "DiscountCode",
+      "GeneratorOptions": { 
+        "Type": "Null",
+        "Weight": 0.9,
+        "SourceGeneratorOptions": {
+          "Type": "Pattern",
+          "Kind": "Regex",
+          "Pattern": "[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}"
         }
       }
     }
