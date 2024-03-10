@@ -381,10 +381,10 @@ The available attributes are:
 
 #### DateTime
 Generates random date/time value. The available attributes are:
-* `MinValue` - minimum value. Defaults to the current date and time.
-* `MaxValue` - maximum value. Defaults to the year after the current date and time.
+* `MinValue` - minimum value in ISO-8601 format. Defaults to the current date and time.
+* `MaxValue` - maximum value in ISO-8601 format. Defaults to the year after the current date and time.
 * `Direction` - specifies the growth direction for generated values - `None`, `Ascending`, or `Descending`. If set to `Ascending`, the sequence of generated values starts from `MinValue` and grows until `MaxValue`. With `Descending`, it starts from `MaxValue` and goes in the opposite direction until `MinValue`. Default is `None`.
-* `Delta` - when `Direction` is not `None`, this parameter determines the increment for each subsequently generated value or the maximum increment if `RandomizeDelta` is also enabled. If `Direction` is `None`, it specifies the fixed interval between all possible generated values. For example, with a `MinValue` of `2020-01-01 13:00:00`, a `MaxValue` of `2020-01-04 13:00:00`, and a `Delta` of `1.00:00:00` (one day), the utility will generate values from January 1st to January 4th, 2020, all at `13:00:00`, in random order. The value of `00:00:00` is allowed only when `Direction` is `None` and means no restriction on the set of generated values other than the minimum and maximum. The default value is `00:00:00`.
+* `Delta` - time interval in .NET-specific TimeSpan format, which adheres to the pattern `[days:]hours:minutes:seconds[.fractional_seconds]`. When `Direction` is not `None`, it determines the increment for each subsequently generated value or the maximum increment if `RandomizeDelta` is also enabled. If `Direction` is `None`, it specifies the fixed interval between all possible generated values. For example, with a `MinValue` of `2020-01-01T13:00:00`, a `MaxValue` of `2020-01-04T13:00:00`, and a `Delta` of `1.00:00:00` (one day), the utility will generate values from January 1st to January 4th, 2020, all at `13:00:00`, in random order. The value of `00:00:00` is allowed only when `Direction` is `None` and means no restriction on the set of generated values other than the minimum and maximum. The default value is `00:00:00`.
 
 #### Finance
 Generates finance-related pieces of information. The following values are available for its  `Kind`  attribute:
@@ -454,13 +454,19 @@ The available attributes are:
 
 #### Pattern
 
-Generates a string according to a pattern specified by the `Pattern` parameter. The pattern can use any of the following three wildcard characters:
+Generates a string according to a pattern specified by the `Pattern` parameter. Its grammar depends on the `Kind`, which can be either `Simple` or `Regex`.
+
+For the `Simple` generator kind the pattern can use any of the following three wildcard characters, while any other characters are copied to the output string as-is:
 
 * `#` - a digit.
 * `?` - a capital letter.
 * `*` - either a digit or a capital letter.
 
-For example, the pattern `??-####` will generate values like `JK-3276`.
+For instance, the pattern `??-####` will generate values like `JK-3276`.
+
+For the `Regex` kind, the pattern should be a valid regular expression, enabling the generator to create strings that conform to the specified expression.
+
+For instance, the pattern `[A-F]{2,4}` will yield strings that are between 2 and 4 characters long and comprise only uppercase letters from A to F.
 
 #### Phone
 Generates random phone numbers. The following values are available for its  `Kind`  attribute:
