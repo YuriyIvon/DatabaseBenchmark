@@ -18,9 +18,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.301.17" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.301.19" />
     <PackageReference Include="BloomFilter.NetCore" Version="2.2.0" />
-    <PackageReference Include="Bogus" Version="35.4.1" />
+    <PackageReference Include="Bogus" Version="35.5.0" />
     <PackageReference Include="CsvHelper" Version="31.0.2" />
     <PackageReference Include="Fare" Version="2.2.1" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.38.1" />
