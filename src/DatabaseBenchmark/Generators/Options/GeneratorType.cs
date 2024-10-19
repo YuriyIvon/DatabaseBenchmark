@@ -7,7 +7,7 @@ namespace DatabaseBenchmark.Generators.Options
     {
         Address,
         Boolean,
-        Collection, //Not exposed through the factory yet
+        Collection,
         Company,
         Constant,
         DataSourceIterator,

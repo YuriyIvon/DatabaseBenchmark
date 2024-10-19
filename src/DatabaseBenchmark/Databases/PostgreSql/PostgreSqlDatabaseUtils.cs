@@ -1,6 +1,7 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Model;
 using Npgsql;
+using NpgsqlTypes;
 
 namespace DatabaseBenchmark.Databases.PostgreSql
 {
@@ -33,13 +34,42 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                     ColumnType.Integer => "integer",
                     ColumnType.Long => "bigint",
                     ColumnType.Double => "double precision",
+                    ColumnType.DateTime => "timestamp",
                     ColumnType.String => "varchar(1000)",
                     ColumnType.Text => "varchar",
-                    ColumnType.DateTime => "timestamp",
                     _ => throw new InputArgumentException($"Unknown column type \"{column.Type}\"")
                 };
 
+            if (column.Array)
+            {
+                baseType += "[]";
+            }
+
             return column.Nullable ? baseType : $"{baseType} NOT NULL";
+        }
+
+        public static NpgsqlDbType GetNativeColumnType(ColumnType columnType, bool array)
+        {
+            var nativeType = columnType switch
+            {
+                ColumnType.Boolean => NpgsqlDbType.Boolean,
+                ColumnType.Integer => NpgsqlDbType.Integer,
+                ColumnType.Long => NpgsqlDbType.Bigint,
+                ColumnType.Double => NpgsqlDbType.Double,
+                ColumnType.DateTime => NpgsqlDbType.Timestamp,
+                ColumnType.Guid => NpgsqlDbType.Uuid,
+                ColumnType.String => NpgsqlDbType.Varchar,
+                ColumnType.Text => NpgsqlDbType.Varchar,
+                ColumnType.Json => NpgsqlDbType.Jsonb,
+                _ => throw new InputArgumentException($"Unknown column type \"{columnType}\"")
+            };
+
+            if (array)
+            {
+                nativeType |= NpgsqlDbType.Array;
+            }
+
+            return nativeType;
         }
     }
 }

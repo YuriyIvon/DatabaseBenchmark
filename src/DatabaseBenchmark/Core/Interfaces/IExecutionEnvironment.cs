@@ -1,4 +1,4 @@
-﻿using System.Data;
+﻿using DatabaseBenchmark.Common;
 
 namespace DatabaseBenchmark.Core.Interfaces
 {
@@ -12,6 +12,6 @@ namespace DatabaseBenchmark.Core.Interfaces
 
         public void WriteLine(string text);
 
-        public void WriteTable(DataTable table);
+        public void WriteTable(LightweightDataTable table);
     }
 }

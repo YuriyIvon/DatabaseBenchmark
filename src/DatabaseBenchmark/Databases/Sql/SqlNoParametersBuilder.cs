@@ -7,10 +7,11 @@ namespace DatabaseBenchmark.Databases.Sql
     {
         public IEnumerable<SqlQueryParameter> Parameters { get; } = Enumerable.Empty<SqlQueryParameter>();
 
-        public string Append(object value, ColumnType type) =>
+        public string Append(object value, ColumnType type, bool array) =>
             value switch
             {
                 null => "NULL",
+                IEnumerable<object> arrayValue => $"[{string.Join(", ", arrayValue.Select(v => $"'{v}'"))}]", //TODO: double-check
                 bool boolValue => boolValue.ToString().ToLower(), //Different databases may accept different Boolean format
                 int intValue => intValue.ToString(),
                 long longValue => longValue.ToString(),

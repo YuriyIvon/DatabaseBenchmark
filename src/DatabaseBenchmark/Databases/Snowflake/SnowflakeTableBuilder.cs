@@ -14,6 +14,11 @@ namespace DatabaseBenchmark.Databases.Snowflake
                 throw new InputArgumentException("Database-generated columns must not be nullable");
             }
 
+            if (column.Array)
+            {
+                throw new InputArgumentException("Snowflake array columns are not supported yet");
+            }
+
             var columnType = new StringBuilder(column.Type switch
             {
                 ColumnType.Boolean => "BOOLEAN",

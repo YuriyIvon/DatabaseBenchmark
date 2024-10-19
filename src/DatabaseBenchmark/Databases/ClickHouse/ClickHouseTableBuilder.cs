@@ -31,7 +31,7 @@ namespace DatabaseBenchmark.Databases.ClickHouse
 
         protected override string BuildColumnType(Column column)
         {
-            var baseType = column.Type switch
+            var type = column.Type switch
             {
                 ColumnType.Boolean => "UInt8",
                 ColumnType.Guid => "UUID",
@@ -44,7 +44,10 @@ namespace DatabaseBenchmark.Databases.ClickHouse
                 _ => throw new InputArgumentException($"Unknown column type \"{column.Type}\"")
             };
 
-            return column.Nullable ? $"Nullable({baseType})" : baseType;
+            type = column.Array ? $"Array({type})" : type;
+            type = column.Nullable ? $"Nullable({type})" : type;
+
+            return type;
         }
     }
 }

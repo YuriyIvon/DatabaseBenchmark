@@ -17,8 +17,8 @@ namespace DatabaseBenchmark.Tests.Generators
         public void GenerateCollectionWithValueGenerator()
         {
             var collectionGenerator = new DatabaseBenchmark.Generators.CollectionGenerator(
-                new ValueGenerator(),
-                new CollectionGeneratorOptions { MinLength = MinLength, MaxLength = MaxLength });
+                new CollectionGeneratorOptions { MinLength = MinLength, MaxLength = MaxLength },
+                new ValueGenerator());
 
             collectionGenerator.Next();
             var collection = (IEnumerable<object>)collectionGenerator.Current;
@@ -32,8 +32,8 @@ namespace DatabaseBenchmark.Tests.Generators
         public void GenerateCollectionWithCollectionGenerator()
         {
             var collectionGenerator = new DatabaseBenchmark.Generators.CollectionGenerator(
-                new CollectionGenerator(),
-                new CollectionGeneratorOptions { MinLength = MinLength, MaxLength = MaxLength });
+                new CollectionGeneratorOptions { MinLength = MinLength, MaxLength = MaxLength },
+                new CollectionGenerator());
 
             collectionGenerator.Next();
             var collection = (IEnumerable<object>)collectionGenerator.Current;

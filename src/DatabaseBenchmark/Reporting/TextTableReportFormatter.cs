@@ -1,15 +1,15 @@
-﻿using DatabaseBenchmark.Reporting.Interfaces;
-using System.Data;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Reporting.Interfaces;
 
 namespace DatabaseBenchmark.Reporting
 {
     public class TextTableReportFormatter : IReportFormatter
     {
-        public void Print(Stream stream, DataTable results)
+        public void Print(Stream stream, LightweightDataTable results)
         {
             using var writer = new StreamWriter(stream);
 
-            foreach (DataColumn column in results.Columns)
+            foreach (var column in results.Columns)
             {
                 writer.Write('+');
 
@@ -19,7 +19,7 @@ namespace DatabaseBenchmark.Reporting
 
             writer.WriteLine('+');
 
-            foreach (DataColumn column in results.Columns)
+            foreach (var column in results.Columns)
             {
                 writer.Write('|');
 
@@ -29,7 +29,7 @@ namespace DatabaseBenchmark.Reporting
 
             writer.WriteLine('|');
 
-            foreach (DataColumn column in results.Columns)
+            foreach (var column in results.Columns)
             {
                 writer.Write('+');
 
@@ -39,9 +39,9 @@ namespace DatabaseBenchmark.Reporting
 
             writer.WriteLine('+');
 
-            foreach (DataRow row in results.Rows)
+            foreach (var row in results.Rows)
             {
-                foreach (DataColumn column in results.Columns)
+                foreach (var column in results.Columns)
                 {
                     writer.Write('|');
                     writer.Write(FormatValue(column, row));
@@ -50,7 +50,7 @@ namespace DatabaseBenchmark.Reporting
                 writer.WriteLine('|');
             }
 
-            foreach (DataColumn column in results.Columns)
+            foreach (var column in results.Columns)
             {
                 writer.Write('+');
 
@@ -62,46 +62,44 @@ namespace DatabaseBenchmark.Reporting
             writer.WriteLine();
         }
 
-        private static int GetColumnWidth(DataColumn column)
+        private static int GetColumnWidth(LightweightDataColumn column)
         {
-            if (column.DataType == typeof(string))
-            {
-                var values = column.Table.Rows.Cast<DataRow>()
-                    .Where(r => r[column] != DBNull.Value)
-                    .Select(r => (string)r[column])
-                    .ToArray();
+            var values = column.Table.Rows
+                .Where(r => r[column.Name] != DBNull.Value)
+                .Select(r => FormatRawValue(r[column.Name]))
+                .ToArray();
 
-                var maxLength = values.Any() ? values.Max(v => v.Length) : 0;
-                var captionLength = column.Caption?.Length ?? 0;
+            var maxLength = values.Any() ? values.Max(v => v.Length) : 0;
+            var captionLength = column.Caption?.Length ?? 0;
 
-                return Math.Max(maxLength, captionLength);
-            }
-            
-            if (column.DataType == typeof(DateTime))
-            {
-                return 20;
-            }
-
-            return 10;
+            return Math.Max(maxLength, captionLength);
         }
 
-        private static string FormatValue(DataColumn column, DataRow row)
+        private static string FormatValue(LightweightDataColumn column, LightweightDataRow row)
         {
-            //TODO: make formatting more robust by supporting more column types
             var columnWidth = GetColumnWidth(column);
-            var value = row[column];
-            if (value is string stringValue)
+            var value = row[column.Name];
+            var unpaddedValue = FormatRawValue(value);
+
+            return value switch
             {
-                return stringValue.PadRight(columnWidth);
-            }
-            else if (value is DateTime dateTimeValue)
-            {
-                return dateTimeValue.ToString("u");
-            }
-            else
-            {
-                return string.Format($"{value:0.##}").PadLeft(columnWidth);
-            }
+                _ when IsNumber(value) => unpaddedValue.PadLeft(columnWidth),
+                _ => unpaddedValue.PadRight(columnWidth)
+            };
         }
+
+        private static string FormatRawValue(object value) =>
+            value switch
+            {
+                IEnumerable<object> arrayValue => $"[{string.Join(", ", arrayValue.Select(FormatRawValue))}]",
+                DateTime dateTimeValue => dateTimeValue.ToString("o"), // TODO: Make output date/time format configurable
+                DateTimeOffset dateTimeOffsetValue => dateTimeOffsetValue.ToString("o"), // TODO: Make output date/time format configurable
+                double doubleValue => string.Format($"{value:0.##}"), // TODO: Make precision configurable
+                float floatValue => string.Format($"{value:0.##}"), // TODO: Make precision configurable
+                _ when IsNumber(value) => value.ToString(),
+                _ => $"\"{value}\"" // TODO: Make quotemarks configurable
+            };
+
+        private static bool IsNumber(object value) => value is byte or short or ushort or int or uint or long or ulong or double or float;
     }
 }

@@ -24,6 +24,7 @@ namespace DatabaseBenchmark.Generators
             {
                 AddressGeneratorOptions o => new AddressGenerator(o),
                 BooleanGeneratorOptions o => new BooleanGenerator(o),
+                CollectionGeneratorOptions o => new CollectionGenerator(o, CreateSourceGenerator(o.SourceGeneratorOptions, nameof(CollectionGeneratorOptions))),
                 CompanyGeneratorOptions o => new CompanyGenerator(o),
                 ConstantGeneratorOptions o => new ConstantGenerator(o),
                 DataSourceIteratorGeneratorOptions o => _dataSourceIteratorGeneratorFactory.Create(o),

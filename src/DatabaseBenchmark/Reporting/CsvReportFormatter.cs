@@ -1,29 +1,29 @@
 ﻿using CsvHelper;
+using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Reporting.Interfaces;
-using System.Data;
 using System.Globalization;
 
 namespace DatabaseBenchmark.Reporting
 {
     public class CsvReportFormatter : IReportFormatter
     {
-        public void Print(Stream stream, DataTable results)
+        public void Print(Stream stream, LightweightDataTable results)
         {
             using var writer = new StreamWriter(stream);
             using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
 
-            foreach (DataColumn column in results.Columns)
+            foreach (LightweightDataColumn column in results.Columns)
             {
                 csv.WriteField(column.Caption);
             }
 
             csv.NextRecord();
 
-            foreach (DataRow row in results.Rows)
+            foreach (LightweightDataRow row in results.Rows)
             {
-                foreach (DataColumn column in results.Columns)
+                foreach (LightweightDataColumn column in results.Columns)
                 {
-                    csv.WriteField(row[column]);
+                    csv.WriteField(row[column.Name]);
                 }
 
                 csv.NextRecord();

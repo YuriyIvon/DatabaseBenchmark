@@ -9,6 +9,8 @@ namespace DatabaseBenchmark.Model
 
         public ColumnType Type { get; set; }
 
+        public bool Array { get; set; }
+
         [JsonConverter(typeof(JsonObjectConverter))]
         public object Value { get; set; }
 

@@ -6,7 +6,7 @@ namespace DatabaseBenchmark.Databases.Sql.Interfaces
     {
         public IEnumerable<SqlQueryParameter> Parameters { get; }
 
-        string Append(object value, ColumnType type);
+        string Append(object value, ColumnType type, bool array);
 
         void Reset();
     }

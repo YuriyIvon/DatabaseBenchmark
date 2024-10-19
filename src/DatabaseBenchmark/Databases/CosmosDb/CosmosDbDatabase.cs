@@ -6,7 +6,6 @@ using DatabaseBenchmark.Databases.CosmosDb.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Microsoft.Azure.Cosmos;
-using System.Data;
 
 namespace DatabaseBenchmark.Databases.CosmosDb
 {

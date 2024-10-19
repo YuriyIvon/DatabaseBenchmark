@@ -1,5 +1,6 @@
 ﻿using DatabaseBenchmark.Databases.Common.Interfaces;
 using Microsoft.Azure.Cosmos;
+using Newtonsoft.Json.Linq;
 
 namespace DatabaseBenchmark.Databases.CosmosDb
 {
@@ -19,7 +20,12 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             _iterator = iterator;
         }
 
-        public object GetValue(string columnName) => _responseItems[_responseItemIndex][columnName];
+        public object GetValue(string columnName) =>
+            _responseItems[_responseItemIndex][columnName] switch
+            {
+                JArray array => array.Cast<JValue>().Select(x => x.Value).ToArray(),
+                object value => value
+            };
 
         public bool Read()
         {

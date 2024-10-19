@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Core.Interfaces;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Reporting;
 using System.Data;
 
@@ -22,7 +23,7 @@ namespace DatabaseBenchmark.Core
 
         public void WriteLine(string text) => Console.WriteLine(text);
 
-        public void WriteTable(DataTable table)
+        public void WriteTable(LightweightDataTable table)
         {
             var output = Console.OpenStandardOutput();
             _tableFormatter.Print(output, table);

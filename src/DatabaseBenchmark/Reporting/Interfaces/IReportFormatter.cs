@@ -1,9 +1,9 @@
-﻿using System.Data;
+﻿using DatabaseBenchmark.Common;
 
 namespace DatabaseBenchmark.Reporting.Interfaces
 {
     public interface IReportFormatter
     {
-        void Print(Stream stream, DataTable results);
+        void Print(Stream stream, LightweightDataTable results);
     }
 }

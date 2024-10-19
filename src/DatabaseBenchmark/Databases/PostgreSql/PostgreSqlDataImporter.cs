@@ -49,7 +49,9 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                     foreach (var column in columns)
                     {
                         var value = _source.GetValue(column.Name);
-                        writer.Write(value);
+
+                        var nativeColumnType = PostgreSqlDatabaseUtils.GetNativeColumnType(column.Type, column.Array);
+                        writer.Write(value, nativeColumnType);
                     }
 
                     progressReporter.Increment(1);

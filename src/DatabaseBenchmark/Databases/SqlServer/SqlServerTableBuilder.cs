@@ -14,6 +14,11 @@ namespace DatabaseBenchmark.Databases.SqlServer
                 throw new InputArgumentException("Database-generated columns must not be nullable");
             }
 
+            if (column.Array)
+            {
+                throw new InputArgumentException("MS SQL doesn't support array columns");
+            }
+
             var columnType = new StringBuilder(column.Type switch
             {
                 ColumnType.Boolean => "bit",

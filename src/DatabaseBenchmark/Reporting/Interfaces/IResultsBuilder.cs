@@ -1,10 +1,10 @@
-﻿using DatabaseBenchmark.Reporting.Model;
-using System.Data;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Reporting.Model;
 
 namespace DatabaseBenchmark.Reporting.Interfaces
 {
     public interface IResultsBuilder
     {
-        DataTable Build(IEnumerable<MetricsCollection> metrics);
+        LightweightDataTable Build(IEnumerable<MetricsCollection> metrics);
     }
 }

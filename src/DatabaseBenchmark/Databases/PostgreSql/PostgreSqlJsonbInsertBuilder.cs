@@ -29,7 +29,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
             for (var i = 0; i < BatchSize && SourceReader.ReadDictionary(Table.Columns, out var sourceRow); i++)
             {
-                var values = columns.Select((c, i) => ParametersBuilder.Append(sourceRow[c.Name], c.Type)).ToList();
+                var values = columns.Select((c, i) => ParametersBuilder.Append(sourceRow[c.Name], c.Type, c.Array)).ToList();
 
                 var jsonbValues = Table.Columns
                     .Where(c => !c.DatabaseGenerated && c.Queryable)
@@ -39,7 +39,8 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
                 var jsonbParameter = ParametersBuilder.Append(
                     JsonSerializer.Serialize(jsonbValues),
-                    ColumnType.Json);
+                    ColumnType.Json,
+                    false);
 
                 values.Add(jsonbParameter);
 

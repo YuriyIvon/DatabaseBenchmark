@@ -19,12 +19,12 @@ namespace DatabaseBenchmark.Databases.Sql
             _isOrdinal = isOrdinal;
         }
 
-        public string Append(object value, ColumnType type)
+        public string Append(object value, ColumnType type, bool array)
         {
             string name = $"p{_counter}";
             _counter++;
 
-            var parameter = new SqlQueryParameter(_prefix, name, value, type);
+            var parameter = new SqlQueryParameter(_prefix, name, value, type, array);
             _parameters.Add(parameter);
 
             return _isOrdinal ? new string(_prefix, 1) : _prefix + name;

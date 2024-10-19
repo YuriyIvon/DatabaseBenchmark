@@ -36,7 +36,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
             {
                 var item = _table.Columns
                     .Where(c => !c.DatabaseGenerated)
-                    .Select((c, i) => (c.Name, Value: DynamoDbAttributeValueUtils.ToAttributeValue(c.Type, values[i])))
+                    .Select((c, i) => (c.Name, Value: DynamoDbAttributeValueUtils.ToAttributeValue(c.Type, c.Array, values[i])))
                     .ToDictionary(t => t.Name, t => t.Value);
 
                 if (PartitionKeyName == null)

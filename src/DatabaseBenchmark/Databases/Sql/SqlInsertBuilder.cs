@@ -41,7 +41,7 @@ namespace DatabaseBenchmark.Databases.Sql
 
             for (var i = 0; i < BatchSize && SourceReader.ReadArray(columns, out var sourceRow); i++)
             {
-                var values = columns.Select((c, i) => ParametersBuilder.Append(sourceRow[i], c.Type)).ToArray();
+                var values = columns.Select((c, i) => ParametersBuilder.Append(sourceRow[i], c.Type, c.Array)).ToArray();
                 rows.Add(values);
             }
 

@@ -67,6 +67,6 @@ namespace DatabaseBenchmark.Databases.Sql
         private string BuildParameter(RawQueryParameter parameter, object value) =>
             parameter.Inline
                 ? InlineParameterFormatter.Format(parameter.InlineFormat, value)
-                : _parametersBuilder.Append(value, parameter.Type);
+                : _parametersBuilder.Append(value, parameter.Type, parameter.Array);
     }
 }

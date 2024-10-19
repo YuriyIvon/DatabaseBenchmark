@@ -11,7 +11,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             if (source.Type == ColumnType.DateTime && source.Value != null)
             {
                 var dateTimeValue = (DateTime)source.Value;
-                source = new SqlQueryParameter(source.Prefix, source.Name, dateTimeValue.ToString("s"), ColumnType.String);
+                source = new SqlQueryParameter(source.Prefix, source.Name, dateTimeValue.ToString("s"), ColumnType.String, false);
             }
 
             base.Populate(source, target);

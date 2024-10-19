@@ -12,12 +12,15 @@ namespace DatabaseBenchmark.Databases.Sql.Interfaces
 
         public ColumnType Type { get; }
 
-        public SqlQueryParameter(char prefix, string name, object value, ColumnType type)
+        public bool Array { get; }
+
+        public SqlQueryParameter(char prefix, string name, object value, ColumnType type, bool array = false)
         {
             Prefix = prefix;
             Name = name;
             Value = value;
             Type = type;
+            Array = array;
         }
     }
 }

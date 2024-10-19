@@ -6,6 +6,8 @@
 
         public ColumnType Type { get; set; }
 
+        public bool Array { get; set; } = false;
+
         public bool Nullable { get; set; } = true;
 
         public bool Queryable { get; set; } = true;

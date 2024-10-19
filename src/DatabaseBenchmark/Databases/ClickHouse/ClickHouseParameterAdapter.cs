@@ -34,6 +34,11 @@ namespace DatabaseBenchmark.Databases.ClickHouse
                 ColumnType.Text => ClickHouseDbType.String,
                 _ => throw new InputArgumentException($"Parameter type {source.Type} is not supported")
             };
+
+            if (source.Array)
+            {
+                clickHouseTarget.ClickHouseDbType |= ClickHouseDbType.Array;
+            }
         }
     }
 }

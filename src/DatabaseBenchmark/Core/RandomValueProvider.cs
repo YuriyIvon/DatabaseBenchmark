@@ -72,12 +72,12 @@ namespace DatabaseBenchmark.Core
                 if (collection)
                 {
                     generator = new CollectionGenerator(
-                        generator, 
                         new CollectionGeneratorOptions
                         {
                             MinLength = randomizationRule.MinCollectionLength,
                             MaxLength = randomizationRule.MaxCollectionLength
-                        });
+                        },
+                        generator);
                 }
 
                 _generators.Add((randomizationRule, collection), generator);

@@ -1,8 +1,8 @@
-﻿using DatabaseBenchmark.Core.Interfaces;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Reporting;
-using System.Data;
 
 namespace DatabaseBenchmark.Core
 {
@@ -97,7 +97,7 @@ namespace DatabaseBenchmark.Core
         {
             var results = query.Results;
 
-            var table = new DataTable();
+            var table = new LightweightDataTable();
             int rowCount = 0;
 
             while (results.Read())
@@ -108,20 +108,18 @@ namespace DatabaseBenchmark.Core
                 {
                     foreach (var columnName in results.ColumnNames)
                     {
-                        if (!table.Columns.Contains(columnName))
+                        if (!table.HasColumn(columnName))
                         {
-                            table.Columns.Add(columnName);
+                            table.AddColumn(columnName);
                         }
                     }
 
-                    DataRow row = table.NewRow();
+                    LightweightDataRow row = table.AddRow();
 
                     foreach (var columnName in results.ColumnNames)
                     {
                         row[columnName] = results.GetValue(columnName);
                     }
-
-                    table.Rows.Add(row);
                 }
             }
 

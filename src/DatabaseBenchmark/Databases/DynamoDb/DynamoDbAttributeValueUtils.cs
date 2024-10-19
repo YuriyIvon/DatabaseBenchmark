@@ -1,6 +1,7 @@
 ﻿using Amazon.DynamoDBv2.Model;
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Model;
+using System.Linq;
 
 namespace DatabaseBenchmark.Databases.DynamoDb
 {
@@ -11,15 +12,24 @@ namespace DatabaseBenchmark.Databases.DynamoDb
             {
                 { NULL: true } => null,
                 { IsBOOLSet: true } => attributeValue.BOOL,
+                { IsLSet: true, L: var l } when l != null => l.Select(FromAttributeValue).ToArray(),
                 { N: var n } when n != null => n,
                 _ => attributeValue.S,
             };
 
-        public static AttributeValue ToAttributeValue(ColumnType type, object value)
+        public static AttributeValue ToAttributeValue(ColumnType type, bool array, object value)
         {
             if (value == null)
             {
                 return new AttributeValue { NULL = true };
+            }
+            else if (array)
+            {
+                return new AttributeValue
+                {
+                    L = ((IEnumerable<object>)value).Select(e => ToAttributeValue(type, false, e)).ToList(),
+                    IsLSet = true
+                };
             }
             else
             {

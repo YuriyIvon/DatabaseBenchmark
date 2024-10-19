@@ -24,6 +24,7 @@ namespace DatabaseBenchmark.Generators.Options
                 {
                     GeneratorType.Address => optionsJson.Deserialize<AddressGeneratorOptions>(options),
                     GeneratorType.Boolean => optionsJson.Deserialize<BooleanGeneratorOptions>(options),
+                    GeneratorType.Collection => optionsJson.Deserialize<CollectionGeneratorOptions>(options),
                     GeneratorType.Company => optionsJson.Deserialize<CompanyGeneratorOptions>(options),
                     GeneratorType.Constant => optionsJson.Deserialize<ConstantGeneratorOptions>(options),
                     GeneratorType.DataSourceIterator => optionsJson.Deserialize<DataSourceIteratorGeneratorOptions>(options),

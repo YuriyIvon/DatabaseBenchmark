@@ -44,7 +44,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
                 _ => throw new InputArgumentException($"Unknown string operator \"{condition.Operator}\"")
             };
 
-            return $"{function}({columnReference}, {ParametersBuilder.Append(value, column.Type)})";
+            return $"{function}({columnReference}, {ParametersBuilder.Append(value, column.Type, column.Array)})";
         }
 
         protected override string BuildNullCondition(QueryPrimitiveCondition condition)

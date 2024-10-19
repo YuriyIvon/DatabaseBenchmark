@@ -1,8 +1,6 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Reporting.Interfaces;
 using DatabaseBenchmark.Reporting.Model;
-using Nest;
-using System.Data;
 
 namespace DatabaseBenchmark.Reporting
 {
@@ -155,13 +153,13 @@ namespace DatabaseBenchmark.Reporting
             ValidateCustomMetricColumns();
         }
             
-        public DataTable Build(IEnumerable<MetricsCollection> metrics)
+        public LightweightDataTable Build(IEnumerable<MetricsCollection> metrics)
         {
-            var results = new DataTable();
+            var table = new LightweightDataTable();
 
             foreach (var metricsCollection in metrics)
             {
-                var row = results.Rows.Add();
+                var row = table.AddRow();
 
                 foreach (var columnName in _displayColumns)
                 {
@@ -183,7 +181,7 @@ namespace DatabaseBenchmark.Reporting
                 }
             }
 
-            return results;
+            return table;
         }
 
         private void ValidateColumns()
@@ -208,13 +206,13 @@ namespace DatabaseBenchmark.Reporting
             }
         }
 
-        private void AppendMetricColumn(DataRow row, string name, MetricsCollection metricCollection)
+        private void AppendMetricColumn(LightweightDataRow row, string name, MetricsCollection metricCollection)
         {
             var columnDefinition = _columns.FirstOrDefault(c => c.Name == name);
 
-            if (!row.Table.Columns.Contains(name))
+            if (!row.Table.HasColumn(name))
             {
-                var column = row.Table.Columns.Add(name, columnDefinition.Type);
+                var column = row.Table.AddColumn(name);
                 column.Caption = columnDefinition.Caption;
             }
 
@@ -222,7 +220,7 @@ namespace DatabaseBenchmark.Reporting
         }
 
         private void AppendCustomMetricColumn(
-            DataRow row,
+            LightweightDataRow row,
             string metricType,
             string prefix,
             IEnumerable<IDictionary<string, double>> customMetrics)
@@ -230,9 +228,9 @@ namespace DatabaseBenchmark.Reporting
             var columnDefinition = _customMetricColumns.FirstOrDefault(c => c.Name == prefix);
 
             var columnName = prefix + metricType;
-            if (!row.Table.Columns.Contains(columnName))
+            if (!row.Table.HasColumn(columnName))
             {
-                var customMetricColumn = row.Table.Columns.Add(prefix + metricType, typeof(double));
+                var customMetricColumn = row.Table.AddColumn(prefix + metricType);
                 customMetricColumn.Caption = $"{columnDefinition.Caption} ({metricType})";
             }
 

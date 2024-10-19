@@ -16,8 +16,8 @@ namespace DatabaseBenchmark.Generators
         public bool IsBounded => _sourceGenerator.IsBounded;
 
         public CollectionGenerator(
-            IGenerator sourceGenerator,
-            CollectionGeneratorOptions options)
+            CollectionGeneratorOptions options,
+            IGenerator sourceGenerator)
         {
             _options = options;
             _sourceGenerator = sourceGenerator;

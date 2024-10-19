@@ -258,7 +258,7 @@ namespace DatabaseBenchmark.Databases.Sql
             }
 
             conditionExpression.Append("IN (");
-            conditionExpression.Append(string.Join(", ", rawCollection.Select(v => ParametersBuilder.Append(v, column.Type))));
+            conditionExpression.Append(string.Join(", ", rawCollection.Select(v => ParametersBuilder.Append(v, column.Type, column.Array))));
             conditionExpression.Append(')');
 
             return conditionExpression.ToString();
@@ -276,7 +276,7 @@ namespace DatabaseBenchmark.Databases.Sql
                 _ => throw new InputArgumentException($"Unknown string operator \"{condition.Operator}\"")
             };
 
-            return $"{columnReference} LIKE {ParametersBuilder.Append(pattern, column.Type)}";
+            return $"{columnReference} LIKE {ParametersBuilder.Append(pattern, column.Type, column.Array)}";
         }
 
         protected virtual string BuildComparisonCondition(QueryPrimitiveCondition condition, object value)
@@ -299,7 +299,7 @@ namespace DatabaseBenchmark.Databases.Sql
             });
 
             conditionExpression.Append(' ');
-            conditionExpression.Append(ParametersBuilder.Append(value, column.Type));
+            conditionExpression.Append(ParametersBuilder.Append(value, column.Type, column.Array));
 
             return conditionExpression.ToString();
         }
@@ -321,12 +321,12 @@ namespace DatabaseBenchmark.Databases.Sql
 
             if (Query.Skip > 0 || Query.Take > 0)
             {
-                expression.AppendLine($"OFFSET {ParametersBuilder.Append(Query.Skip, ColumnType.Integer)} ROWS");
+                expression.AppendLine($"OFFSET {ParametersBuilder.Append(Query.Skip, ColumnType.Integer, false)} ROWS");
             }
 
             if (Query.Take > 0)
             {
-                expression.AppendLine($"FETCH NEXT {ParametersBuilder.Append(Query.Take, ColumnType.Integer)} ROWS ONLY");
+                expression.AppendLine($"FETCH NEXT {ParametersBuilder.Append(Query.Take, ColumnType.Integer, false)} ROWS ONLY");
             }
 
             return expression.ToString();

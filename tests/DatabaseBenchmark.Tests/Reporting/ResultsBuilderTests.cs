@@ -64,14 +64,14 @@ namespace DatabaseBenchmark.Tests.Reporting
 
             Assert.Single(results.Rows);
             Assert.Equal(8, results.Columns.Count);
-            Assert.True(results.Columns.Contains("name"));
-            Assert.True(results.Columns.Contains("avg"));
-            Assert.True(results.Columns.Contains("stdDev"));
-            Assert.True(results.Columns.Contains("min"));
-            Assert.True(results.Columns.Contains("p50"));
-            Assert.True(results.Columns.Contains("max"));
-            Assert.True(results.Columns.Contains("qps"));
-            Assert.True(results.Columns.Contains("avgRows"));
+            Assert.True(results.HasColumn("name"));
+            Assert.True(results.HasColumn("avg"));
+            Assert.True(results.HasColumn("stdDev"));
+            Assert.True(results.HasColumn("min"));
+            Assert.True(results.HasColumn("p50"));
+            Assert.True(results.HasColumn("max"));
+            Assert.True(results.HasColumn("qps"));
+            Assert.True(results.HasColumn("avgRows"));
         }
 
         [Fact]

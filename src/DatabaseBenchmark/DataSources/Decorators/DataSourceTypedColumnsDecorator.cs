@@ -29,23 +29,37 @@ namespace DatabaseBenchmark.DataSources.Decorators
             {
                 return column.Nullable ? null : throw new InputArgumentException($"Column \"{column.Name}\" does not allow null values");
             }
+            else if (column.Array)
+            {
+                if (value is IEnumerable<object> valueCollection)
+                {
+                    return valueCollection.Select(v => ConvertSingleValue(column, v, formatProvider)).ToArray();
+                }
+                else
+                {
+                    throw new InputArgumentException($"A non-array value received for an array column {column.Name}");
+                }
+            }
             else
             {
-                return column.Type switch
-                {
-                    ColumnType.Boolean => ToBool(value),
-                    ColumnType.Double => ToDouble(value, formatProvider),
-                    ColumnType.Integer => ToInt(value),
-                    ColumnType.Long => ToLong(value),
-                    ColumnType.Text => ToString(value),
-                    ColumnType.String => ToString(value),
-                    ColumnType.DateTime => ToDateTime(value, formatProvider),
-                    ColumnType.Guid => ToGuid(value),
-                    ColumnType.Json => value,
-                    _ => throw new InputArgumentException($"Unknown column type \"{column.Type}\"")
-                };
+                return ConvertSingleValue(column, value, formatProvider);
             }
         }
+
+        private static object ConvertSingleValue(Column column, object value, IFormatProvider formatProvider) =>
+            column.Type switch
+            {
+                ColumnType.Boolean => ToBool(value),
+                ColumnType.Double => ToDouble(value, formatProvider),
+                ColumnType.Integer => ToInt(value),
+                ColumnType.Long => ToLong(value),
+                ColumnType.Text => ToString(value),
+                ColumnType.String => ToString(value),
+                ColumnType.DateTime => ToDateTime(value, formatProvider),
+                ColumnType.Guid => ToGuid(value),
+                ColumnType.Json => value,
+                _ => throw new InputArgumentException($"Unknown column type \"{column.Type}\"")
+            };
 
         private static object ToBool(object value) =>
             value switch

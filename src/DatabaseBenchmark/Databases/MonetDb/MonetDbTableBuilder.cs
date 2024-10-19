@@ -14,6 +14,11 @@ namespace DatabaseBenchmark.Databases.MonetDb
                 throw new InputArgumentException("Database-generated columns must not be nullable");
             }
 
+            if (column.Array)
+            {
+                throw new InputArgumentException("MonetDB doesn't support array columns");
+            }
+
             var columnType = new StringBuilder(column.Type switch
             {
                 ColumnType.Boolean => "boolean",

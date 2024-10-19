@@ -1,4 +1,6 @@
-﻿namespace DatabaseBenchmark.Generators.Options
+﻿using DatabaseBenchmark.Model;
+
+namespace DatabaseBenchmark.Generators.Options
 {
     public class CollectionGeneratorOptions : GeneratorOptionsBase
     {
@@ -7,5 +9,7 @@
         public int MinLength { get; set; }
 
         public int MaxLength { get; set; }
+
+        public IGeneratorOptions SourceGeneratorOptions { get; set; }
     }
 }

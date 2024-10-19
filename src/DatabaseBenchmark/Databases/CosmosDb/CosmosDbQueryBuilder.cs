@@ -40,12 +40,12 @@ namespace DatabaseBenchmark.Databases.CosmosDb
 
             if (Query.Skip > 0 || Query.Take > 0)
             {
-                expression.AppendLine($"OFFSET {ParametersBuilder.Append(Query.Skip, ColumnType.Integer)}");
+                expression.AppendLine($"OFFSET {ParametersBuilder.Append(Query.Skip, ColumnType.Integer, false)}");
             }
 
             if (Query.Take > 0)
             {
-                expression.AppendLine($"LIMIT {ParametersBuilder.Append(Query.Take, ColumnType.Integer)}");
+                expression.AppendLine($"LIMIT {ParametersBuilder.Append(Query.Take, ColumnType.Integer, false)}");
             }
 
             return expression.ToString();
