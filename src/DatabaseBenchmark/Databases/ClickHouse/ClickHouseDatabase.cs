@@ -56,7 +56,8 @@ namespace DatabaseBenchmark.Databases.ClickHouse
         public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
             new SqlDataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
                 .Connection<ClickHouseConnection>(ConnectionString)
-                .ParametersBuilder<SqlNoParametersBuilder>()
+                .ParametersBuilder(() => new SqlParametersBuilder())
+                .ParametersBuilder<ClickHouseNoParametersBuilder>()
                 .ParameterAdapter<ClickHouseParameterAdapter>()
                 .OptionsProvider(_optionsProvider)
                 .Environment(_environment)
@@ -77,6 +78,7 @@ namespace DatabaseBenchmark.Databases.ClickHouse
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
             new SqlInsertExecutorFactory<ClickHouseConnection>(this, table, source, batchSize, _environment)
+                .Customize<ISqlParametersBuilder, ClickHouseNoParametersBuilder>()
                 .Customize<ISqlParameterAdapter, ClickHouseParameterAdapter>();
 
         public void ExecuteScript(string script) => throw new InputArgumentException("Custom scripts are not supported for ClickHouse");

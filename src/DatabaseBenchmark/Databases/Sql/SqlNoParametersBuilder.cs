@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Databases.Sql.Interfaces;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Databases.Sql
@@ -7,11 +8,11 @@ namespace DatabaseBenchmark.Databases.Sql
     {
         public IEnumerable<SqlQueryParameter> Parameters { get; } = Enumerable.Empty<SqlQueryParameter>();
 
-        public string Append(object value, ColumnType type, bool array) =>
+        public virtual string Append(object value, ColumnType type, bool array) =>
             value switch
             {
+                IEnumerable<object> => throw new InputArgumentException("Array literals are not supported"),
                 null => "NULL",
-                IEnumerable<object> arrayValue => $"[{string.Join(", ", arrayValue.Select(v => $"'{v}'"))}]", //TODO: double-check
                 bool boolValue => boolValue.ToString().ToLower(), //Different databases may accept different Boolean format
                 int intValue => intValue.ToString(),
                 long longValue => longValue.ToString(),
