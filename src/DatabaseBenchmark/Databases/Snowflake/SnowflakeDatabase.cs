@@ -21,8 +21,6 @@ namespace DatabaseBenchmark.Databases.Snowflake
         {
             ConnectionString = connectionString;
             _environment = environment;
-
-            SnowflakeDbConnectionPool.SetPooling(false);
         }
 
         public void CreateTable(Table table, bool dropExisting)
