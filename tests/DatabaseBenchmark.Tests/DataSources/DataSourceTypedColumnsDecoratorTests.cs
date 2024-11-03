@@ -75,6 +75,36 @@ namespace DatabaseBenchmark.Tests.DataSources
             [ColumnType.Guid, "abc"]
         ];
 
+        public static IEnumerable<object[]> ValidArraySamples =>
+        [
+            [ColumnType.Boolean, new List<bool> { true, false }, new bool[] { true, false }],
+            [ColumnType.Integer, new List<int> { 1, 2, 3 }, new int[] { 1, 2, 3 }],
+            [ColumnType.Long, new List<long> { 1, 2, 3 }, new long[] { 1, 2, 3 }],
+            [ColumnType.Double, new List<double> { 1.1, 2.1, 3.1 }, new double[] { 1.1, 2.1, 3.1 }],
+            [ColumnType.DateTime, new List<DateTime> { new (2024, 10, 2), new (2024, 11, 2) }, new DateTime[] { new (2024, 10, 2), new (2024, 11, 2) }],
+            [ColumnType.Guid, new List<Guid> { new ("271bf677-4bf5-4fc7-b6f1-93bd2bd8ebb5"), new ("91a4388d-0deb-4b22-a8f3-3d8be3f0193b") }, new Guid[] { new("271bf677-4bf5-4fc7-b6f1-93bd2bd8ebb5"), new("91a4388d-0deb-4b22-a8f3-3d8be3f0193b") }],
+            [ColumnType.String, new List<string> { "one", "two", "three" }, new string[] { "one", "two", "three" }],
+            [ColumnType.Boolean, "[true, false]", new bool[] { true, false }],
+            [ColumnType.Integer, "[1, 2, 3]", new int[] { 1, 2, 3 }],
+            [ColumnType.Long, "[1, 2, 3]", new long[] { 1, 2, 3 }],
+            [ColumnType.Double, "[1.1, 2.1, 3.1]", new double[] { 1.1, 2.1, 3.1 }],
+            [ColumnType.DateTime, "[\"2024-10-02\", \"2024-11-02\"]", new DateTime[] { new (2024, 10, 2), new (2024, 11, 2) }],
+            [ColumnType.Guid, "[\"271bf677-4bf5-4fc7-b6f1-93bd2bd8ebb5\", \"91a4388d-0deb-4b22-a8f3-3d8be3f0193b\"]", new Guid[] { new("271bf677-4bf5-4fc7-b6f1-93bd2bd8ebb5"), new("91a4388d-0deb-4b22-a8f3-3d8be3f0193b") }],
+            [ColumnType.String, "[\"one\", \"two\", \"three\"]", new string[] { "one", "two", "three" }]
+        ];
+
+        public static IEnumerable<object[]> InvalidArraySamples =>
+        [
+            [ColumnType.String, "1234"],
+            [ColumnType.Integer, "1234"],
+            [ColumnType.String, 123],
+            [ColumnType.Integer, 123],
+            [ColumnType.String, new object()],
+            [ColumnType.String, "{\"one\": \"two\"}"],
+            [ColumnType.String, "[[1, 2], [1, 2, 3]]"],
+            [ColumnType.String, "[{}, {}]"],
+        ];
+
         [Theory]
         [MemberData(nameof(CompatibleTypeSamples))]
         public void ReadCompatibleValue(ColumnType columnType, object sourceValue, object targetValue)
@@ -99,6 +129,38 @@ namespace DatabaseBenchmark.Tests.DataSources
             var columns = new Column[]
             {
                 new() { Name = "Dummy", Type = columnType }
+            };
+
+            IDataSource dataSource = new TestDataSource(sourceValue);
+            dataSource = new DataSourceTypedColumnsDecorator(dataSource, columns, CultureInfo.InvariantCulture);
+
+            Assert.Throws<InputArgumentException>(() => dataSource.GetValue(columns[0].Name));
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidArraySamples))]
+        public void ReadValidArrayValues(ColumnType columnType, object sourceValue, object targetValue)
+        {
+            var columns = new Column[]
+            {
+                new() { Name = "Dummy", Type = columnType, Array = true }
+            };
+
+            IDataSource dataSource = new TestDataSource(sourceValue);
+            dataSource = new DataSourceTypedColumnsDecorator(dataSource, columns, CultureInfo.InvariantCulture);
+
+            var value = dataSource.GetValue(columns[0].Name);
+
+            Assert.Equal(targetValue, value);
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidArraySamples))]
+        public void ReadInvalidArrayValues(ColumnType columnType, object sourceValue)
+        {
+            var columns = new Column[]
+            {
+                new() { Name = "Dummy", Type = columnType, Array = true }
             };
 
             IDataSource dataSource = new TestDataSource(sourceValue);

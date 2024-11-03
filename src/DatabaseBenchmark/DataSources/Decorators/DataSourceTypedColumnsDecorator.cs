@@ -1,6 +1,9 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
+using System.Collections;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace DatabaseBenchmark.DataSources.Decorators
 {
@@ -31,14 +34,12 @@ namespace DatabaseBenchmark.DataSources.Decorators
             }
             else if (column.Array)
             {
-                if (value is IEnumerable<object> valueCollection)
+                return value switch
                 {
-                    return valueCollection.Select(v => ConvertSingleValue(column, v, formatProvider)).ToArray();
-                }
-                else
-                {
-                    throw new InputArgumentException($"A non-array value received for an array column {column.Name}");
-                }
+                    string jsonString => NormalizeArray(column, ParseJsonArray(jsonString), formatProvider),
+                    IEnumerable valueCollection => NormalizeArray(column, valueCollection, formatProvider),
+                    _ => throw new InputArgumentException($"The value received for an array column \"{column.Name}\" is neither an array nor a JSON array string")
+                };
             }
             else
             {
@@ -159,5 +160,39 @@ namespace DatabaseBenchmark.DataSources.Decorators
 
         private static Exception CreateConvertException(object value, Type targetType) =>
             new InputArgumentException($"A value \"{value}\" of type \"{value.GetType()}\" can't be converted to \"{targetType}\"");
+
+        private static object NormalizeArray(Column column, IEnumerable valueCollection, IFormatProvider formatProvider) =>
+            valueCollection.Cast<object>().Select(v => ConvertSingleValue(column, v, formatProvider)).ToArray();
+
+        private static object GetJsonNodeValue(JsonNode node) =>
+            node switch
+            {
+                JsonValue value => value.GetValueKind() switch
+                {
+                    JsonValueKind.True => true,
+                    JsonValueKind.False => false,
+                    JsonValueKind.Null => null,
+                    JsonValueKind.Number => value.GetValue<double>(),
+                    _ => value.ToString()
+                },
+                _ => throw new InputArgumentException("An array column can store only primitive values")
+            };
+
+        private static IEnumerable<object> ParseJsonArray(string jsonString)
+        {
+            try
+            {
+                if (JsonNode.Parse(jsonString) is not JsonArray jsonArray)
+                {
+                    throw new InputArgumentException($"The string \"{jsonString}\" is not a valid JSON array definition");
+                }
+
+                return jsonArray.Select(GetJsonNodeValue).ToArray();
+            }
+            catch
+            {
+                throw new InputArgumentException($"The string \"{jsonString}\" is not a valid JSON array definition");
+            }
+        }
     }
 }
