@@ -52,6 +52,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
             new SqlQueryExecutorFactory<NpgsqlConnection>(this, table, query, _environment)
+                .Customize<ISqlQueryBuilder, PostgreSqlQueryBuilder>()
                 .Customize<ISqlParameterAdapter, PostgreSqlParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>

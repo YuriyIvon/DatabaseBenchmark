@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Databases.ClickHouse;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Databases.ClickHouse;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
@@ -46,6 +47,38 @@ namespace DatabaseBenchmark.Tests.Databases
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);
+        }
+
+        [Fact]
+        public void BuildQueryArrayColumn()
+        {
+            var query = SampleInputs.ArrayColumnQuery;
+            var parametersBuilder = new SqlParametersBuilder();
+            var builder = new ClickHouseQueryBuilder(SampleInputs.ArrayColumnTable, query, parametersBuilder, null, null);
+
+            var queryText = builder.Build();
+
+            var normalizedQueryText = queryText.NormalizeSpaces();
+            Assert.Equal("SELECT Category, SubCategory FROM Sample"
+                + " WHERE has(Tags, @p0)", normalizedQueryText);
+        }
+
+        [Theory]
+        [InlineData(QueryPrimitiveOperator.In)]
+        [InlineData(QueryPrimitiveOperator.Greater)]
+        [InlineData(QueryPrimitiveOperator.GreaterEquals)]
+        [InlineData(QueryPrimitiveOperator.Lower)]
+        [InlineData(QueryPrimitiveOperator.LowerEquals)]
+        [InlineData(QueryPrimitiveOperator.StartsWith)]
+        public void BuildQueryArrayColumnUnsupportedOperator(QueryPrimitiveOperator @operator)
+        {
+            var query = SampleInputs.ArrayColumnQuery;
+            ((QueryPrimitiveCondition)query.Condition).Operator = @operator;
+
+            var parametersBuilder = new SqlParametersBuilder();
+            var builder = new ClickHouseQueryBuilder(SampleInputs.ArrayColumnTable, query, parametersBuilder, null, null);
+
+            Assert.Throws<InputArgumentException>(builder.Build);
         }
     }
 }

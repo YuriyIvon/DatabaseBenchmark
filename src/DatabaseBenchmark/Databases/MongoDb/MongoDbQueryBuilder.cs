@@ -9,6 +9,13 @@ namespace DatabaseBenchmark.Databases.MongoDb
 {
     public class MongoDbQueryBuilder : IMongoDbQueryBuilder
     {
+        private static readonly QueryPrimitiveOperator[] AllowedArrayOperators =
+        [
+            QueryPrimitiveOperator.Equals,
+            QueryPrimitiveOperator.NotEquals,
+            QueryPrimitiveOperator.Contains
+        ];
+
         private readonly Table _table;
         private readonly Query _query;
         private readonly IRandomValueProvider _randomValueProvider;
@@ -77,38 +84,38 @@ namespace DatabaseBenchmark.Databases.MongoDb
             return request;
         }
 
-        private BsonDocument BuildCondition(IQueryCondition predicate)
+        private BsonDocument BuildCondition(IQueryCondition condition)
         {
-            if (predicate.RandomizeInclusion && _randomPrimitives.GetRandomBoolean())
+            if (condition.RandomizeInclusion && _randomPrimitives.GetRandomBoolean())
             {
                 return null;
             }
             else
             {
-                return predicate switch
+                return condition switch
                 {
                     QueryGroupCondition groupCondition => BuildGroupCondition(groupCondition),
                     QueryPrimitiveCondition primitiveCondition => BuildPrimitiveCondition(primitiveCondition),
-                    _ => throw new InputArgumentException($"Unknown predicate type \"{predicate.GetType()}\"")
+                    _ => throw new InputArgumentException($"Unknown predicate type \"{condition.GetType()}\"")
                 };
             }
         }
 
-        private BsonDocument BuildGroupCondition(QueryGroupCondition predicate)
+        private BsonDocument BuildGroupCondition(QueryGroupCondition condition)
         {
-            var predicates = predicate.Conditions
+            var conditions = condition.Conditions
                 .Select(BuildCondition)
                 .Where(p => p != null)
                 .ToArray();
 
-            if (predicates.Any())
+            if (conditions.Any())
             {
-                return predicate.Operator switch
+                return condition.Operator switch
                 {
-                    QueryGroupOperator.And => new BsonDocument("$and", new BsonArray(predicates)),
-                    QueryGroupOperator.Or => new BsonDocument("$or", new BsonArray(predicates)),
-                    QueryGroupOperator.Not => new BsonDocument("$nor", new BsonArray(predicates)),
-                    _ => throw new InputArgumentException($"Unknown group operator \"{predicate.Operator}\"")
+                    QueryGroupOperator.And => new BsonDocument("$and", new BsonArray(conditions)),
+                    QueryGroupOperator.Or => new BsonDocument("$or", new BsonArray(conditions)),
+                    QueryGroupOperator.Not => new BsonDocument("$nor", new BsonArray(conditions)),
+                    _ => throw new InputArgumentException($"Unknown group operator \"{condition.Operator}\"")
                 };
             }
             else
@@ -117,28 +124,34 @@ namespace DatabaseBenchmark.Databases.MongoDb
             }
         }
 
-        private BsonDocument BuildPrimitiveCondition(QueryPrimitiveCondition predicate)
+        private BsonDocument BuildPrimitiveCondition(QueryPrimitiveCondition condition)
         {
-            var rawValue = !predicate.RandomizeValue
-                ? predicate.Value
-                : predicate.Operator == QueryPrimitiveOperator.In
-                    ? _randomValueProvider.GetValueCollection(_table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
-                    : _randomValueProvider.GetValue(_table.Name, predicate.ColumnName, predicate.ValueRandomizationRule);
+            var column = GetColumn(condition.ColumnName);
+            if (column.Array && !AllowedArrayOperators.Contains(condition.Operator))
+            {
+                throw new InputArgumentException($"Primitive operator \"{condition.Operator}\" is not supported for array columns");
+            }
+
+            var rawValue = !condition.RandomizeValue
+                ? condition.Value
+                : condition.Operator == QueryPrimitiveOperator.In
+                    ? _randomValueProvider.GetValueCollection(_table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                    : _randomValueProvider.GetValue(_table.Name, condition.ColumnName, condition.ValueRandomizationRule);
 
             var bsonValue = BsonValue.Create(rawValue);
 
-            return predicate.Operator switch
+            return condition.Operator switch
             {
-                QueryPrimitiveOperator.Equals => new BsonDocument(predicate.ColumnName, bsonValue),
-                QueryPrimitiveOperator.NotEquals => new BsonDocument(predicate.ColumnName, new BsonDocument("$ne", bsonValue)),
-                QueryPrimitiveOperator.In => new BsonDocument(predicate.ColumnName, new BsonDocument("$in", bsonValue)),
-                QueryPrimitiveOperator.Lower => new BsonDocument(predicate.ColumnName, new BsonDocument("$lt", bsonValue)),
-                QueryPrimitiveOperator.LowerEquals => new BsonDocument(predicate.ColumnName, new BsonDocument("$lte", bsonValue)),
-                QueryPrimitiveOperator.Greater => new BsonDocument(predicate.ColumnName, new BsonDocument("$gt", bsonValue)),
-                QueryPrimitiveOperator.GreaterEquals => new BsonDocument(predicate.ColumnName, new BsonDocument("$gte", bsonValue)),
-                QueryPrimitiveOperator.Contains => new BsonDocument(predicate.ColumnName, new BsonDocument("$regex", bsonValue)),
-                QueryPrimitiveOperator.StartsWith => new BsonDocument(predicate.ColumnName, new BsonDocument("$regex", $"^{rawValue}")),
-                _ => throw new InputArgumentException($"Unknown primitive operator \"{predicate.Operator}\"")
+                QueryPrimitiveOperator.Equals => new BsonDocument(condition.ColumnName, bsonValue),
+                QueryPrimitiveOperator.NotEquals => new BsonDocument(condition.ColumnName, new BsonDocument("$ne", bsonValue)),
+                QueryPrimitiveOperator.In => new BsonDocument(condition.ColumnName, new BsonDocument("$in", bsonValue)),
+                QueryPrimitiveOperator.Lower => new BsonDocument(condition.ColumnName, new BsonDocument("$lt", bsonValue)),
+                QueryPrimitiveOperator.LowerEquals => new BsonDocument(condition.ColumnName, new BsonDocument("$lte", bsonValue)),
+                QueryPrimitiveOperator.Greater => new BsonDocument(condition.ColumnName, new BsonDocument("$gt", bsonValue)),
+                QueryPrimitiveOperator.GreaterEquals => new BsonDocument(condition.ColumnName, new BsonDocument("$gte", bsonValue)),
+                QueryPrimitiveOperator.Contains => BuildContainsCondition(condition, bsonValue),
+                QueryPrimitiveOperator.StartsWith => new BsonDocument(condition.ColumnName, new BsonDocument("$regex", $"^{rawValue}")),
+                _ => throw new InputArgumentException($"Unknown primitive operator \"{condition.Operator}\"")
             };
         }
 
@@ -209,6 +222,19 @@ namespace DatabaseBenchmark.Databases.MongoDb
             return projection;
         }
 
+        private BsonDocument BuildContainsCondition(QueryPrimitiveCondition condition, BsonValue bsonValue)
+        {
+            var column = GetColumn(condition.ColumnName);
+            if (column.Array)
+            {
+                return new BsonDocument(condition.ColumnName, bsonValue);
+            }
+            else
+            {
+                return new BsonDocument(condition.ColumnName, new BsonDocument("$regex", bsonValue));
+            }
+        }
+
         private string BuildColumnReference(string columnName)
         {
             if (_query.Aggregate != null && _query.Aggregate.GroupColumnNames.Contains(columnName))
@@ -218,6 +244,12 @@ namespace DatabaseBenchmark.Databases.MongoDb
             }
 
             return columnName;
+        }
+
+        protected Column GetColumn(string columnName)
+        {
+            var column = _table.Columns.FirstOrDefault(c => c.Name == columnName);
+            return column ?? throw new InputArgumentException($"Unknown column \"{columnName}\"");
         }
     }
 }

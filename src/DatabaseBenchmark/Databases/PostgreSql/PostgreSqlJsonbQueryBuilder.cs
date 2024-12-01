@@ -1,15 +1,13 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common.Interfaces;
-using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 using System.Text;
-using System.Text.Json;
 
 namespace DatabaseBenchmark.Databases.PostgreSql
 {
-    public class PostgreSqlJsonbQueryBuilder: SqlQueryBuilder
+    public class PostgreSqlJsonbQueryBuilder: PostgreSqlQueryBuilder
     {
         private readonly PostgreSqlJsonbQueryOptions _queryOptions;
 
@@ -20,7 +18,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             IRandomValueProvider randomValueProvider,
             IRandomPrimitives randomPrimitives,
             IOptionsProvider optionsProvider) 
-            : base(table, query, parametersBuilder, randomValueProvider, randomPrimitives)
+            : base(table, query, parametersBuilder, randomValueProvider, randomPrimitives, optionsProvider)
         {
             _queryOptions = optionsProvider.GetOptions<PostgreSqlJsonbQueryOptions>();
         }
@@ -109,7 +107,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             }
         }
 
-        protected override string BuildComparisonCondition(QueryPrimitiveCondition condition, object value)
+        protected override string BuildBasicOperatorCondition(QueryPrimitiveCondition condition, object value)
         {
             var column = GetColumn(condition.ColumnName);
 
@@ -145,21 +143,29 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             }
             else
             {
-                return base.BuildComparisonCondition(condition, value);
+                return base.BuildBasicOperatorCondition(condition, value);
             }
         }
 
-        protected override string BuildStringCondition(QueryPrimitiveCondition condition, object value)
+        protected override string BuildAdvancedOperatorCondition(QueryPrimitiveCondition condition, object value)
         {
             var column = GetColumn(condition.ColumnName);
 
             if (_queryOptions.UseGinOperators && column.Queryable)
             {
-                throw new InputArgumentException("PostgreSQL jsonb operators don't support string functions");
+                if (column.Array && condition.Operator == QueryPrimitiveOperator.Contains)
+                {
+                    var formattedValue = FormatValue(value);
+                    return $"{PostgreSqlJsonbConstants.JsonbColumnName} @> '{{\"{column.Name}\": [{formattedValue}]}}'::jsonb";
+                }
+                else
+                {
+                    throw new InputArgumentException("PostgreSQL jsonb GIN operators don't support string functions");
+                }
             }
             else
             {
-                return base.BuildStringCondition(condition, value);
+                return base.BuildAdvancedOperatorCondition(condition, value);
             }
         }
 
@@ -193,8 +199,5 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
             return $"{@operator}({inputConditions.First()})";
         }
-
-        private static string FormatValue(object value) =>
-            JsonSerializer.Serialize(value).Replace("'", "''");
     }
 }

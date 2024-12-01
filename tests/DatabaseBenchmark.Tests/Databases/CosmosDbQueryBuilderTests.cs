@@ -1,10 +1,9 @@
-﻿using DatabaseBenchmark.Databases.CosmosDb;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Databases.CosmosDb;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace DatabaseBenchmark.Tests.Databases
@@ -51,6 +50,45 @@ namespace DatabaseBenchmark.Tests.Databases
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);
+        }
+
+        [Fact]
+        public void BuildQueryArrayColumn()
+        {
+            var query = SampleInputs.ArrayColumnQuery;
+            var parametersBuilder = new SqlParametersBuilder();
+            var builder = new CosmosDbQueryBuilder(SampleInputs.ArrayColumnTable, query, parametersBuilder, null, null);
+
+            var queryText = builder.Build();
+
+            var normalizedQueryText = queryText.NormalizeSpaces();
+            Assert.Equal("SELECT Sample.Category, Sample.SubCategory FROM Sample"
+                + " WHERE ARRAY_CONTAINS(Sample.Tags, @p0)", normalizedQueryText);
+
+            var reference = new SqlQueryParameter[]
+            {
+                new ('@', "p0", "ABC", ColumnType.String)
+            };
+
+            Assert.Equal(reference, parametersBuilder.Parameters);
+        }
+
+        [Theory]
+        [InlineData(QueryPrimitiveOperator.In)]
+        [InlineData(QueryPrimitiveOperator.Greater)]
+        [InlineData(QueryPrimitiveOperator.GreaterEquals)]
+        [InlineData(QueryPrimitiveOperator.Lower)]
+        [InlineData(QueryPrimitiveOperator.LowerEquals)]
+        [InlineData(QueryPrimitiveOperator.StartsWith)]
+        public void BuildQueryArrayColumnUnsupportedOperator(QueryPrimitiveOperator @operator)
+        {
+            var query = SampleInputs.ArrayColumnQuery;
+            ((QueryPrimitiveCondition)query.Condition).Operator = @operator;
+
+            var parametersBuilder = new SqlParametersBuilder();
+            var builder = new CosmosDbQueryBuilder(SampleInputs.ArrayColumnTable, query, parametersBuilder, null, null);
+
+            Assert.Throws<InputArgumentException>(builder.Build);
         }
     }
 }

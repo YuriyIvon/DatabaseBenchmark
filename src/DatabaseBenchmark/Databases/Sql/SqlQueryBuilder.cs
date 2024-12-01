@@ -227,11 +227,11 @@ namespace DatabaseBenchmark.Databases.Sql
                 {
                     if (condition.Operator == QueryPrimitiveOperator.Contains || condition.Operator == QueryPrimitiveOperator.StartsWith)
                     {
-                        return BuildStringCondition(condition, value);
+                        return BuildAdvancedOperatorCondition(condition, value);
                     }
                     else
                     {
-                        return BuildComparisonCondition(condition, value);
+                        return BuildBasicOperatorCondition(condition, value);
                     }
                 }
                 else
@@ -258,13 +258,13 @@ namespace DatabaseBenchmark.Databases.Sql
             }
 
             conditionExpression.Append("IN (");
-            conditionExpression.Append(string.Join(", ", rawCollection.Select(v => ParametersBuilder.Append(v, column.Type, column.Array))));
+            conditionExpression.Append(string.Join(", ", rawCollection.Select(v => ParametersBuilder.Append(v, column.Type, false))));
             conditionExpression.Append(')');
 
             return conditionExpression.ToString();
         }
 
-        protected virtual string BuildStringCondition(QueryPrimitiveCondition condition, object value)
+        protected virtual string BuildAdvancedOperatorCondition(QueryPrimitiveCondition condition, object value)
         {
             var column = GetColumn(condition.ColumnName);
             var columnReference = BuildRegularColumnReference(condition.ColumnName);
@@ -276,10 +276,10 @@ namespace DatabaseBenchmark.Databases.Sql
                 _ => throw new InputArgumentException($"Unknown string operator \"{condition.Operator}\"")
             };
 
-            return $"{columnReference} LIKE {ParametersBuilder.Append(pattern, column.Type, column.Array)}";
+            return $"{columnReference} LIKE {ParametersBuilder.Append(pattern, column.Type, false)}";
         }
 
-        protected virtual string BuildComparisonCondition(QueryPrimitiveCondition condition, object value)
+        protected virtual string BuildBasicOperatorCondition(QueryPrimitiveCondition condition, object value)
         {
             var column = GetColumn(condition.ColumnName);
             var columnReference = BuildRegularColumnReference(condition.ColumnName);
@@ -299,7 +299,7 @@ namespace DatabaseBenchmark.Databases.Sql
             });
 
             conditionExpression.Append(' ');
-            conditionExpression.Append(ParametersBuilder.Append(value, column.Type, column.Array));
+            conditionExpression.Append(ParametersBuilder.Append(value, column.Type, false));
 
             return conditionExpression.ToString();
         }
@@ -335,12 +335,7 @@ namespace DatabaseBenchmark.Databases.Sql
         protected Column GetColumn(string columnName)
         {
             var column = Table.Columns.FirstOrDefault(c => c.Name == columnName);
-            if (column == null)
-            {
-                throw new InputArgumentException($"Unknown column \"{columnName}\"");
-            }
-
-            return column;
+            return column ?? throw new InputArgumentException($"Unknown column \"{columnName}\"");
         }
     }
 }

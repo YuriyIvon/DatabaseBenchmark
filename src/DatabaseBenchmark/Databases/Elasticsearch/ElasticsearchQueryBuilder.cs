@@ -9,6 +9,13 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 {
     public class ElasticsearchQueryBuilder : IElasticsearchQueryBuilder
     {
+        private static readonly QueryPrimitiveOperator[] AllowedArrayOperators =
+        [
+            QueryPrimitiveOperator.Equals,
+            QueryPrimitiveOperator.NotEquals,
+            QueryPrimitiveOperator.Contains
+        ];
+
         private readonly Table _table;
         private readonly Query _query;
         private readonly IRandomValueProvider _randomValueProvider;
@@ -80,38 +87,38 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             return request;
         }
 
-        private QueryContainer BuildCondition(IQueryCondition predicate)
+        private QueryContainer BuildCondition(IQueryCondition condition)
         {
-            if (predicate.RandomizeInclusion && _randomPrimitives.GetRandomBoolean())
+            if (condition.RandomizeInclusion && _randomPrimitives.GetRandomBoolean())
             {
                 return null;
             }
             else
             {
-                return predicate switch
+                return condition switch
                 {
                     QueryGroupCondition groupCondition => BuildGroupCondition(groupCondition),
                     QueryPrimitiveCondition primitiveCondition => BuildPrimitiveCondition(primitiveCondition),
-                    _ => throw new InputArgumentException($"Unknown predicate type \"{predicate.GetType()}\"")
+                    _ => throw new InputArgumentException($"Unknown predicate type \"{condition.GetType()}\"")
                 };
             }
         }
 
-        private QueryContainer BuildGroupCondition(QueryGroupCondition predicate)
+        private QueryContainer BuildGroupCondition(QueryGroupCondition condition)
         {
-            var predicates = predicate.Conditions
+            var conditions = condition.Conditions
                 .Select(p => BuildCondition(p))
                 .Where(p => p != null)
                 .ToArray();
 
-            if (predicates.Any())
+            if (conditions.Any())
             {
-                return predicate.Operator switch
+                return condition.Operator switch
                 {
-                    QueryGroupOperator.And => new BoolQuery { Must = predicates },
-                    QueryGroupOperator.Or => new BoolQuery { Should = predicates },
-                    QueryGroupOperator.Not => BuildNotCondition(predicates),
-                    _ => throw new InputArgumentException($"Unknown group operator \"{predicate.Operator}\"")
+                    QueryGroupOperator.And => new BoolQuery { Must = conditions },
+                    QueryGroupOperator.Or => new BoolQuery { Should = conditions },
+                    QueryGroupOperator.Not => BuildNotCondition(conditions),
+                    _ => throw new InputArgumentException($"Unknown group operator \"{condition.Operator}\"")
                 };
             }
             else
@@ -130,79 +137,87 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             return new BoolQuery { MustNot = inputConditions };
         }
 
-        private QueryContainer BuildPrimitiveCondition(QueryPrimitiveCondition predicate)
+        private QueryContainer BuildPrimitiveCondition(QueryPrimitiveCondition condition)
         {
-            var rawValue = !predicate.RandomizeValue 
-                ? predicate.Value
-                : predicate.Operator == QueryPrimitiveOperator.In 
-                    ? _randomValueProvider.GetValueCollection(_table.Name, predicate.ColumnName, predicate.ValueRandomizationRule)
-                    : _randomValueProvider.GetValue(_table.Name, predicate.ColumnName, predicate.ValueRandomizationRule);
+            var column = GetColumn(condition.ColumnName);
 
-            var column = _table.Columns.First(c => c.Name == predicate.ColumnName);
+            if (column.Array && !AllowedArrayOperators.Contains(condition.Operator))
+            {
+                throw new InputArgumentException($"Primitive operator \"{condition.Operator}\" is not supported for array columns");
+            }
+
+            var rawValue = !condition.RandomizeValue 
+                ? condition.Value
+                : condition.Operator == QueryPrimitiveOperator.In 
+                    ? _randomValueProvider.GetValueCollection(_table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                    : _randomValueProvider.GetValue(_table.Name, condition.ColumnName, condition.ValueRandomizationRule);
 
             //TODO: double-check DateTime and serialization for all database types
-            return predicate.Operator switch
+            return condition.Operator switch
             {
                 QueryPrimitiveOperator.Equals => 
                     rawValue != null 
-                        ? new TermQuery { Field = predicate.ColumnName, Value = rawValue }
+                        ? new TermQuery { Field = condition.ColumnName, Value = rawValue }
                         : new BoolQuery
                         {
                             MustNot = new QueryContainer[]
                             {
-                                new ExistsQuery { Field = predicate.ColumnName }
+                                new ExistsQuery { Field = condition.ColumnName }
                             }
                         },
-                QueryPrimitiveOperator.In => new TermQuery { Field = predicate.ColumnName, Value = rawValue },
+                QueryPrimitiveOperator.In => new TermQuery { Field = condition.ColumnName, Value = rawValue },
                 QueryPrimitiveOperator.NotEquals => 
                     rawValue != null 
                         ? new BoolQuery 
                         {
                             MustNot = new QueryContainer[]
                             {
-                                new TermQuery { Field = predicate.ColumnName, Value = rawValue }
+                                new TermQuery { Field = condition.ColumnName, Value = rawValue }
                             }
                         }
-                        : new ExistsQuery { Field = predicate.ColumnName },
+                        : new ExistsQuery { Field = condition.ColumnName },
                 QueryPrimitiveOperator.Lower => column.Type switch 
                     {
-                        ColumnType.Integer => new LongRangeQuery { Field = predicate.ColumnName, LessThan = (long?)rawValue },
-                        ColumnType.Double => new NumericRangeQuery { Field = predicate.ColumnName, LessThan = (double?)rawValue },
-                        ColumnType.DateTime => new DateRangeQuery { Field = predicate.ColumnName, LessThan = (DateTime?)rawValue },
-                        ColumnType.String => new TermRangeQuery { Field = predicate.ColumnName, LessThan = (string)rawValue },
-                        ColumnType.Text => new TermRangeQuery { Field = predicate.ColumnName, LessThan = (string)rawValue },
+                        ColumnType.Integer => new LongRangeQuery { Field = condition.ColumnName, LessThan = (long?)rawValue },
+                        ColumnType.Double => new NumericRangeQuery { Field = condition.ColumnName, LessThan = (double?)rawValue },
+                        ColumnType.DateTime => new DateRangeQuery { Field = condition.ColumnName, LessThan = (DateTime?)rawValue },
+                        ColumnType.String => new TermRangeQuery { Field = condition.ColumnName, LessThan = (string)rawValue },
+                        ColumnType.Text => new TermRangeQuery { Field = condition.ColumnName, LessThan = (string)rawValue },
                         _ => throw new InputArgumentException($"Operator Lower is not supported for column type \"{column.Type}\"")
                     },
                 QueryPrimitiveOperator.LowerEquals => column.Type switch
                     {
-                        ColumnType.Integer => new LongRangeQuery { Field = predicate.ColumnName, LessThanOrEqualTo = (long?)rawValue },
-                        ColumnType.Double => new NumericRangeQuery { Field = predicate.ColumnName, LessThanOrEqualTo = (double?)rawValue },
-                        ColumnType.DateTime => new DateRangeQuery { Field = predicate.ColumnName, LessThanOrEqualTo = (DateTime?)rawValue },
-                        ColumnType.String => new TermRangeQuery { Field = predicate.ColumnName, LessThanOrEqualTo = (string)rawValue },
-                        ColumnType.Text => new TermRangeQuery { Field = predicate.ColumnName, LessThanOrEqualTo = (string)rawValue },
+                        ColumnType.Integer => new LongRangeQuery { Field = condition.ColumnName, LessThanOrEqualTo = (long?)rawValue },
+                        ColumnType.Double => new NumericRangeQuery { Field = condition.ColumnName, LessThanOrEqualTo = (double?)rawValue },
+                        ColumnType.DateTime => new DateRangeQuery { Field = condition.ColumnName, LessThanOrEqualTo = (DateTime?)rawValue },
+                        ColumnType.String => new TermRangeQuery { Field = condition.ColumnName, LessThanOrEqualTo = (string)rawValue },
+                        ColumnType.Text => new TermRangeQuery { Field = condition.ColumnName, LessThanOrEqualTo = (string)rawValue },
                         _ => throw new InputArgumentException($"Operator LowerEquals is not supported for column type \"{column.Type}\"")
                     },
                 QueryPrimitiveOperator.Greater => column.Type switch
                     {
-                        ColumnType.Integer => new LongRangeQuery { Field = predicate.ColumnName, GreaterThan = (long?)rawValue },
-                        ColumnType.Double => new NumericRangeQuery { Field = predicate.ColumnName, GreaterThan = (double?)rawValue },
-                        ColumnType.DateTime => new DateRangeQuery { Field = predicate.ColumnName, GreaterThan = (DateTime?)rawValue },
-                        ColumnType.String => new TermRangeQuery { Field = predicate.ColumnName, GreaterThan = (string)rawValue },
-                        ColumnType.Text => new TermRangeQuery { Field = predicate.ColumnName, GreaterThan = (string)rawValue },
+                        ColumnType.Integer => new LongRangeQuery { Field = condition.ColumnName, GreaterThan = (long?)rawValue },
+                        ColumnType.Double => new NumericRangeQuery { Field = condition.ColumnName, GreaterThan = (double?)rawValue },
+                        ColumnType.DateTime => new DateRangeQuery { Field = condition.ColumnName, GreaterThan = (DateTime?)rawValue },
+                        ColumnType.String => new TermRangeQuery { Field = condition.ColumnName, GreaterThan = (string)rawValue },
+                        ColumnType.Text => new TermRangeQuery { Field = condition.ColumnName, GreaterThan = (string)rawValue },
                         _ => throw new InputArgumentException($"Operator Greater is not supported for column type \"{column.Type}\"")
                     },
                 QueryPrimitiveOperator.GreaterEquals => column.Type switch
                     {
-                        ColumnType.Integer => new LongRangeQuery { Field = predicate.ColumnName, GreaterThanOrEqualTo = (long?)rawValue },
-                        ColumnType.Double => new NumericRangeQuery { Field = predicate.ColumnName, GreaterThanOrEqualTo = (double?)rawValue },
-                        ColumnType.DateTime => new DateRangeQuery { Field = predicate.ColumnName, GreaterThanOrEqualTo = (DateTime?)rawValue },
-                        ColumnType.String => new TermRangeQuery { Field = predicate.ColumnName, GreaterThanOrEqualTo = (string)rawValue },
-                        ColumnType.Text => new TermRangeQuery { Field = predicate.ColumnName, GreaterThanOrEqualTo = (string)rawValue },
+                        ColumnType.Integer => new LongRangeQuery { Field = condition.ColumnName, GreaterThanOrEqualTo = (long?)rawValue },
+                        ColumnType.Double => new NumericRangeQuery { Field = condition.ColumnName, GreaterThanOrEqualTo = (double?)rawValue },
+                        ColumnType.DateTime => new DateRangeQuery { Field = condition.ColumnName, GreaterThanOrEqualTo = (DateTime?)rawValue },
+                        ColumnType.String => new TermRangeQuery { Field = condition.ColumnName, GreaterThanOrEqualTo = (string)rawValue },
+                        ColumnType.Text => new TermRangeQuery { Field = condition.ColumnName, GreaterThanOrEqualTo = (string)rawValue },
                         _ => throw new InputArgumentException($"Operator GreaterEquals is not supported for column type \"{column.Type}\"")
                     },
-                QueryPrimitiveOperator.Contains => new WildcardQuery { Field = predicate.ColumnName, Value = $"*{rawValue}*" },
-                QueryPrimitiveOperator.StartsWith => new WildcardQuery { Field = predicate.ColumnName, Value = $"{rawValue}*"},
-                _ => throw new InputArgumentException($"Unknown primitive operator \"{predicate.Operator}\"")
+                QueryPrimitiveOperator.Contains => 
+                    column.Array 
+                        ? new TermQuery { Field = condition.ColumnName, Value = rawValue }
+                        : new WildcardQuery { Field = condition.ColumnName, Value = $"*{rawValue}*" },
+                QueryPrimitiveOperator.StartsWith => new WildcardQuery { Field = condition.ColumnName, Value = $"{rawValue}*"},
+                _ => throw new InputArgumentException($"Unknown primitive operator \"{condition.Operator}\"")
             };
         }
 
@@ -250,6 +265,12 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                 : sort.Direction == QuerySortDirection.Ascending
                     ? SortOrder.Ascending
                     : SortOrder.Descending;
+        }
+
+        protected Column GetColumn(string columnName)
+        {
+            var column = _table.Columns.FirstOrDefault(c => c.Name == columnName);
+            return column ?? throw new InputArgumentException($"Unknown column \"{columnName}\"");
         }
     }
 }

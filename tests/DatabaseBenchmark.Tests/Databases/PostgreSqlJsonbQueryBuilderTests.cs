@@ -179,5 +179,37 @@ namespace DatabaseBenchmark.Tests.Databases
 
             Assert.Equal(reference, parametersBuilder.Parameters);
         }
+
+        [Fact]
+        public void BuildQueryArrayColumn()
+        {
+            var query = SampleInputs.ArrayColumnQuery;
+            var parametersBuilder = new SqlParametersBuilder();
+            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.ArrayColumnTable, query, parametersBuilder, null, null, _optionsProvider);
+
+            var queryText = builder.Build();
+
+            var normalizedQueryText = queryText.NormalizeSpaces();
+            Assert.Equal("SELECT attributes->>'Category' Category, attributes->>'SubCategory' SubCategory FROM Sample"
+                + " WHERE attributes @> '{\"Tags\": [\"ABC\"]}'::jsonb", normalizedQueryText);
+        }
+
+        [Theory]
+        [InlineData(QueryPrimitiveOperator.In)]
+        [InlineData(QueryPrimitiveOperator.Greater)]
+        [InlineData(QueryPrimitiveOperator.GreaterEquals)]
+        [InlineData(QueryPrimitiveOperator.Lower)]
+        [InlineData(QueryPrimitiveOperator.LowerEquals)]
+        [InlineData(QueryPrimitiveOperator.StartsWith)]
+        public void BuildQueryArrayColumnUnsupportedOperator(QueryPrimitiveOperator @operator)
+        {
+            var query = SampleInputs.ArrayColumnQuery;
+            ((QueryPrimitiveCondition)query.Condition).Operator = @operator;
+
+            var parametersBuilder = new SqlParametersBuilder();
+            var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.ArrayColumnTable, query, parametersBuilder, null, null, _optionsProvider);
+
+            Assert.Throws<InputArgumentException>(builder.Build);
+        }
     }
 }

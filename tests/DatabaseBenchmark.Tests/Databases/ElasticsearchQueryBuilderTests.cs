@@ -1,6 +1,7 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Elasticsearch;
+using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
 using Nest;
 using NSubstitute;
@@ -97,6 +98,38 @@ namespace DatabaseBenchmark.Tests.Databases
                 "\"query\":{\"bool\":{\"must\":[{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"SubCategory\"}}]}},{\"range\":{\"Rating\":{\"gte\":5.0}}},{\"bool\":{\"should\":[{\"wildcard\":{\"Name\":{\"value\":\"A*\"}}},{\"wildcard\":{\"Name\":{\"value\":\"*B*\"}}}]}}]}}," +
                 "\"size\":100}",
                 rawQuery);
+        }
+
+        [Fact]
+        public void BuildQueryArrayColumn()
+        {
+            var query = SampleInputs.ArrayColumnQuery;
+
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.ArrayColumnTable, query, null, null);
+
+            var request = builder.Build();
+            var rawQuery = SerializeSearchRequest(request);
+
+            Assert.Equal("{\"fields\":[\"Category\",\"SubCategory\"]," +
+                "\"query\":{\"term\":{\"Tags\":{\"value\":\"ABC\"}}}}",
+                rawQuery);
+        }
+
+        [Theory]
+        [InlineData(QueryPrimitiveOperator.In)]
+        [InlineData(QueryPrimitiveOperator.Greater)]
+        [InlineData(QueryPrimitiveOperator.GreaterEquals)]
+        [InlineData(QueryPrimitiveOperator.Lower)]
+        [InlineData(QueryPrimitiveOperator.LowerEquals)]
+        [InlineData(QueryPrimitiveOperator.StartsWith)]
+        public void BuildQueryArrayColumnUnsupportedOperator(QueryPrimitiveOperator @operator)
+        {
+            var query = SampleInputs.ArrayColumnQuery;
+            ((QueryPrimitiveCondition)query.Condition).Operator = @operator;
+
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.ArrayColumnTable, query, null, null);
+
+            Assert.Throws<InputArgumentException>(builder.Build);
         }
 
         private static string SerializeSearchRequest(SearchRequest searchRequest)

@@ -9,6 +9,13 @@ namespace DatabaseBenchmark.Databases.DynamoDb
 {
     public class DynamoDbQueryBuilder : SqlQueryBuilder
     {
+        private static readonly QueryPrimitiveOperator[] AllowedArrayOperators =
+        [
+            QueryPrimitiveOperator.Equals,
+            QueryPrimitiveOperator.NotEquals,
+            QueryPrimitiveOperator.Contains
+        ];
+
         public DynamoDbQueryBuilder(
             Table table,
             Query query,
@@ -32,7 +39,18 @@ namespace DatabaseBenchmark.Databases.DynamoDb
             return base.BuildSelectClause();
         }
 
-        protected override string BuildStringCondition(QueryPrimitiveCondition condition, object value)
+        protected override string BuildPrimitiveCondition(QueryPrimitiveCondition condition)
+        {
+            var column = GetColumn(condition.ColumnName);
+            if (column.Array && !AllowedArrayOperators.Contains(condition.Operator))
+            {
+                throw new InputArgumentException($"Primitive operator \"{condition.Operator}\" is not supported for array columns");
+            }
+
+            return base.BuildPrimitiveCondition(condition);
+        }
+
+        protected override string BuildAdvancedOperatorCondition(QueryPrimitiveCondition condition, object value)
         {
             var column = GetColumn(condition.ColumnName);
             var columnReference = BuildRegularColumnReference(condition.ColumnName);
@@ -44,7 +62,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
                 _ => throw new InputArgumentException($"Unknown string operator \"{condition.Operator}\"")
             };
 
-            return $"{function}({columnReference}, {ParametersBuilder.Append(value, column.Type, column.Array)})";
+            return $"{function}({columnReference}, {ParametersBuilder.Append(value, column.Type, false)})";
         }
 
         protected override string BuildNullCondition(QueryPrimitiveCondition condition)

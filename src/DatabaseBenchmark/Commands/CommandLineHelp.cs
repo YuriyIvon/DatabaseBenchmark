@@ -22,14 +22,14 @@ namespace DatabaseBenchmark.Commands
             {
                 Name = "create",
                 OptionsContainerType = typeof(CreateCommandOptions),
-                RestrictedValueOptions = new RestrictedValueOptionDescriptor[]
-                {
+                RestrictedValueOptions =
+                [
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(CreateCommandOptions.DatabaseType),
                         AllowedValuesProvider = new DatabaseFactory(null, null),
-                        ValueSpecificOptions = new ValueSpecificOptionsDescriptor[]
-                        {
+                        ValueSpecificOptions =
+                        [
                             new ValueSpecificOptionsDescriptor
                             {
                                 Value = "ClickHouse",
@@ -45,91 +45,91 @@ namespace DatabaseBenchmark.Commands
                                 Value = "PostgresJsonb",
                                 OptionsContainerType = typeof(PostgreSqlJsonbTableOptions)
                             }
-                        }
+                        ]
                     }
-                }
+                ]
 
             },
             new CommandDescriptor
             {
                 Name = "import",
                 OptionsContainerType = typeof(ImportCommandOptions),
-                RestrictedValueOptions = new RestrictedValueOptionDescriptor[]
-                {
+                RestrictedValueOptions =
+                [
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(ImportCommandOptions.DatabaseType),
                         AllowedValuesProvider = new DatabaseFactory(null, null),
-                        ValueSpecificOptions = new ValueSpecificOptionsDescriptor[]
-                        {
+                        ValueSpecificOptions =
+                        [
                             new ValueSpecificOptionsDescriptor
                             {
                                 Value = "MongoDb",
                                 OptionsContainerType = typeof(MongoDbInsertOptions)
                             }
-                        }
+                        ]
                     },
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(ImportCommandOptions.DataSourceType),
                         AllowedValuesProvider = new DataSourceFactory(null, null, null),
-                        ValueSpecificOptions = new ValueSpecificOptionsDescriptor[]
-                        {
+                        ValueSpecificOptions =
+                        [
                             new ValueSpecificOptionsDescriptor
                             {
                                 Value = "Csv",
                                 OptionsContainerType = typeof(CsvDataSourceOptions)
                             }
-                        }
+                        ]
                     }
-                }
+                ]
             },
             new CommandDescriptor
             {
                 Name = "insert",
                 OptionsContainerType = typeof(InsertCommandOptions),
-                RestrictedValueOptions = new RestrictedValueOptionDescriptor[]
-                {
+                RestrictedValueOptions =
+                [
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(InsertCommandOptions.DatabaseType),
                         AllowedValuesProvider = new DatabaseFactory(null, null),
-                        ValueSpecificOptions = new ValueSpecificOptionsDescriptor[]
-                        {
+                        ValueSpecificOptions =
+                        [
                             new ValueSpecificOptionsDescriptor
                             {
                                 Value = "MongoDb",
                                 OptionsContainerType = typeof(MongoDbInsertOptions)
                             }
-                        }
+                        ]
                     },
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(InsertCommandOptions.DataSourceType),
                         AllowedValuesProvider = new DataSourceFactory(null, null, null),
-                        ValueSpecificOptions = new ValueSpecificOptionsDescriptor[]
-                        {
+                        ValueSpecificOptions =
+                        [
                             new ValueSpecificOptionsDescriptor
                             {
                                 Value = "Csv",
                                 OptionsContainerType = typeof(CsvDataSourceOptions)
                             }
-                        }
+                        ]
                     }
-                }
+                ]
             },
             new CommandDescriptor
             {
                 Name = "query",
                 OptionsContainerType = typeof(QueryCommandOptions),
-                RestrictedValueOptions = new RestrictedValueOptionDescriptor[]
-                {
+                RestrictedValueOptions =
+                [
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(QueryCommandOptions.DatabaseType),
                         AllowedValuesProvider = new DatabaseFactory(null, null),
-                        ValueSpecificOptions = new ValueSpecificOptionsDescriptor[]
-                        {
+                        ValueSpecificOptions =
+                        [
                             new ValueSpecificOptionsDescriptor
                             {
                                 Value = "CosmosDb",
@@ -142,43 +142,48 @@ namespace DatabaseBenchmark.Commands
                             },
                             new ValueSpecificOptionsDescriptor
                             {
+                                Value = "Postgres",
+                                OptionsContainerType = typeof(PostgreSqlQueryOptions)
+                            },
+                            new ValueSpecificOptionsDescriptor
+                            {
                                 Value = "PostgresJsonb",
                                 OptionsContainerType = typeof(PostgreSqlJsonbQueryOptions)
                             }
-                        }
+                        ]
                     },
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(QueryCommandOptions.ReportFormatterType),
                         AllowedValuesProvider = new ReportFormatterFactory()
                     }
-                }
+                ]
             },
             new CommandDescriptor
             {
                 Name = "query-scenario",
                 OptionsContainerType = typeof(QueryScenarioCommandOptions),
-                RestrictedValueOptions = new RestrictedValueOptionDescriptor[]
-                {
+                RestrictedValueOptions =
+                [
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(RawQueryCommandOptions.ReportFormatterType),
                         AllowedValuesProvider = new ReportFormatterFactory()
                     }
-                }
+                ]
             },
             new CommandDescriptor
             {
                 Name = "raw-query",
                 OptionsContainerType = typeof(RawQueryCommandOptions),
-                RestrictedValueOptions = new RestrictedValueOptionDescriptor[]
-                {
+                RestrictedValueOptions =
+                [
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(RawQueryCommandOptions.DatabaseType),
                         AllowedValuesProvider = new DatabaseFactory(null, null),
-                        ValueSpecificOptions = new ValueSpecificOptionsDescriptor[]
-                        {
+                        ValueSpecificOptions =
+                        [
                             new ValueSpecificOptionsDescriptor
                             {
                                 Value = "CosmosDb",
@@ -188,33 +193,28 @@ namespace DatabaseBenchmark.Commands
                             {
                                 Value = "MongoDb",
                                 OptionsContainerType = typeof(MongoDbQueryOptions)
-                            },
-                            new ValueSpecificOptionsDescriptor
-                            {
-                                Value = "PostgresJsonb",
-                                OptionsContainerType = typeof(PostgreSqlJsonbQueryOptions)
                             }
-                        }
+                        ]
                     },
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(RawQueryCommandOptions.ReportFormatterType),
                         AllowedValuesProvider = new ReportFormatterFactory()
                     }
-                }
+                ]
             },
             new CommandDescriptor
             {
                 Name = "raw-query-scenario",
                 OptionsContainerType = typeof(QueryScenarioCommandOptions),
-                RestrictedValueOptions = new RestrictedValueOptionDescriptor[]
-                {
+                RestrictedValueOptions =
+                [
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(RawQueryCommandOptions.ReportFormatterType),
                         AllowedValuesProvider = new ReportFormatterFactory()
                     }
-                }
+                ]
             }
         };
 
@@ -263,7 +263,7 @@ namespace DatabaseBenchmark.Commands
         {
             var prefix = optionsContainerType.GetCustomAttribute<OptionPrefixAttribute>()?.Prefix;
 
-            var commandOptions = optionsContainerType.GetInterfaces().Concat(new[] { optionsContainerType })
+            var commandOptions = optionsContainerType.GetInterfaces().Concat([optionsContainerType])
                     .SelectMany(t => t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy))
                     .Select(p => new OptionDescriptor(p, p.GetCustomAttribute<OptionAttribute>()))
                     .Where(p => p.PropertyAttribute != null)

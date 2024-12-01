@@ -9,8 +9,8 @@ namespace DatabaseBenchmark.Tests.Utils
         public static Table Table => new()
         {
             Name = "Sample",
-            Columns = new Column[]
-            {
+            Columns =
+            [
                 new Column
                 {
                     Name = "Id",
@@ -67,32 +67,49 @@ namespace DatabaseBenchmark.Tests.Utils
                     Queryable = false,
                     Nullable = false
                 }
-            }
+            ]
+        };
+
+        public static Table ArrayColumnTable => new()
+        {
+            Name = "Sample",
+            Columns =
+            [
+                .. Table.Columns,
+                new Column
+                {
+                    Name = "Tags",
+                    Type = ColumnType.String,
+                    Queryable = true,
+                    Nullable = true,
+                    Array = true
+                }
+            ]
         };
 
         public static Query NoArgumentsQuery => new();
 
         public static Query SpecificFieldsQuery => new()
         {
-            Columns = new string[]
-            {
+            Columns =
+            [
                 "Id",
                 "Category",
                 "Name",
                 "CreatedAt",
                 "Rating",
                 "Price"
-            }
+            ]
         };
 
         public static Query AllArgumentsQuery => new()
         {
-            Columns = new string[] { "Category", "SubCategory" },
+            Columns = [ "Category", "SubCategory" ],
             Condition = new QueryGroupCondition
             {
                 Operator = QueryGroupOperator.And,
-                Conditions = new IQueryCondition[]
-                {
+                Conditions =
+                [
                     new QueryPrimitiveCondition
                     {
                         ColumnName = "Category",
@@ -114,8 +131,8 @@ namespace DatabaseBenchmark.Tests.Utils
                     new QueryGroupCondition
                     {
                         Operator = QueryGroupOperator.Or,
-                        Conditions = new QueryPrimitiveCondition[]
-                        {
+                        Conditions =
+                        [
                             new QueryPrimitiveCondition
                             {
                                 ColumnName = "Name",
@@ -128,25 +145,25 @@ namespace DatabaseBenchmark.Tests.Utils
                                 Operator = QueryPrimitiveOperator.Contains,
                                 Value = "B"
                             }
-                        }
+                        ]
                     }
-                }
+                ]
             },
             Aggregate = new QueryAggregate
             {
-                GroupColumnNames = new string[] { "Category", "SubCategory" },
-                ResultColumns = new QueryAggregateColumn[]
-                {
+                GroupColumnNames = ["Category", "SubCategory"],
+                ResultColumns =
+                [
                     new QueryAggregateColumn
                     {
                         SourceColumnName = "Price",
                         Function = QueryAggregateFunction.Sum,
                         ResultColumnName = "TotalPrice"
                     }
-                }
+                ]
             },
-            Sort = new QuerySort[]
-            {
+            Sort =
+            [
                 new QuerySort
                 {
                     ColumnName = "Category",
@@ -157,7 +174,7 @@ namespace DatabaseBenchmark.Tests.Utils
                     ColumnName = "SubCategory",
                     Direction = QuerySortDirection.Ascending,
                 }
-            },
+            ],
             Skip = 10,
             Take = 100
         };
@@ -198,6 +215,28 @@ namespace DatabaseBenchmark.Tests.Utils
             }
         }
 
+        public static Query ArrayColumnQuery => new()
+        {
+            Columns = ["Category", "SubCategory"],
+            Condition = new QueryPrimitiveCondition
+            {
+                ColumnName = "Tags",
+                Operator = QueryPrimitiveOperator.Contains,
+                Value = "ABC"
+            }
+        };
+
+        public static Query ArrayColumnNullQuery => new()
+        {
+            Columns = ["Category", "SubCategory"],
+            Condition = new QueryPrimitiveCondition
+            {
+                ColumnName = "Tags",
+                Operator = QueryPrimitiveOperator.Equals,
+                Value = null
+            }
+        };
+
         public static RawQuery RawSqlQuery => new()
         {
             Text = "SELECT * FROM Sample WHERE Category = ${category} AND CreatedDate >= ${minDate} AND Price <= ${maxPrice} AND Available = ${available}",
@@ -234,8 +273,8 @@ namespace DatabaseBenchmark.Tests.Utils
             Parameters = RawQueryInlineParameters
         };
 
-        public static RawQueryParameter[] RawQueryParameters => new[]
-        {
+        public static RawQueryParameter[] RawQueryParameters =>
+        [
             new RawQueryParameter
             {
                 Name = "category",
@@ -260,10 +299,10 @@ namespace DatabaseBenchmark.Tests.Utils
                 Type = ColumnType.Boolean,
                 Value = true
             }
-        };
+        ];
 
-        public static RawQueryParameter[] RawQueryInlineParameters => new[]
-        {
+        public static RawQueryParameter[] RawQueryInlineParameters =>
+        [
             new RawQueryParameter
             {
                 Name = "category",
@@ -292,6 +331,6 @@ namespace DatabaseBenchmark.Tests.Utils
                 Value = true,
                 Inline = true
             }
-        };
+        ];
     }
 }
