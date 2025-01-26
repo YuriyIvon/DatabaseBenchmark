@@ -219,8 +219,10 @@ namespace DatabaseBenchmark.Databases.Sql
             }
             else
             {
+                var column = GetColumn(condition.ColumnName);
+
                 var value = condition.RandomizeValue
-                    ? RandomValueProvider.GetValue(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                    ? RandomValueProvider.GetValue(Table.Name, column, condition.ValueRandomizationRule)
                     : condition.Value;
 
                 if (value != null)
@@ -249,7 +251,7 @@ namespace DatabaseBenchmark.Databases.Sql
             conditionExpression.Append(' ');
 
             var rawCollection = condition.RandomizeValue
-                ? RandomValueProvider.GetValueCollection(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                ? RandomValueProvider.GetValueCollection(Table.Name, column, condition.ValueRandomizationRule)
                 : (IEnumerable<object>)condition.Value;
 
             if (rawCollection == null)
@@ -299,7 +301,7 @@ namespace DatabaseBenchmark.Databases.Sql
             });
 
             conditionExpression.Append(' ');
-            conditionExpression.Append(ParametersBuilder.Append(value, column.Type, false));
+            conditionExpression.Append(ParametersBuilder.Append(value, column.Type, column.Array));
 
             return conditionExpression.ToString();
         }

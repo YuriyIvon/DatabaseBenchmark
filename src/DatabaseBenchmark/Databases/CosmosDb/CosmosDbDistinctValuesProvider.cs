@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Model;
 using Microsoft.Azure.Cosmos;
 
 namespace DatabaseBenchmark.Databases.CosmosDb
@@ -16,10 +17,12 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             _environment = environment;
         }
 
-        public object[] GetDistinctValues(string tableName, string columnName)
+        public object[] GetDistinctValues(string tableName, IValueDefinition column, bool unfoldArray)
         {
             var container = _database.GetContainer(tableName);
-            var query = $"SELECT DISTINCT VALUE c.{columnName} FROM c";
+            var query = unfoldArray
+                ? $"SELECT DISTINCT VALUE v FROM c JOIN v IN c.{column.Name}"
+                : $"SELECT DISTINCT VALUE c.{column.Name} FROM c";
 
             if (_environment.TraceQueries)
             {

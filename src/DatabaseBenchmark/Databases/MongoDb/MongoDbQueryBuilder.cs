@@ -135,8 +135,8 @@ namespace DatabaseBenchmark.Databases.MongoDb
             var rawValue = !condition.RandomizeValue
                 ? condition.Value
                 : condition.Operator == QueryPrimitiveOperator.In
-                    ? _randomValueProvider.GetValueCollection(_table.Name, condition.ColumnName, condition.ValueRandomizationRule)
-                    : _randomValueProvider.GetValue(_table.Name, condition.ColumnName, condition.ValueRandomizationRule);
+                    ? _randomValueProvider.GetValueCollection(_table.Name, column, condition.ValueRandomizationRule)
+                    : _randomValueProvider.GetValue(_table.Name, column, condition.ValueRandomizationRule);
 
             var bsonValue = BsonValue.Create(rawValue);
 

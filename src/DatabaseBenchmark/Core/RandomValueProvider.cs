@@ -1,5 +1,4 @@
-﻿using Bogus;
-using DatabaseBenchmark.Common;
+﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Generators;
@@ -14,16 +13,13 @@ namespace DatabaseBenchmark.Core
         private readonly Dictionary<(ValueRandomizationRule, bool), IGenerator> _generators = [];
 
         private readonly IGeneratorFactory _generatorFactory;
-        private readonly IColumnPropertiesProvider _columnPropertiesProvider;
         private readonly IDistinctValuesProvider _distinctValuesProvider;
 
         public RandomValueProvider(
             IGeneratorFactory randomGeneratorFactory,
-            IColumnPropertiesProvider columnPropertiesProvider,
             IDistinctValuesProvider distinctValuesProvider)
         {
             _generatorFactory = randomGeneratorFactory;
-            _columnPropertiesProvider = columnPropertiesProvider;
             _distinctValuesProvider = distinctValuesProvider;
         }
 
@@ -38,13 +34,13 @@ namespace DatabaseBenchmark.Core
             }
         }
 
-        public object GetValue(string tableName, string columnName, ValueRandomizationRule randomizationRule) =>
-            GetValue(tableName, columnName, randomizationRule, false);
+        public object GetValue(string tableName, IValueDefinition valueDefinition, ValueRandomizationRule randomizationRule) =>
+            GetValue(tableName, valueDefinition, randomizationRule, false);
 
-        public IEnumerable<object> GetValueCollection(string tableName, string columnName, ValueRandomizationRule randomizationRule) =>
-            (IEnumerable<object>)GetValue(tableName, columnName, randomizationRule, true);
+        public IEnumerable<object> GetValueCollection(string tableName, IValueDefinition valueDefinition, ValueRandomizationRule randomizationRule) =>
+            (IEnumerable<object>)GetValue(tableName, valueDefinition, randomizationRule, true);
 
-        private object GetValue(string tableName, string columnName, ValueRandomizationRule randomizationRule, bool collection)
+        private object GetValue(string tableName, IValueDefinition valueDefinition, ValueRandomizationRule randomizationRule, bool collection)
         {
             if (!_generators.TryGetValue((randomizationRule, collection), out var generator))
             {
@@ -58,14 +54,16 @@ namespace DatabaseBenchmark.Core
                     }
 
                     var listItemGeneratorOptions = options as ListItemGeneratorOptions ?? new ListItemGeneratorOptions();
-                    listItemGeneratorOptions.Items = _distinctValuesProvider.GetDistinctValues(tableName, columnName);
+                    listItemGeneratorOptions.Items = _distinctValuesProvider.GetDistinctValues(
+                        tableName,
+                        valueDefinition,
+                        valueDefinition.Array && randomizationRule.UnfoldArrayValues);
 
                     generator = _generatorFactory.Create(listItemGeneratorOptions);
                 }
                 else
                 {
-                    var columnType = _columnPropertiesProvider.GetColumnType(tableName, columnName);
-                    options ??= GetDefaultGeneratorOptions(columnType);
+                    options ??= GetDefaultGeneratorOptions(valueDefinition.Type);
                     generator = _generatorFactory.Create(options);
                 }
 

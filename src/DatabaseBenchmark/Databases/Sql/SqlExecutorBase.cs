@@ -50,7 +50,7 @@ namespace DatabaseBenchmark.Databases.Sql
 
             ApplyTransaction(transaction, command);
 
-            _environment.TraceCommand(command);
+            _environment.TraceCommand(command.CommandText, _parametersBuilder.Parameters);
 
             return CreatePreparedStatement(command);
         }

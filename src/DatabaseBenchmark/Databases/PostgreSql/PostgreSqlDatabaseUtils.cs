@@ -71,5 +71,20 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
             return nativeType;
         }
+
+        public static string CastExpression(string expression, ColumnType columnType)
+        {
+            var castType = columnType switch
+            {
+                ColumnType.Boolean => "boolean",
+                ColumnType.Guid => "uuid",
+                ColumnType.Integer => "integer",
+                ColumnType.Long => "bigint",
+                ColumnType.Double => "double",
+                _ => null
+            };
+
+            return castType != null ? $"({expression})::{castType}" : expression;
+        }
     }
 }

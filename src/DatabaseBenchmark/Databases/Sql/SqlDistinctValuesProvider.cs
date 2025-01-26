@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Model;
 using System.Data;
 
 namespace DatabaseBenchmark.Databases.Sql
@@ -16,12 +17,12 @@ namespace DatabaseBenchmark.Databases.Sql
             _connection = connection;
         }
 
-        public object[] GetDistinctValues(string tableName, string columnName)
+        public object[] GetDistinctValues(string tableName, IValueDefinition column, bool unfoldArray)
         {
             var command = _connection.CreateCommand();
-            command.CommandText = $"SELECT DISTINCT {columnName} FROM {tableName}";
+            command.CommandText = $"SELECT DISTINCT {column.Name} FROM {tableName}";
 
-            _environment.TraceCommand(command);
+            _environment.TraceCommand(command.CommandText);
 
             return command.ReadAsArray<object>();
         }

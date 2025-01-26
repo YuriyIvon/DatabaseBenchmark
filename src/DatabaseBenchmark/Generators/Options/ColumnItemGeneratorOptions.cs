@@ -12,6 +12,8 @@ namespace DatabaseBenchmark.Generators.Options
 
         public bool Distinct { get; set; } = false;
 
+        public bool Queryable { get; set; } = true;
+
         //TODO: can we avoid using this field?
         public ColumnType ColumnType { get; set; }
 

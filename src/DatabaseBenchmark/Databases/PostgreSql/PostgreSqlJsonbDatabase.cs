@@ -1,5 +1,4 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
-using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
@@ -40,7 +39,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             var commandText = tableBuilder.BuildCreateTableCommandText(table);
             var command = new NpgsqlCommand(commandText, connection);
 
-            _environment.TraceCommand(command);
+            _environment.TraceCommand(command.CommandText);
 
             command.ExecuteNonQuery();
         }

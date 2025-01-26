@@ -19,7 +19,8 @@ namespace DatabaseBenchmark.Tests.Common
   ""DateProperty"": ""2007-10-10"",
   ""DateTimeProperty"": ""2007-10-10T12:12:12Z"",
   ""StringProperty"": ""string"",
-  ""ArrayProperty"": [""A"", ""B""]
+  ""ArrayProperty1"": [""A"", ""B""],
+  ""ArrayProperty2"": [""C"", ""D""]
 }";
             var deserialized = JsonSerializer.Deserialize<DeserializedPayload>(json);
 
@@ -29,7 +30,9 @@ namespace DatabaseBenchmark.Tests.Common
             Assert.Equal(typeof(DateTime), deserialized.DateProperty.GetType());
             Assert.Equal(typeof(DateTime), deserialized.DateTimeProperty.GetType());
             Assert.Equal(typeof(string), deserialized.StringProperty.GetType());
-            Assert.Equal(typeof(string), deserialized.ArrayProperty[0].GetType());
+            Assert.Equal(typeof(string), deserialized.ArrayProperty1[0].GetType());
+            Assert.Equal(typeof(object[]), deserialized.ArrayProperty2.GetType());
+            Assert.Equal(typeof(string), ((object[])deserialized.ArrayProperty2)[0].GetType());
         }
 
         [Fact]
@@ -84,7 +87,10 @@ namespace DatabaseBenchmark.Tests.Common
             public object StringProperty { get; set; }
 
             [JsonConverter(typeof(JsonObjectArrayConverter))]
-            public object[] ArrayProperty { get; set; }
+            public object[] ArrayProperty1 { get; set; }
+
+            [JsonConverter(typeof(JsonObjectConverter))]
+            public object ArrayProperty2 { get; set; }
         }
 
         private class DeserializedCondition

@@ -1,10 +1,19 @@
 ﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Reporting.Interfaces;
+using System.Collections;
 
 namespace DatabaseBenchmark.Reporting
 {
     public class TextTableReportFormatter : IReportFormatter
     {
+        private readonly IValueFormatter _valueFormatter;
+
+        public TextTableReportFormatter(IValueFormatter valueFormatter)
+        {
+            _valueFormatter = valueFormatter;
+        }
+
         public void Print(Stream stream, LightweightDataTable results)
         {
             using var writer = new StreamWriter(stream);
@@ -62,11 +71,11 @@ namespace DatabaseBenchmark.Reporting
             writer.WriteLine();
         }
 
-        private static int GetColumnWidth(LightweightDataColumn column)
+        private int GetColumnWidth(LightweightDataColumn column)
         {
             var values = column.Table.Rows
                 .Where(r => r[column.Name] != DBNull.Value)
-                .Select(r => FormatRawValue(r[column.Name]))
+                .Select(r => _valueFormatter.Format(r[column.Name]))
                 .ToArray();
 
             var maxLength = values.Any() ? values.Max(v => v.Length) : 0;
@@ -75,11 +84,11 @@ namespace DatabaseBenchmark.Reporting
             return Math.Max(maxLength, captionLength);
         }
 
-        private static string FormatValue(LightweightDataColumn column, LightweightDataRow row)
+        private string FormatValue(LightweightDataColumn column, LightweightDataRow row)
         {
             var columnWidth = GetColumnWidth(column);
             var value = row[column.Name];
-            var unpaddedValue = FormatRawValue(value);
+            var unpaddedValue = _valueFormatter.Format(value);
 
             return value switch
             {
@@ -87,18 +96,6 @@ namespace DatabaseBenchmark.Reporting
                 _ => unpaddedValue.PadRight(columnWidth)
             };
         }
-
-        private static string FormatRawValue(object value) =>
-            value switch
-            {
-                IEnumerable<object> arrayValue => $"[{string.Join(", ", arrayValue.Select(FormatRawValue))}]",
-                DateTime dateTimeValue => dateTimeValue.ToString("o"), // TODO: Make output date/time format configurable
-                DateTimeOffset dateTimeOffsetValue => dateTimeOffsetValue.ToString("o"), // TODO: Make output date/time format configurable
-                double doubleValue => string.Format($"{value:0.##}"), // TODO: Make precision configurable
-                float floatValue => string.Format($"{value:0.##}"), // TODO: Make precision configurable
-                _ when IsNumber(value) => value.ToString(),
-                _ => $"\"{value}\"" // TODO: Make quotemarks configurable
-            };
 
         private static bool IsNumber(object value) => value is byte or short or ushort or int or uint or long or ulong or double or float;
     }

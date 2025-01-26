@@ -25,7 +25,6 @@ namespace DatabaseBenchmark.Databases.CosmosDb
             Container.RegisterInstance<Query>(query);
             Container.RegisterInstance<IExecutionEnvironment>(environment);
             Container.RegisterInstance<IOptionsProvider>(optionsProvider);
-            Container.RegisterSingleton<IColumnPropertiesProvider, TableColumnPropertiesProvider>();
             Container.RegisterSingleton<IGeneratorFactory, DummyGeneratorFactory>();
             Container.RegisterSingleton<IRandomPrimitives, RandomPrimitives>();
             Container.RegisterSingleton<ICache, MemoryCache>();

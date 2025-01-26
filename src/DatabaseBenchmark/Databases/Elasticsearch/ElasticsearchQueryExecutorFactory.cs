@@ -20,7 +20,6 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             Container.RegisterInstance<IDatabase>(database);
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<Query>(query);
-            Container.RegisterSingleton<IColumnPropertiesProvider, TableColumnPropertiesProvider>();
             Container.RegisterSingleton<IGeneratorFactory, DummyGeneratorFactory>();
             Container.RegisterSingleton<IRandomPrimitives, RandomPrimitives>();
             Container.RegisterSingleton<ICache, MemoryCache>();

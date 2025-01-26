@@ -26,7 +26,7 @@ namespace DatabaseBenchmark.Databases
             _factories = new()
             {
                 ["SqlServer"] = (connectionString) => new SqlServerDatabase(connectionString, environment),
-                ["Postgres"] = (connectionString) => new PostgreSqlDatabase(connectionString, environment),
+                ["Postgres"] = (connectionString) => new PostgreSqlDatabase(connectionString, environment, optionsProvider),
                 ["PostgresJsonb"] = (connectionString) => new PostgreSqlJsonbDatabase(connectionString, environment, optionsProvider),
                 ["Elasticsearch"] = (connectionString) => new ElasticsearchDatabase(connectionString, environment),
                 ["MySql"] = (connectionString) => new MySqlDatabase(connectionString, environment, optionsProvider),

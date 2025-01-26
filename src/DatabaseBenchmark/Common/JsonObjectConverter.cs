@@ -37,6 +37,18 @@ namespace DatabaseBenchmark.Common
                 return reader.GetString();
             }
 
+            if (reader.TokenType == JsonTokenType.StartArray)
+            {
+                var items = new List<object>();
+
+                while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
+                {
+                    items.Add(Read(ref reader, typeof(object), options));
+                }
+
+                return items.ToArray();
+            }
+
             using var document = JsonDocument.ParseValue(ref reader);
             return document.RootElement.Clone();
         }

@@ -44,7 +44,7 @@ namespace DatabaseBenchmark.Databases.Snowflake
                 CommandText = commandText
             };
 
-            _environment.TraceCommand(command);
+            _environment.TraceCommand(command.CommandText);
 
             command.ExecuteNonQuery();
         }

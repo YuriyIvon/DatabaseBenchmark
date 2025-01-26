@@ -4,7 +4,7 @@ using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace DatabaseBenchmark.Databases.SqlServer
 {
@@ -34,7 +34,7 @@ namespace DatabaseBenchmark.Databases.SqlServer
             var commandText = tableBuilder.Build(table);
             var command = new SqlCommand(commandText, connection);
 
-            _environment.TraceCommand(command);
+            _environment.TraceCommand(command.CommandText);
 
             command.ExecuteNonQuery();
         }

@@ -1,6 +1,6 @@
 ﻿namespace DatabaseBenchmark.Model
 {
-    public class Column
+    public class Column : IValueDefinition
     {
         public string Name { get; set; }
 

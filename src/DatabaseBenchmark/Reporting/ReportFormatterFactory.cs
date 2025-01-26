@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Reporting.Interfaces;
 
@@ -9,7 +10,7 @@ namespace DatabaseBenchmark.Reporting
         private readonly Dictionary<string, Func<IReportFormatter>> _factories =
             new()
             {
-                ["Text"] = () => new TextTableReportFormatter(),
+                ["Text"] = () => new TextTableReportFormatter(new ValueFormatter()),
                 ["Csv"] = () => new CsvReportFormatter()
             };
 

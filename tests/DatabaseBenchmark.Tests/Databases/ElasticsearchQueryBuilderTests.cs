@@ -111,7 +111,8 @@ namespace DatabaseBenchmark.Tests.Databases
             var rawQuery = SerializeSearchRequest(request);
 
             Assert.Equal("{\"fields\":[\"Category\",\"SubCategory\"]," +
-                "\"query\":{\"term\":{\"Tags\":{\"value\":\"ABC\"}}}}",
+                "\"query\":{\"bool\":{\"should\":[{\"term\":{\"Tags\":{\"value\":\"ABC\"}}}," + 
+                "{\"terms\":{\"Tags\":[\"A\",\"B\",\"C\"]}}]}}}",
                 rawQuery);
         }
 
@@ -125,7 +126,7 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryArrayColumnUnsupportedOperator(QueryPrimitiveOperator @operator)
         {
             var query = SampleInputs.ArrayColumnQuery;
-            ((QueryPrimitiveCondition)query.Condition).Operator = @operator;
+            ((QueryPrimitiveCondition)((QueryGroupCondition)query.Condition).Conditions[0]).Operator = @operator;
 
             var builder = new ElasticsearchQueryBuilder(SampleInputs.ArrayColumnTable, query, null, null);
 

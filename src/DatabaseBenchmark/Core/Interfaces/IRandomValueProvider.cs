@@ -6,8 +6,8 @@ namespace DatabaseBenchmark.Core.Interfaces
     {
         void Next();
 
-        object GetValue(string tableName, string columnName, ValueRandomizationRule randomizationRule);
+        object GetValue(string tableName, IValueDefinition valueDefinition, ValueRandomizationRule randomizationRule);
 
-        IEnumerable<object> GetValueCollection(string tableName, string columnName, ValueRandomizationRule randomizationRule);
+        IEnumerable<object> GetValueCollection(string tableName, IValueDefinition valueDefinition, ValueRandomizationRule randomizationRule);
     }
 }

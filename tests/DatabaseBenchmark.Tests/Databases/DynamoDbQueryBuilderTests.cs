@@ -111,14 +111,15 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Category, SubCategory FROM Sample"
-                + " WHERE contains(Tags, ?)", normalizedQueryText);
+                + " WHERE (contains(Tags, ?) OR Tags = ?)", normalizedQueryText);
 
             var reference = new SqlQueryParameter[]
             {
-                new ('?', "p0", "ABC", ColumnType.String)
+                new ('?', "p0", "ABC", ColumnType.String),
+                new ('?', "p1", new object[] { "A", "B", "C" }, ColumnType.String, true)
             };
 
-            Assert.Equal(reference, parametersBuilder.Parameters);
+            Assert.Equal(reference, parametersBuilder.Parameters, new SqlQueryParameterEqualityComparer());
         }
 
         [Theory]
@@ -131,7 +132,8 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryArrayColumnUnsupportedOperator(QueryPrimitiveOperator @operator)
         {
             var query = SampleInputs.ArrayColumnQuery;
-            ((QueryPrimitiveCondition)query.Condition).Operator = @operator;
+            //TODO: change to a query generator function that returns a query with the specified operator
+            ((QueryPrimitiveCondition)((QueryGroupCondition)query.Condition).Conditions[0]).Operator = @operator;
 
             var parametersBuilder = new SqlParametersBuilder('?', true);
             var builder = new DynamoDbQueryBuilder(SampleInputs.ArrayColumnTable, query, parametersBuilder, null, null);

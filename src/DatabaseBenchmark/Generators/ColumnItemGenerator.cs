@@ -66,7 +66,8 @@ namespace DatabaseBenchmark.Generators
                     new()
                     {
                         Name = _options.ColumnName,
-                        Type = _options.ColumnType
+                        Type = _options.ColumnType,
+                        Queryable = _options.Queryable
                     }
                 ]
             };

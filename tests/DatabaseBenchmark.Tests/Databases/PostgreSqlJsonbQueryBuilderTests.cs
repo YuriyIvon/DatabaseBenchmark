@@ -191,7 +191,14 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT attributes->>'Category' Category, attributes->>'SubCategory' SubCategory FROM Sample"
-                + " WHERE attributes @> '{\"Tags\": [\"ABC\"]}'::jsonb", normalizedQueryText);
+                + " WHERE (attributes @> '{\"Tags\": [\"ABC\"]}'::jsonb OR attributes->'Tags' = @p0)", normalizedQueryText);
+
+            var reference = new SqlQueryParameter[]
+            {
+                new ('@', "p0", "[\"A\",\"B\",\"C\"]", ColumnType.Json)
+            };
+
+            Assert.Equal(reference, parametersBuilder.Parameters);
         }
 
         [Theory]
@@ -204,7 +211,8 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryArrayColumnUnsupportedOperator(QueryPrimitiveOperator @operator)
         {
             var query = SampleInputs.ArrayColumnQuery;
-            ((QueryPrimitiveCondition)query.Condition).Operator = @operator;
+            //TODO: change to a query generator function that returns a query with the specified operator
+            ((QueryPrimitiveCondition)((QueryGroupCondition)query.Condition).Conditions[0]).Operator = @operator;
 
             var parametersBuilder = new SqlParametersBuilder();
             var builder = new PostgreSqlJsonbQueryBuilder(SampleInputs.ArrayColumnTable, query, parametersBuilder, null, null, _optionsProvider);

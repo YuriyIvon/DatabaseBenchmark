@@ -218,11 +218,24 @@ namespace DatabaseBenchmark.Tests.Utils
         public static Query ArrayColumnQuery => new()
         {
             Columns = ["Category", "SubCategory"],
-            Condition = new QueryPrimitiveCondition
+            Condition = new QueryGroupCondition
             {
-                ColumnName = "Tags",
-                Operator = QueryPrimitiveOperator.Contains,
-                Value = "ABC"
+                Operator = QueryGroupOperator.Or,
+                Conditions =
+                [
+                    new QueryPrimitiveCondition
+                    {
+                        ColumnName = "Tags",
+                        Operator = QueryPrimitiveOperator.Contains,
+                        Value = "ABC"
+                    },
+                    new QueryPrimitiveCondition
+                    {
+                        ColumnName = "Tags",
+                        Operator = QueryPrimitiveOperator.Equals,
+                        Value = new object[] { "A", "B", "C" }
+                    }
+                ]
             }
         };
 

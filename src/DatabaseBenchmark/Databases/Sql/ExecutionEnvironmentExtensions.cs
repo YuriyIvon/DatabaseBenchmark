@@ -1,42 +1,57 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
-using System.Data;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using System.Text;
 
 namespace DatabaseBenchmark.Databases.Sql
 {
     public static class ExecutionEnvironmentExtensions
     {
-        public static void TraceCommand(this IExecutionEnvironment environment, IDbCommand command)
+        public static void TraceCommand(this IExecutionEnvironment environment, string commandText)
         {
             if (environment.TraceQueries)
             {
                 var traceBuilder = new StringBuilder();
 
                 traceBuilder.AppendLine("Query:");
-                traceBuilder.AppendLine(command.CommandText);
+                traceBuilder.AppendLine(commandText);
 
-                if (command.Parameters.Count > 0)
+                environment.WriteLine(traceBuilder.ToString());
+            }
+        }
+
+        public static void TraceCommand(this IExecutionEnvironment environment, string commandText, IEnumerable<SqlQueryParameter> parameters)
+        {
+            environment.TraceCommand(commandText);
+
+            if (environment.TraceQueries)
+            {
+                var traceBuilder = new StringBuilder();
+
+                if (parameters.Count() > 0)
                 {
                     traceBuilder.AppendLine("Parameters:");
 
-                    //To make this common method compatible with ClickHouse driver
-                    if (command.Parameters is IEnumerable<IDataParameter> collection)
+                    foreach (var parameter in parameters)
                     {
-                        foreach (var parameter in collection)
-                        {
-                            traceBuilder.AppendLine($"{parameter.ParameterName}={parameter.Value}");
-                        }
-                    }
-                    else
-                    {
-                        foreach (IDataParameter parameter in command.Parameters)
-                        {
-                            traceBuilder.AppendLine($"{parameter.ParameterName}={parameter.Value}");
-                        }
+                        PrintParameter(traceBuilder, parameter, environment.ValueFormatter);
                     }
                 }
 
                 environment.WriteLine(traceBuilder.ToString());
+            }
+        }
+
+        private static void PrintParameter(StringBuilder traceBuilder, SqlQueryParameter parameter, IValueFormatter valueFormatter)
+        {
+            traceBuilder.Append($"{parameter.Prefix}{parameter.Name}={valueFormatter.Format(parameter.Value)}");
+
+            if (parameter.Value != null)
+            {
+                traceBuilder.AppendLine($" ({parameter.Value.GetType()})");
+            }
+            else
+            {
+                traceBuilder.AppendLine();
             }
         }
     }

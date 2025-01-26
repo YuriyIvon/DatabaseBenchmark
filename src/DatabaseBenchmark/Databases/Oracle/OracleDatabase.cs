@@ -37,7 +37,7 @@ namespace DatabaseBenchmark.Databases.Oracle
             var commandText = tableBuilder.Build(table);
             var command = new OracleCommand(commandText, connection);
 
-            _environment.TraceCommand(command);
+            _environment.TraceCommand(command.CommandText);
 
             command.ExecuteNonQuery();
         }

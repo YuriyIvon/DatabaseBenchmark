@@ -5,7 +5,7 @@ using DatabaseBenchmark.Databases.Model;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 
 namespace DatabaseBenchmark.Databases.SqlServer

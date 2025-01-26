@@ -2,6 +2,7 @@
 using Amazon.DynamoDBv2.Model;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common.Interfaces;
+using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
 using System.Text;
 
@@ -30,14 +31,14 @@ namespace DatabaseBenchmark.Databases.DynamoDb
         {
             var query = _queryBuilder.Build();
 
-            TraceCommand(query, _parametersBuilder.Parameters);
+            _environment.TraceCommand(query, _parametersBuilder.Parameters);
 
             var request = new ExecuteStatementRequest
             {
                 Statement = query,
                 ReturnConsumedCapacity = ReturnConsumedCapacity.TOTAL,
                 Parameters = _parametersBuilder.Parameters
-                    .Select(p => DynamoDbAttributeValueUtils.ToAttributeValue(p.Type, false, p.Value))
+                    .Select(p => DynamoDbAttributeValueUtils.ToAttributeValue(p.Type, p.Array, p.Value))
                     .ToList()
             };
 
@@ -47,28 +48,5 @@ namespace DatabaseBenchmark.Databases.DynamoDb
         public IPreparedQuery Prepare(ITransaction transaction) => Prepare();
 
         public void Dispose() => _client?.Dispose();
-
-        public void TraceCommand(string query, IEnumerable<SqlQueryParameter> parameters)
-        {
-            if (_environment.TraceQueries)
-            {
-                var traceBuilder = new StringBuilder();
-
-                traceBuilder.AppendLine("Query:");
-                traceBuilder.AppendLine(query);
-
-                if (parameters.Any())
-                {
-                    traceBuilder.AppendLine("Parameters:");
-
-                    foreach (var parameter in parameters)
-                    {
-                        traceBuilder.AppendLine($"{parameter.Prefix}{parameter.Name}={parameter.Value}");
-                    }
-                }
-
-                _environment.WriteLine(traceBuilder.ToString());
-            }
-        }
     }
 }

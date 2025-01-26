@@ -60,7 +60,15 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Category, SubCategory FROM Sample"
-                + " WHERE has(Tags, @p0)", normalizedQueryText);
+                + " WHERE (has(Tags, @p0) OR Tags = @p1)", normalizedQueryText);
+
+            var reference = new SqlQueryParameter[]
+            {
+                new ('@', "p0", "ABC", ColumnType.String),
+                new ('@', "p1", new object[] { "A", "B", "C" }, ColumnType.String, true)
+            };
+
+            Assert.Equal(reference, parametersBuilder.Parameters, new SqlQueryParameterEqualityComparer());
         }
 
         [Theory]
@@ -73,7 +81,9 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryArrayColumnUnsupportedOperator(QueryPrimitiveOperator @operator)
         {
             var query = SampleInputs.ArrayColumnQuery;
-            ((QueryPrimitiveCondition)query.Condition).Operator = @operator;
+
+            //TODO: change to a query generator function that returns a query with the specified operator
+            ((QueryPrimitiveCondition)((QueryGroupCondition)query.Condition).Conditions[0]).Operator = @operator;
 
             var parametersBuilder = new SqlParametersBuilder();
             var builder = new ClickHouseQueryBuilder(SampleInputs.ArrayColumnTable, query, parametersBuilder, null, null);

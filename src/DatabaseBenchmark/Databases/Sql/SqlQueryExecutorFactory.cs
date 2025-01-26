@@ -23,7 +23,6 @@ namespace DatabaseBenchmark.Databases.Sql
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<Query>(query);
             Container.RegisterInstance<IExecutionEnvironment>(environment);
-            Container.RegisterSingleton<IColumnPropertiesProvider, TableColumnPropertiesProvider>();
             Container.RegisterSingleton<IGeneratorFactory, DummyGeneratorFactory>();
             Container.RegisterSingleton<IRandomPrimitives, RandomPrimitives>();
             Container.RegisterSingleton<ICache, MemoryCache>();

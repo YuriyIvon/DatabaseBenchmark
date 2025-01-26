@@ -58,8 +58,8 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                 var rawValue = !parameter.RandomizeValue
                     ? parameter.Value
                     : parameter.Collection
-                        ? _randomValueProvider.GetValueCollection(null, parameter.Name, parameter.ValueRandomizationRule)
-                        : _randomValueProvider.GetValue(null, parameter.Name, parameter.ValueRandomizationRule);
+                        ? _randomValueProvider.GetValueCollection(null, parameter, parameter.ValueRandomizationRule)
+                        : _randomValueProvider.GetValue(null, parameter, parameter.ValueRandomizationRule);
 
                 if (rawValue is IEnumerable<object> rawCollection)
                 {

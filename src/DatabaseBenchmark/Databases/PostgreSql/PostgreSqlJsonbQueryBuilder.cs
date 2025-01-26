@@ -32,19 +32,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
             if (column.Queryable)
             {
-                var castType = column.Type switch
-                {
-                    ColumnType.Boolean => "boolean",
-                    ColumnType.Guid => "uuid",
-                    ColumnType.Integer => "integer",
-                    ColumnType.Long => "bigint",
-                    ColumnType.Double => "double",
-                    _ => null
-                };
-
-                return castType != null
-                    ? $"({PostgreSqlJsonbConstants.JsonbColumnName}->>'{columnName}')::{castType}"
-                    : $"{PostgreSqlJsonbConstants.JsonbColumnName}->>'{columnName}'";
+                return PostgreSqlDatabaseUtils.CastExpression($"{PostgreSqlJsonbConstants.JsonbColumnName}->>'{columnName}'", column.Type);
             }
             else
             {
@@ -82,7 +70,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             if (_queryOptions.UseGinOperators && column.Queryable)
             {
                 var rawCollection = condition.RandomizeValue
-                    ? RandomValueProvider.GetValueCollection(Table.Name, condition.ColumnName, condition.ValueRandomizationRule)
+                    ? RandomValueProvider.GetValueCollection(Table.Name, column, condition.ValueRandomizationRule)
                     : (IEnumerable<object>)condition.Value;
 
                 //Rewrite IN operator as a set of OR expressions
@@ -111,35 +99,13 @@ namespace DatabaseBenchmark.Databases.PostgreSql
         {
             var column = GetColumn(condition.ColumnName);
 
-            if (_queryOptions.UseGinOperators && column.Queryable)
+            if (column.Array && column.Queryable)
             {
-                if (condition.Operator == QueryPrimitiveOperator.Equals)
-                {
-                    var formattedValue = FormatValue(value);
-                    return $"{PostgreSqlJsonbConstants.JsonbColumnName} @> '{{\"{column.Name}\": {formattedValue}}}'::jsonb";
-                }
-                else
-                {
-                    var predicateExpression = new StringBuilder(PostgreSqlJsonbConstants.JsonbColumnName);
-                    predicateExpression.Append(" @@ '$.");
-                    predicateExpression.Append(condition.ColumnName);
-                    predicateExpression.Append(' ');
-                    predicateExpression.Append(condition.Operator switch
-                    {
-                        QueryPrimitiveOperator.Equals => "==",
-                        QueryPrimitiveOperator.NotEquals => "!=",
-                        QueryPrimitiveOperator.Greater => ">",
-                        QueryPrimitiveOperator.GreaterEquals => ">=",
-                        QueryPrimitiveOperator.Lower => "<",
-                        QueryPrimitiveOperator.LowerEquals => "<=",
-                        _ => throw new InputArgumentException($"Unknown primitive operator \"{condition.Operator}\"")
-                    });
-                    predicateExpression.Append(' ');
-                    predicateExpression.Append(FormatValue(value));
-                    predicateExpression.Append('\'');
-
-                    return predicateExpression.ToString();
-                }
+                return BuildBasicOperatorArrayCondition(condition, value);
+            }
+            else if (_queryOptions.UseGinOperators && column.Queryable)
+            {
+                return BuildBasicOperatorScalarCondition(condition, value);
             }
             else
             {
@@ -187,6 +153,54 @@ namespace DatabaseBenchmark.Databases.PostgreSql
             else
             {
                 return base.BuildNullCondition(condition);
+            }
+        }
+
+        private string BuildBasicOperatorArrayCondition(QueryPrimitiveCondition condition, object value)
+        {
+            var conditionExpression = new StringBuilder($"{PostgreSqlJsonbConstants.JsonbColumnName}->'{condition.ColumnName}' ");
+
+            conditionExpression.Append(condition.Operator switch
+            {
+                QueryPrimitiveOperator.Equals => "=",
+                QueryPrimitiveOperator.NotEquals => "<>",
+                _ => throw new InputArgumentException($"Unsupported array comparison operator \"{condition.Operator}\"")
+            });
+
+            conditionExpression.Append(' ');
+            conditionExpression.Append(ParametersBuilder.Append(FormatValue(value), ColumnType.Json, false));
+
+            return conditionExpression.ToString();
+        }
+
+        private static string BuildBasicOperatorScalarCondition(QueryPrimitiveCondition condition, object value)
+        {
+            if (condition.Operator == QueryPrimitiveOperator.Equals)
+            {
+                var formattedValue = FormatValue(value);
+                return $"{PostgreSqlJsonbConstants.JsonbColumnName} @> '{{\"{condition.ColumnName}\": {formattedValue}}}'::jsonb";
+            }
+            else
+            {
+                var conditionExpression = new StringBuilder(PostgreSqlJsonbConstants.JsonbColumnName);
+                conditionExpression.Append(" @@ '$.");
+                conditionExpression.Append(condition.ColumnName);
+                conditionExpression.Append(' ');
+                conditionExpression.Append(condition.Operator switch
+                {
+                    QueryPrimitiveOperator.Equals => "==",
+                    QueryPrimitiveOperator.NotEquals => "!=",
+                    QueryPrimitiveOperator.Greater => ">",
+                    QueryPrimitiveOperator.GreaterEquals => ">=",
+                    QueryPrimitiveOperator.Lower => "<",
+                    QueryPrimitiveOperator.LowerEquals => "<=",
+                    _ => throw new InputArgumentException($"Unknown primitive operator \"{condition.Operator}\"")
+                });
+                conditionExpression.Append(' ');
+                conditionExpression.Append(FormatValue(value));
+                conditionExpression.Append('\'');
+
+                return conditionExpression.ToString();
             }
         }
 

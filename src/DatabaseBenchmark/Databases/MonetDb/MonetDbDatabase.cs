@@ -37,7 +37,7 @@ namespace DatabaseBenchmark.Databases.MonetDb
             var commandText = tableBuilder.Build(table);
             var command = new MonetDbCommand(commandText, connection);
 
-            _environment.TraceCommand(command);
+            _environment.TraceCommand(command.CommandText);
 
             command.ExecuteNonQuery();
         }

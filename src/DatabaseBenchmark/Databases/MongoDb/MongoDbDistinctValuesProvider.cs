@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Model;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -17,14 +18,14 @@ namespace DatabaseBenchmark.Databases.MongoDb
             _environment = environment;
         }
 
-        public object[] GetDistinctValues(string tableName, string columnName)
+        public object[] GetDistinctValues(string tableName, IValueDefinition column, bool unfoldArray)
         {
             var collection = _database.GetCollection<BsonDocument>(tableName);
-            FieldDefinition<BsonDocument, object> field = columnName;
+            FieldDefinition<BsonDocument, object> field = column.Name;
 
             if (_environment.TraceQueries)
             {
-                _environment.WriteLine($"Reading distinct values for column {columnName} of collection {tableName}");
+                _environment.WriteLine($"Reading distinct values for column {column.Name} of collection {tableName}");
             }
 
             var result = collection.Distinct(field, new BsonDocument());

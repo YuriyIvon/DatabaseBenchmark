@@ -115,7 +115,7 @@ namespace DatabaseBenchmark.Tests.Databases
             var queryBson = builder.Build();
             var queryText = queryBson.ToJson();
 
-            Assert.Equal("[{ \"$match\" : { \"Tags\" : \"ABC\" } }," +
+            Assert.Equal("[{ \"$match\" : { \"$or\" : [{ \"Tags\" : \"ABC\" }, { \"Tags\" : [\"A\", \"B\", \"C\"] }] } }," +
                 " { \"$project\" : { \"_id\" : 0, \"Category\" : \"$Category\", \"SubCategory\" : \"$SubCategory\" } }]",
                 queryText);
         }
@@ -130,7 +130,8 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryArrayColumnUnsupportedOperator(QueryPrimitiveOperator @operator)
         {
             var query = SampleInputs.ArrayColumnQuery;
-            ((QueryPrimitiveCondition)query.Condition).Operator = @operator;
+            //TODO: change to a query generator function that returns a query with the specified operator
+            ((QueryPrimitiveCondition)((QueryGroupCondition)query.Condition).Conditions[0]).Operator = @operator;
 
             var builder = new MongoDbQueryBuilder(SampleInputs.ArrayColumnTable, query, null, null);
 

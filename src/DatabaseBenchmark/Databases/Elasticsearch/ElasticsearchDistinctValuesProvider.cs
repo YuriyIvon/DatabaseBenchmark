@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Model;
 using Nest;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
@@ -12,7 +13,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             _client = client;
         }
 
-        public object[] GetDistinctValues(string tableName, string columnName)
+        public object[] GetDistinctValues(string tableName, IValueDefinition column, bool unfoldArray)
         {
             const int maxBuckets = 10000;
             const string bucketName = "distinct";
@@ -22,13 +23,13 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                 .Size(0)
                 .Aggregations(a => a
                     .Terms(bucketName, td => td
-                        .Field(columnName)
+                        .Field(column.Name)
                         .Size(maxBuckets))));
 
             return result.Aggregations
-                .Terms(bucketName)
+                .Terms<object>(bucketName)
                 .Buckets
-                .Select(i => (object)i.Key)
+                .Select(i => i.Key)
                 .ToArray();
         }
     }

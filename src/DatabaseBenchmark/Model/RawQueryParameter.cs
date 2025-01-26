@@ -3,13 +3,13 @@ using System.Text.Json.Serialization;
 
 namespace DatabaseBenchmark.Model
 {
-    public class RawQueryParameter
+    public class RawQueryParameter : IValueDefinition
     {
         public string Name { get; set; }
 
         public ColumnType Type { get; set; }
 
-        public bool Array { get; set; }
+        public bool Array { get; set; } = false;
 
         [JsonConverter(typeof(JsonObjectConverter))]
         public object Value { get; set; }

@@ -1,22 +1,25 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Reporting;
-using System.Data;
 
 namespace DatabaseBenchmark.Core
 {
     public class ExecutionEnvironment : IExecutionEnvironment
     {
-        private readonly TextTableReportFormatter _tableFormatter = new();
+        private readonly TextTableReportFormatter _tableFormatter;
 
         public bool TraceQueries { get; }
 
         public bool TraceResults { get; }
 
+        public IValueFormatter ValueFormatter { get; } = new ValueFormatter();
+
         public ExecutionEnvironment(bool traceQueries, bool traceResults = false)
         {
             TraceQueries = traceQueries;
             TraceResults = traceResults;
+
+            _tableFormatter = new TextTableReportFormatter(ValueFormatter);
         }
 
         public void Write(string text) => Console.Write(text);

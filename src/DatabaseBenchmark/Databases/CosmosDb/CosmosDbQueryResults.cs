@@ -23,6 +23,7 @@ namespace DatabaseBenchmark.Databases.CosmosDb
         public object GetValue(string columnName) =>
             _responseItems[_responseItemIndex][columnName] switch
             {
+                null => null,
                 JArray array => array.Cast<JValue>().Select(x => x.Value).ToArray(),
                 object value => value
             };

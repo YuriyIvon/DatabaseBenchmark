@@ -69,6 +69,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
                 BsonDouble bsonDouble => bsonDouble.Value,
                 BsonString bsonString => bsonString.Value,
                 BsonDateTime bsonDateTime => bsonDateTime.ToNullableUniversalTime(),
+                BsonArray bsonArray => bsonArray.Select(ToStandardType).ToArray(),
                 BsonNull => null,
                 _ => value
             };

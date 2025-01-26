@@ -48,7 +48,7 @@ namespace DatabaseBenchmark.Databases.ClickHouse
             var commandText = tableBuilder.Build(table);
             var command = connection.CreateCommand(commandText);
 
-            _environment.TraceCommand(command);
+            _environment.TraceCommand(command.CommandText);
 
             command.ExecuteNonQuery();
         }
@@ -69,11 +69,13 @@ namespace DatabaseBenchmark.Databases.ClickHouse
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
             new SqlQueryExecutorFactory<ClickHouseConnection>(this, table, query, _environment)
+                .Customize<IDistinctValuesProvider, ClickHouseDistinctValuesProvider>() 
                 .Customize<ISqlQueryBuilder, ClickHouseQueryBuilder>()
                 .Customize<ISqlParameterAdapter, ClickHouseParameterAdapter>();
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new SqlRawQueryExecutorFactory<ClickHouseConnection>(this, query, _environment)
+                .Customize<IDistinctValuesProvider, ClickHouseDistinctValuesProvider>()
                 .Customize<ISqlParameterAdapter, ClickHouseParameterAdapter>();
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>

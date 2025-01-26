@@ -149,15 +149,17 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             var rawValue = !condition.RandomizeValue 
                 ? condition.Value
                 : condition.Operator == QueryPrimitiveOperator.In 
-                    ? _randomValueProvider.GetValueCollection(_table.Name, condition.ColumnName, condition.ValueRandomizationRule)
-                    : _randomValueProvider.GetValue(_table.Name, condition.ColumnName, condition.ValueRandomizationRule);
+                    ? _randomValueProvider.GetValueCollection(_table.Name, column, condition.ValueRandomizationRule)
+                    : _randomValueProvider.GetValue(_table.Name, column, condition.ValueRandomizationRule);
 
             //TODO: double-check DateTime and serialization for all database types
             return condition.Operator switch
             {
                 QueryPrimitiveOperator.Equals => 
                     rawValue != null 
-                        ? new TermQuery { Field = condition.ColumnName, Value = rawValue }
+                        ? column.Array
+                            ? new TermsQuery { Field = condition.ColumnName, Terms = (IEnumerable<object>)rawValue }
+                            : new TermQuery { Field = condition.ColumnName, Value = rawValue }
                         : new BoolQuery
                         {
                             MustNot = new QueryContainer[]
@@ -172,7 +174,9 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                         {
                             MustNot = new QueryContainer[]
                             {
-                                new TermQuery { Field = condition.ColumnName, Value = rawValue }
+                                column.Array
+                                    ? new TermsQuery { Field = condition.ColumnName, Terms = (IEnumerable<object>)rawValue }
+                                    : new TermQuery { Field = condition.ColumnName, Value = rawValue }
                             }
                         }
                         : new ExistsQuery { Field = condition.ColumnName },

@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Model;
 
 namespace DatabaseBenchmark.Core
 {
@@ -13,10 +14,10 @@ namespace DatabaseBenchmark.Core
             _cache = cache;
         }
 
-        public object[] GetDistinctValues(string tableName, string columnName)
+        public object[] GetDistinctValues(string tableName, IValueDefinition column, bool unfoldArray)
         {
-            var key = string.Join(".", tableName, columnName);
-            return _cache.GetOrRead<object[]>(key, () => _wrappedProvider.GetDistinctValues(tableName, columnName));
+            var key = string.Join(".", tableName, column.Name);
+            return _cache.GetOrRead<object[]>(key, () => _wrappedProvider.GetDistinctValues(tableName, column, unfoldArray));
         }
     }
 }

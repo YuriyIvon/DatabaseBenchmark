@@ -42,7 +42,7 @@ namespace DatabaseBenchmark.Databases.MySql
             var commandText = tableBuilder.Build(table);
             var command = new MySqlCommand(commandText, connection);
 
-            _environment.TraceCommand(command);
+            _environment.TraceCommand(command.CommandText);
 
             command.ExecuteNonQuery();
         }

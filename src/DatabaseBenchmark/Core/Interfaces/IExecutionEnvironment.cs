@@ -4,14 +4,16 @@ namespace DatabaseBenchmark.Core.Interfaces
 {
     public interface IExecutionEnvironment
     {
-        public bool TraceQueries { get; }
+        bool TraceQueries { get; }
 
-        public bool TraceResults { get; }
+        bool TraceResults { get; }
 
-        public void Write(string text);
+        IValueFormatter ValueFormatter {  get; }
 
-        public void WriteLine(string text);
+        void Write(string text);
 
-        public void WriteTable(LightweightDataTable table);
+        void WriteLine(string text);
+
+        void WriteTable(LightweightDataTable table);
     }
 }

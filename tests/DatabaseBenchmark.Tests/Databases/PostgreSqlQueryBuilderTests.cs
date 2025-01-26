@@ -2,6 +2,7 @@
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.PostgreSql;
 using DatabaseBenchmark.Databases.Sql;
+using DatabaseBenchmark.Databases.Sql.Interfaces;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
 using NSubstitute;
@@ -24,7 +25,15 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Category, SubCategory FROM Sample"
-                + " WHERE @p0 = ANY(Tags)", normalizedQueryText);
+                + " WHERE (@p0 = ANY(Tags) OR Tags = @p1)", normalizedQueryText);
+
+            var reference = new SqlQueryParameter[]
+            {
+                new ('@', "p0", "ABC", ColumnType.String),
+                new ('@', "p1", new object[] { "A", "B", "C" }, ColumnType.String, true)
+            };
+
+            Assert.Equal(reference, parametersBuilder.Parameters, new SqlQueryParameterEqualityComparer());
         }
 
         [Fact]
@@ -40,7 +49,7 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Category, SubCategory FROM Sample"
-                + " WHERE Tags @> '{\"ABC\"}'", normalizedQueryText);
+                + " WHERE (Tags @> '{\"ABC\"}' OR Tags = @p0)", normalizedQueryText);
         }
 
         [Theory]
@@ -53,7 +62,8 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryArrayColumnUnsupportedOperator(QueryPrimitiveOperator @operator)
         {
             var query = SampleInputs.ArrayColumnQuery;
-            ((QueryPrimitiveCondition)query.Condition).Operator = @operator;
+            //TODO: change to a query generator function that returns a query with the specified operator
+            ((QueryPrimitiveCondition)((QueryGroupCondition)query.Condition).Conditions[0]).Operator = @operator;
 
             var parametersBuilder = new SqlParametersBuilder();
             var optionsProvider = Substitute.For<IOptionsProvider>();
