@@ -21,7 +21,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
         public object[] GetDistinctValues(string tableName, IValueDefinition column, bool unfoldArray)
         {
             var collection = _database.GetCollection<BsonDocument>(tableName);
-            FieldDefinition<BsonDocument, object> field = column.Name;
+            FieldDefinition<BsonDocument, BsonValue> field = column.Name;
 
             if (_environment.TraceQueries)
             {

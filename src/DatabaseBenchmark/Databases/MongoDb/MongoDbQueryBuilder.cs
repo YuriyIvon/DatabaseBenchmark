@@ -138,7 +138,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
                     ? _randomValueProvider.GetValueCollection(_table.Name, column, condition.ValueRandomizationRule)
                     : _randomValueProvider.GetValue(_table.Name, column, condition.ValueRandomizationRule);
 
-            var bsonValue = BsonValue.Create(rawValue);
+            var bsonValue = CreateBsonValue(column, rawValue);
 
             return condition.Operator switch
             {
@@ -222,6 +222,12 @@ namespace DatabaseBenchmark.Databases.MongoDb
             return projection;
         }
 
+        protected Column GetColumn(string columnName)
+        {
+            var column = _table.Columns.FirstOrDefault(c => c.Name == columnName);
+            return column ?? throw new InputArgumentException($"Unknown column \"{columnName}\"");
+        }
+
         private BsonDocument BuildContainsCondition(QueryPrimitiveCondition condition, BsonValue bsonValue)
         {
             var column = GetColumn(condition.ColumnName);
@@ -246,10 +252,12 @@ namespace DatabaseBenchmark.Databases.MongoDb
             return columnName;
         }
 
-        protected Column GetColumn(string columnName)
-        {
-            var column = _table.Columns.FirstOrDefault(c => c.Name == columnName);
-            return column ?? throw new InputArgumentException($"Unknown column \"{columnName}\"");
-        }
+        private static BsonValue CreateBsonValue(Column column, object value) =>
+            value switch
+            {
+                Guid guidValue when column.Type == ColumnType.Guid => new BsonBinaryData(guidValue, GuidRepresentation.Standard),
+                string stringValue when column.Type == ColumnType.Guid => new BsonBinaryData(new Guid(stringValue), GuidRepresentation.Standard),
+                _ => BsonValue.Create(value)
+            };
     }
 }

@@ -52,7 +52,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
         }
 
         public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize) =>
-            new DataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
+            new DataImporterBuilder(table, new MongoDbDataSourceWrapper(source), batchSize, DefaultImportBatchSize)
                 .OptionsProvider(_optionsProvider)
                 .Environment(_environment)
                 .TransactionProvider<NoTransactionProvider>()
