@@ -13,12 +13,13 @@ namespace DatabaseBenchmark.Databases.Sql
             {
                 IEnumerable<object> => throw new InputArgumentException("Array literals are not supported"),
                 null => "NULL",
-                bool boolValue => boolValue.ToString().ToLower(), //Different databases may accept different Boolean format
+                bool boolValue => boolValue.ToString().ToLower(), //TODO: Different databases may accept different Boolean format
                 int intValue => intValue.ToString(),
                 long longValue => longValue.ToString(),
                 double doubleValue => doubleValue.ToString(),
-                DateTime dateTimeValue => Quote(dateTimeValue.ToString("o")),
-                Guid guidValue => Quote(guidValue.ToString()), //Different databases may accept different UUID format
+                DateTime dateTimeValue => Quote(dateTimeValue.ToSortableString()),
+                DateTimeOffset dateTimeValue => Quote(dateTimeValue.ToSortableString()),
+                Guid guidValue => Quote(guidValue.ToString()), //TODO: Different databases may accept different UUID format
                 _ => Quote(value.ToString().Replace("'", "''"))
             };
 

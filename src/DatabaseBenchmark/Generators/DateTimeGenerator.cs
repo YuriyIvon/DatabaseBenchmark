@@ -25,6 +25,9 @@ namespace DatabaseBenchmark.Generators
 
         public bool Next()
         {
+            var minValue = DateTime.SpecifyKind(_options.MinValue, _options.DateTimeKind);
+            var maxValue = DateTime.SpecifyKind(_options.MaxValue, _options.DateTimeKind);
+
             if (_options.Direction != Direction.None)
             {
                 if (_options.Delta.TotalMilliseconds == 0)
@@ -35,8 +38,8 @@ namespace DatabaseBenchmark.Generators
                 if (_lastValue == null)
                 {
                     _lastValue = _options.Direction == Direction.Ascending
-                        ? _options.MinValue
-                        : _options.MaxValue;
+                        ? minValue
+                        : maxValue;
                 }
                 else
                 {
@@ -52,8 +55,8 @@ namespace DatabaseBenchmark.Generators
                     var isAscending = _options.Direction == Direction.Ascending;
                     var value = _lastValue + (isAscending ? delta : -delta);
 
-                    if ((isAscending && value > _options.MaxValue) ||
-                        (!isAscending && value < _options.MinValue))
+                    if ((isAscending && value > maxValue) ||
+                        (!isAscending && value < minValue))
                     {
                         return false;
                     }
@@ -68,17 +71,17 @@ namespace DatabaseBenchmark.Generators
             else if (_options.Delta.TotalMilliseconds != 0)
             {
                 var deltaMilliseconds = _options.Delta.TotalMilliseconds;
-                var rangeMilliseconds = (_options.MaxValue - _options.MinValue).TotalMilliseconds;
+                var rangeMilliseconds = (maxValue - minValue).TotalMilliseconds;
                 var totalSegments = (long)(rangeMilliseconds / deltaMilliseconds);
                 var randomSegment = _randomizer.Long(0, totalSegments);
 
-                Current = _options.MinValue.AddMilliseconds(deltaMilliseconds * randomSegment);
+                Current = minValue.AddMilliseconds(deltaMilliseconds * randomSegment);
 
                 return true;
             }
             else
             {
-                Current = _dateFaker.Between(_options.MinValue, _options.MaxValue);
+                Current = _dateFaker.Between(minValue, maxValue);
 
                 return true;
             }

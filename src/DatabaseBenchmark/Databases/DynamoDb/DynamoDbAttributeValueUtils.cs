@@ -41,7 +41,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
                     ColumnType.Long => new AttributeValue { N = value.ToString() },
                     ColumnType.Text => new AttributeValue(value.ToString()),
                     ColumnType.String => new AttributeValue(value.ToString()),
-                    ColumnType.DateTime => new AttributeValue(((DateTime)value).ToString("s")),
+                    ColumnType.DateTime => new AttributeValue(((DateTime)value).ToSortableString()),
                     ColumnType.Guid => new AttributeValue(value.ToString()),
                     ColumnType.Json => new AttributeValue(value.ToString()),
                     _ => throw new InputArgumentException($"Unknown column type \"{type}\"")

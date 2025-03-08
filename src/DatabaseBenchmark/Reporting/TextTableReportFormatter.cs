@@ -1,7 +1,6 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Reporting.Interfaces;
-using System.Collections;
 
 namespace DatabaseBenchmark.Reporting
 {
@@ -92,11 +91,9 @@ namespace DatabaseBenchmark.Reporting
 
             return value switch
             {
-                _ when IsNumber(value) => unpaddedValue.PadLeft(columnWidth),
+                _ when value.IsNumber() => unpaddedValue.PadLeft(columnWidth),
                 _ => unpaddedValue.PadRight(columnWidth)
             };
         }
-
-        private static bool IsNumber(object value) => value is byte or short or ushort or int or uint or long or ulong or double or float;
     }
 }

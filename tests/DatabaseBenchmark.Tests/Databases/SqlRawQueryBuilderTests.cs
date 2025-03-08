@@ -40,7 +40,7 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var queryText = builder.Build();
 
-            Assert.Equal("SELECT * FROM Sample WHERE Category = 'ABC' AND CreatedDate >= '2020-01-02T03:04:05' AND Price <= 25.5", queryText);
+            Assert.Equal("SELECT * FROM Sample WHERE Category = 'ABC' AND CreatedDate >= '2020-01-02T03:04:05.0000000' AND Price <= 25.5", queryText);
             Assert.Empty(parametersBuilder.Parameters);
         }
     }

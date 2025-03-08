@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Databases.Common;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.Databases.Sql.Interfaces;
@@ -9,6 +10,8 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 {
     public class PostgreSqlJsonbInsertBuilder : SqlInsertBuilder
     {
+        private readonly JsonSerializerOptions _jsonSerializerOptions = new() { Converters = { new JsonDateTimeConverter() } };
+
         public PostgreSqlJsonbInsertBuilder(
             Table table,
             IDataSourceReader sourceReader,
@@ -38,7 +41,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                         c => sourceRow[c.Name]);
 
                 var jsonbParameter = ParametersBuilder.Append(
-                    JsonSerializer.Serialize(jsonbValues),
+                    JsonSerializer.Serialize(jsonbValues, _jsonSerializerOptions),
                     ColumnType.Json,
                     false);
 

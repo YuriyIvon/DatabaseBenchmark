@@ -25,6 +25,7 @@ namespace DatabaseBenchmark.Tests.Generators
             Assert.IsType<DateTime>(value);
 
             var dtValue = (DateTime)value;
+            Assert.Equal(DateTimeKind.Unspecified, dtValue.Kind);
             Assert.True(dtValue >= _options.MinValue);
             Assert.True(dtValue <= _options.MaxValue);
         }
@@ -54,6 +55,10 @@ namespace DatabaseBenchmark.Tests.Generators
             var dailyValue = (DateTime)dailyGenerator.Current;
             var hourlyValue = (DateTime)hourlyGenerator.Current;
             var minutelyValue = (DateTime)minutelyGenerator.Current;
+
+            Assert.Equal(DateTimeKind.Unspecified, dailyValue.Kind);
+            Assert.Equal(DateTimeKind.Unspecified, hourlyValue.Kind);
+            Assert.Equal(DateTimeKind.Unspecified, minutelyValue.Kind);
 
             Assert.True(dailyValue < maxValue);
             Assert.True(dailyValue >= minValue);
@@ -96,6 +101,7 @@ namespace DatabaseBenchmark.Tests.Generators
                 generator.Next();
 
                 var dtValue = (DateTime)generator.Current;
+                Assert.Equal(DateTimeKind.Unspecified, dtValue.Kind);
                 Assert.True(dtValue > lastValue);
                 Assert.Equal(TimeSpan.FromDays(1), dtValue - lastValue);
 
@@ -117,6 +123,7 @@ namespace DatabaseBenchmark.Tests.Generators
                 generator.Next();
 
                 var dtValue = (DateTime)generator.Current;
+                Assert.Equal(DateTimeKind.Unspecified, dtValue.Kind);
                 Assert.True(dtValue < lastValue);
                 Assert.Equal(TimeSpan.FromDays(1), lastValue - dtValue);
 
@@ -139,6 +146,7 @@ namespace DatabaseBenchmark.Tests.Generators
                 generator.Next();
 
                 var dtValue = (DateTime)generator.Current;
+                Assert.Equal(DateTimeKind.Unspecified, dtValue.Kind);
                 Assert.True(dtValue > lastValue);
 
                 lastValue = dtValue;

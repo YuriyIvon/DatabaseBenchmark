@@ -8,6 +8,8 @@
 
         public DateTime MaxValue { get; set; } = DateTime.Now.AddYears(1);
 
+        public DateTimeKind DateTimeKind { get; set; } = DateTimeKind.Unspecified;
+
         public Direction Direction { get; set; } = Direction.None;
 
         public TimeSpan Delta { get; set; } = TimeSpan.Zero;

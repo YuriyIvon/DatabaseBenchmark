@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Core.Interfaces;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Model;
@@ -17,6 +18,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
         private readonly Table _table;
         private readonly IDataSource _source;
         private readonly IExecutionEnvironment _environment;
+        private readonly JsonSerializerOptions _jsonSerializerOptions = new() { Converters = { new JsonDateTimeConverter() } };
 
         public PostgreSqlJsonbDataImporter(
             string connectionString,
@@ -53,7 +55,9 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                             c => _source.GetValue(c.Name));
                     writer.StartRow();
 
-                    writer.Write(JsonSerializer.Serialize(jsonbValues), NpgsqlTypes.NpgsqlDbType.Jsonb);
+                    writer.Write(
+                        JsonSerializer.Serialize(jsonbValues, _jsonSerializerOptions), 
+                        NpgsqlTypes.NpgsqlDbType.Jsonb);
 
                     foreach (var column in nonQueryableColumns)
                     {

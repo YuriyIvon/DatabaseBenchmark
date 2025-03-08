@@ -12,7 +12,7 @@ namespace DatabaseBenchmark.Databases.Common
                 int n => n.ToString(format),
                 long n => n.ToString(format),
                 double n => n.ToString(format),
-                DateTime dt => dt.ToString(format ?? "s"),
+                DateTime dt => format != null ? dt.ToString(format) : dt.ToSortableString(),
                 Guid g => g.ToString(format),
                 _ => value.ToString()
             };

@@ -29,7 +29,7 @@ namespace DatabaseBenchmark.Tests.Databases
             var queryParts = builder.Build();
 
             var queryText = new BsonArray(queryParts).ToString();
-            Assert.Equal(@"[{ ""$match"" : { ""$and"" : [{ ""category"" : ""ABC"" }, { ""createdDate"" : { ""$gte"" : ""2020-01-02T03:04:05"" } }, { ""price"" : { ""$lte"" : 25.5 } }, { ""available"" : true }] } }]", queryText);
+            Assert.Equal(@"[{ ""$match"" : { ""$and"" : [{ ""category"" : ""ABC"" }, { ""createdDate"" : { ""$gte"" : ""2020-01-02T03:04:05.0000000"" } }, { ""price"" : { ""$lte"" : 25.5 } }, { ""available"" : true }] } }]", queryText);
         }
     }
 }

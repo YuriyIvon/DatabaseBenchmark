@@ -138,10 +138,11 @@ namespace DatabaseBenchmark.DataSources.Decorators
                 string stringValue => HandleFormatException(() => Guid.Parse(stringValue), value, typeof(Guid)),
                 _ => throw CreateConvertException(value, typeof(Guid))
             };
+
         private static object ToString(object value) =>
             value switch
             {
-                DateTime dateTimeValue => dateTimeValue.ToString("s"),
+                DateTime dateTimeValue => dateTimeValue.ToSortableString(),
                 string stringValue => stringValue,
                 _ => value.ToString()
             };

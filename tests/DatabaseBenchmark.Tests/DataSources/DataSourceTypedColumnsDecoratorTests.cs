@@ -53,7 +53,7 @@ namespace DatabaseBenchmark.Tests.DataSources
             [ColumnType.String, "abc", "abc"],
             [ColumnType.String, false, "False"],
             [ColumnType.String, 10, "10"],
-            [ColumnType.String, new DateTime(2024, 2, 1, 12, 13, 14), "2024-02-01T12:13:14"],
+            [ColumnType.String, new DateTime(2024, 2, 1, 12, 13, 14), "2024-02-01T12:13:14.0000000"],
             [ColumnType.String, Guid.Parse("3d0dc68b-3a19-4b44-9143-84db02bfa9f8"), "3d0dc68b-3a19-4b44-9143-84db02bfa9f8"]
         ];
 
