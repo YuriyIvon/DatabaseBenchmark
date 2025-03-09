@@ -18,14 +18,15 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var queryText = builder.Build();
 
-            Assert.Equal("SELECT * FROM Sample WHERE Category = @p0 AND CreatedDate >= @p1 AND Price <= @p2 AND Available = @p3", queryText);
+            Assert.Equal("SELECT * FROM Sample WHERE Category = @p0 AND CreatedDate >= @p1 AND Price <= @p2 AND Available = @p3 AND UserId <> @p4", queryText);
 
             var reference = new SqlQueryParameter[]
             {
                 new ('@', "p0", "ABC", ColumnType.String),
                 new ('@', "p1", new DateTime(2020, 1, 2, 3, 4, 5), ColumnType.DateTime),
                 new ('@', "p2", 25.5, ColumnType.Double),
-                new ('@', "p3", true, ColumnType.Boolean)
+                new ('@', "p3", true, ColumnType.Boolean),
+                new ('@', "p4", "d5a611c6-aa28-4842-8643-6a58e2f8123e", ColumnType.Guid)
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);

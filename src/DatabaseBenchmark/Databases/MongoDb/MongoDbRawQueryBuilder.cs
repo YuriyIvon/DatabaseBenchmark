@@ -68,6 +68,6 @@ namespace DatabaseBenchmark.Databases.MongoDb
         private static string FormatParameter(RawQueryParameter parameter, object value) =>
             parameter.Inline
                 ? InlineParameterFormatter.Format(parameter.InlineFormat, value)
-                : JsonSerializer.Serialize(value);
+                : MongoDbValueAdapter.CreateBsonValue(parameter.Type, value).ToJson();
     }
 }

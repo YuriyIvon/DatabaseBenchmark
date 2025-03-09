@@ -138,7 +138,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
                     ? _randomValueProvider.GetValueCollection(_table.Name, column, condition.ValueRandomizationRule)
                     : _randomValueProvider.GetValue(_table.Name, column, condition.ValueRandomizationRule);
 
-            var bsonValue = CreateBsonValue(column, rawValue);
+            var bsonValue = MongoDbValueAdapter.CreateBsonValue(column.Type, rawValue);
 
             return condition.Operator switch
             {
@@ -251,13 +251,5 @@ namespace DatabaseBenchmark.Databases.MongoDb
 
             return columnName;
         }
-
-        private static BsonValue CreateBsonValue(Column column, object value) =>
-            value switch
-            {
-                Guid guidValue when column.Type == ColumnType.Guid => new BsonBinaryData(guidValue, GuidRepresentation.Standard),
-                string stringValue when column.Type == ColumnType.Guid => new BsonBinaryData(new Guid(stringValue), GuidRepresentation.Standard),
-                _ => BsonValue.Create(value)
-            };
     }
 }

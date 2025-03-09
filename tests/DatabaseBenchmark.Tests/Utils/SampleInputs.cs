@@ -252,7 +252,7 @@ namespace DatabaseBenchmark.Tests.Utils
 
         public static RawQuery RawSqlQuery => new()
         {
-            Text = "SELECT * FROM Sample WHERE Category = ${category} AND CreatedDate >= ${minDate} AND Price <= ${maxPrice} AND Available = ${available}",
+            Text = "SELECT * FROM Sample WHERE Category = ${category} AND CreatedDate >= ${minDate} AND Price <= ${maxPrice} AND Available = ${available} AND UserId <> ${userId}",
             Parameters = RawQueryParameters
         };
 
@@ -276,7 +276,7 @@ namespace DatabaseBenchmark.Tests.Utils
 
         public static RawQuery RawMongoDbQuery => new()
         {
-            Text = @"[{ ""$match"" : { ""$and"" : [{ ""category"" : ${category} }, { ""createdDate"" : { ""$gte"" : ${minDate} } }, { ""price"" : { ""$lte"" : ${maxPrice} } }, { ""available"" : ${available} }] } }]",
+            Text = @"[{ ""$match"" : { ""$and"" : [{ ""category"" : ${category} }, { ""createdDate"" : { ""$gte"" : ${minDate} } }, { ""price"" : { ""$lte"" : ${maxPrice} } }, { ""available"" : ${available} }, { ""userId"" : { ""$ne"" : ${userId} } }] } }]",
             Parameters = RawQueryParameters
         };
 
@@ -311,6 +311,12 @@ namespace DatabaseBenchmark.Tests.Utils
                 Name = "available",
                 Type = ColumnType.Boolean,
                 Value = true
+            },
+            new RawQueryParameter
+            {
+                Name = "userId",
+                Type = ColumnType.Guid,
+                Value = "d5a611c6-aa28-4842-8643-6a58e2f8123e"
             }
         ];
 
