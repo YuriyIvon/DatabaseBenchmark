@@ -61,15 +61,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                         ? _randomValueProvider.GetValueCollection(null, parameter, parameter.ValueRandomizationRule)
                         : _randomValueProvider.GetValue(null, parameter, parameter.ValueRandomizationRule);
 
-                if (rawValue is IEnumerable<object> rawCollection)
-                {
-                    var aliases = rawCollection.Select(v => FormatParameter(parameter, v)).ToArray();
-                    parameterString = string.Join(", ", aliases);
-                }
-                else
-                {
-                    parameterString = FormatParameter(parameter, rawValue);
-                }
+                parameterString = FormatParameter(parameter, rawValue);
 
                 queryText = queryText.Replace($"${{{parameter.Name}}}", parameterString);
             }

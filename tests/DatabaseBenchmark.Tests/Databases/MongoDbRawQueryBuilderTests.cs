@@ -30,5 +30,17 @@ namespace DatabaseBenchmark.Tests.Databases
             var queryText = new BsonArray(queryParts).ToString();
             Assert.Equal(@"[{ ""$match"" : { ""$and"" : [{ ""category"" : ""ABC"" }, { ""createdDate"" : { ""$gte"" : ""2020-01-02T03:04:05.0000000"" } }, { ""price"" : { ""$lte"" : 25.5 } }, { ""available"" : true }] } }]", queryText);
         }
+
+        [Fact]
+        public void BuildArrayQuery()
+        {
+            var query = SampleInputs.RawMongoDbArrayQuery;
+            var builder = new MongoDbRawQueryBuilder(query, null);
+
+            var queryParts = builder.Build();
+
+            var queryText = new BsonArray(queryParts).ToString();
+            Assert.Equal(@"[{ ""$match"" : { ""Tags"" : [""One"", ""Two""] } }]", queryText);
+        }
     }
 }

@@ -44,5 +44,24 @@ namespace DatabaseBenchmark.Tests.Databases
             Assert.Equal("SELECT * FROM Sample WHERE Category = 'ABC' AND CreatedDate >= '2020-01-02T03:04:05.0000000' AND Price <= 25.5", queryText);
             Assert.Empty(parametersBuilder.Parameters);
         }
+
+        [Fact]
+        public void BuildArrayParameterizedQuery()
+        {
+            var query = SampleInputs.RawSqlArrayQuery;
+            var parametersBuilder = new SqlParametersBuilder();
+            var builder = new SqlRawQueryBuilder(query, parametersBuilder, null);
+
+            var queryText = builder.Build();
+
+            Assert.Equal("SELECT * FROM Sample WHERE Tags = @p0", queryText);
+            
+            var reference = new SqlQueryParameter[]
+            {
+                new ('@', "p0", new object[] { "One", "Two" }, ColumnType.String, true)
+            };
+
+            Assert.Equal(reference, parametersBuilder.Parameters, new SqlQueryParameterEqualityComparer());
+        }
     }
 }

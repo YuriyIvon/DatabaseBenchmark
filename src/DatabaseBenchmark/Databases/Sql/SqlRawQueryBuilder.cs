@@ -36,37 +36,37 @@ namespace DatabaseBenchmark.Databases.Sql
             return queryText;
         }
 
+        protected virtual string BuildParameter(RawQueryParameter parameter, object value) =>
+            parameter.Inline
+                ? InlineParameterFormatter.Format(parameter.InlineFormat, value)
+                : _parametersBuilder.Append(value, parameter.Type, parameter.Array);
+
+        protected virtual string BuildParameterList(RawQueryParameter parameter, IEnumerable<object> collectionValue)
+        {
+            var aliases = collectionValue.Select(v => BuildParameter(parameter, v)).ToArray();
+            return string.Join(", ", aliases);
+        }
+
         private string ApplyParameters(string queryText)
         {
             foreach (var parameter in _query.Parameters)
             {
-                string parameterString;
-
                 var rawValue = !parameter.RandomizeValue
                     ? parameter.Value
                     : parameter.Collection
                         ? _randomValueProvider.GetValueCollection(null, parameter, parameter.ValueRandomizationRule)
                         : _randomValueProvider.GetValue(null, parameter, parameter.ValueRandomizationRule);
 
-                if (rawValue is IEnumerable<object> rawCollection)
+                var parameterString = rawValue switch
                 {
-                    var aliases = rawCollection.Select(v => BuildParameter(parameter, v)).ToArray();
-                    parameterString = string.Join(", ", aliases);
-                }
-                else
-                {
-                    parameterString = BuildParameter(parameter, rawValue);
-                }
+                    IEnumerable<object> collectionValue when !parameter.Array => BuildParameterList(parameter, collectionValue),
+                    _ => BuildParameter(parameter, rawValue)
+                };
 
                 queryText = queryText.Replace($"${{{parameter.Name}}}", parameterString);
             }
 
             return queryText;
         }
-
-        private string BuildParameter(RawQueryParameter parameter, object value) =>
-            parameter.Inline
-                ? InlineParameterFormatter.Format(parameter.InlineFormat, value)
-                : _parametersBuilder.Append(value, parameter.Type, parameter.Array);
     }
 }

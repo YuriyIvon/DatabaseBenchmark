@@ -262,6 +262,12 @@ namespace DatabaseBenchmark.Tests.Utils
             Parameters = RawQueryInlineParameters
         };
 
+        public static RawQuery RawSqlArrayQuery => new()
+        {
+            Text = "SELECT * FROM Sample WHERE Tags = ${tags}",
+            Parameters = RawQueryArrayParameters
+        };
+
         public static RawQuery RawElasticsearchQuery => new()
         {
             Text = @"{""query"":{""bool"":{""must"":[{""term"":{""category"":{""value"":${category}}}},{""range"":{""createdDate"":{""gte"":${minDate}}}},{""range"":{""price"":{""lte"":${maxPrice}}}},{""term"":{""available"":{""value"":${available}}}}]}}}",
@@ -284,6 +290,12 @@ namespace DatabaseBenchmark.Tests.Utils
         {
             Text = @"[{ ""$match"" : { ""$and"" : [{ ""category"" : ""${category}"" }, { ""createdDate"" : { ""$gte"" : ""${minDate}"" } }, { ""price"" : { ""$lte"" : ${maxPrice} } }, { ""available"" : ${available} }] } }]",
             Parameters = RawQueryInlineParameters
+        };
+
+        public static RawQuery RawMongoDbArrayQuery => new()
+        {
+            Text = @"[{ ""$match"" : { ""Tags"" : ${tags} } }]",
+            Parameters = RawQueryArrayParameters
         };
 
         public static RawQueryParameter[] RawQueryParameters =>
@@ -349,6 +361,17 @@ namespace DatabaseBenchmark.Tests.Utils
                 Type = ColumnType.Boolean,
                 Value = true,
                 Inline = true
+            }
+        ];
+
+        public static RawQueryParameter[] RawQueryArrayParameters =>
+        [
+            new RawQueryParameter
+            {
+                Name = "tags",
+                Type = ColumnType.String,
+                Array = true,
+                Value = new object[] { "One", "Two" }
             }
         ];
     }
