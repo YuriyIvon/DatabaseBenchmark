@@ -19,6 +19,7 @@ namespace DatabaseBenchmark.Tests.Core
             [(long)123, "123"],
             [(float)1.2345, "1.23"],
             [(double)1.2345, "1.23"],
+            [(decimal)1.2345, "1.2345"],
             [true, "True"],
             ["abc", "\"abc\""],
             [new Guid("6971bc34-4117-4dba-a405-d2ffa82bf6d2"), "\"6971bc34-4117-4dba-a405-d2ffa82bf6d2\""],
