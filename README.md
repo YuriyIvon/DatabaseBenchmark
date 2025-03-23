@@ -342,6 +342,13 @@ The `Locale` parameter specifies the locale to be used for address generation. A
 #### Boolean
 Generates a random Boolean. Its `Weight` attribute specifies the probability of the `true` value in the range between 0 and 1.
 
+#### Collection
+Generates a collection of values produced by another generator. Can be used, for example, to populate array columns or generate lists of values for queries using `In` operator. 
+
+* `MinLength` - the minimum collection length.
+* `MaxLength` - the maximum collection length.
+* `SourceGeneratorOptions` - the underlying generator options - can be any of the other types.
+
 #### ColumnItem
 Randomly picks a value from a list retrieved from a table column in the target database. Uses the same logic as the [ListItem generator](#listitem_generator), but a different primary source.
 
@@ -388,7 +395,7 @@ Generates random date/time value. The available attributes are:
 * `MaxValue` - maximum value in ISO-8601 format. Defaults to the year after the current date and time.
 * `Direction` - specifies the growth direction for generated values - `None`, `Ascending`, or `Descending`. If set to `Ascending`, the sequence of generated values starts from `MinValue` and grows until `MaxValue`. With `Descending`, it starts from `MaxValue` and goes in the opposite direction until `MinValue`. Default is `None`.
 * `Delta` - time interval in .NET-specific TimeSpan format, which adheres to the pattern `[days:]hours:minutes:seconds[.fractional_seconds]`. When `Direction` is not `None`, it determines the increment for each subsequently generated value or the maximum increment if `RandomizeDelta` is also enabled. If `Direction` is `None`, it specifies the fixed interval between all possible generated values. For example, with a `MinValue` of `2020-01-01T13:00:00`, a `MaxValue` of `2020-01-04T13:00:00`, and a `Delta` of `1.00:00:00` (one day), the utility will generate values from January 1st to January 4th, 2020, all at `13:00:00`, in random order. The value of `00:00:00` is allowed only when `Direction` is `None` and means no restriction on the set of generated values other than the minimum and maximum. The default value is `00:00:00`.
-* `DateTimeKind` - .NET DateTime kind to be used for generated values. It can be `Local`, `Utc`, or `Unspecified`. For database table columns of DateTime type without time zone offset, it is better to use `Unspecified`. Default is `Unspecified`.
+* `DateTimeKind` - .NET kind to be used for generated values. It can be `Local`, `Utc`, or `Unspecified`. For database table columns of DateTime type without time zone offset, it is better to use `Unspecified`. Default is `Unspecified`.
 
 #### Finance
 Generates finance-related pieces of information. The following values are available for its  `Kind`  attribute:
