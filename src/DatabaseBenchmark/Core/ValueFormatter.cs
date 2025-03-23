@@ -9,11 +9,12 @@ namespace DatabaseBenchmark.Core
         public string Format(object value) =>
             value switch
             {
+                null => "NULL",
                 string => $"\"{value}\"",
                 IEnumerable arrayValue => $"[{string.Join(", ", arrayValue.Cast<object>().Select(Format))}]",
                 DateTime dateTimeValue => dateTimeValue.ToSortableString(), // TODO: Make output date/time format configurable
                 DateTimeOffset dateTimeOffsetValue => dateTimeOffsetValue.ToSortableString(), // TODO: Make output date/time format configurable
-                double or float => string.Format($"{value:0.##}"), // TODO: Make precision configurable
+                double or float or decimal => string.Format($"{value:0.##}"), // TODO: Make precision configurable
                 bool boolValue => boolValue.ToString(),
                 _ when value.IsNumber() => value.ToString(),
                 _ => $"\"{value}\"" // TODO: Make quotemarks configurable

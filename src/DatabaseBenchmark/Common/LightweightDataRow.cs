@@ -6,7 +6,7 @@
 
         public object this[string columnName]
         {
-            get => _columnValues[columnName];
+            get => _columnValues.GetValueOrDefault(columnName);
             set => _columnValues[columnName] = value;
         }
 

@@ -15,7 +15,7 @@ namespace DatabaseBenchmark.Reporting
 
         public void Print(Stream stream, LightweightDataTable results)
         {
-            using var writer = new StreamWriter(stream);
+            using var writer = new StreamWriter(stream, leaveOpen: true);
 
             foreach (var column in results.Columns)
             {
