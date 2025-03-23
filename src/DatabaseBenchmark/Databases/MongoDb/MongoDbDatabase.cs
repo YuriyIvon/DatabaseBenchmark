@@ -75,7 +75,7 @@ namespace DatabaseBenchmark.Databases.MongoDb
             new MongoDbRawQueryExecutorFactory(this, query, _environment, _optionsProvider);
 
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize) =>
-            new MongoDbInsertExecutorFactory(this, table, source, batchSize, _environment, _optionsProvider);
+            new MongoDbInsertExecutorFactory(this, table, new MongoDbDataSourceWrapper(source), batchSize, _environment, _optionsProvider);
 
         public void ExecuteScript(string script) => throw new InputArgumentException("Custom scripts are not supported for MongoDB");
 
