@@ -1,0 +1,178 @@
+{
+  "Columns": [
+    { 
+      "Name": "Id",
+      "GeneratorOptions": { 
+        "Type": "Integer",
+        "Direction": "Ascending",
+        "MinValue": 1,
+        "MaxValue": 2147483647,
+        "Delta": 1
+      }
+    },
+    { 
+      "Name": "CountryCode",
+      "GeneratorOptions": {
+        "Type": "Null",
+        "Weight": 0.3,
+        "SourceGeneratorOptions": { 
+          "Type": "Address",
+          "Kind": "CountryCode"
+        }        
+      }
+    },
+    { 
+      "Name": "IsActive",
+      "GeneratorOptions": { 
+        "Type": "Boolean"
+      }
+    },
+    { 
+      "Name": "CompanyName",
+      "GeneratorOptions": { 
+        "Type": "Company"
+      }
+    },
+    { 
+      "Name": "CreatedAt",
+      "GeneratorOptions": { 
+        "Type": "DateTime",
+        "Direction": "Ascending",
+        "MinValue": "2020-01-01T13:00:00",
+        "Delta": "00:05:00",
+        "RandomizeDelta": true
+      }
+    },
+    { 
+      "Name": "Iban",
+      "GeneratorOptions": { 
+        "Type": "Finance",
+        "Kind": "Iban"
+      }
+    },
+    { 
+      "Name": "Rating",
+      "GeneratorOptions": { 
+        "Type": "Float",
+        "MinValue": 0,
+        "MaxValue": 5
+      }
+    },
+    { 
+      "Name": "UserId",
+      "GeneratorOptions": { 
+        "Type": "ColumnItem",
+        "TableName": "GeneratedUsers",
+        "ColumnName": "Id",
+        "Distinct": false,
+        "Queryable": false,
+        "ColumnType": "Integer"
+      }
+    },
+    { 
+      "Name": "ObjectGuid",
+      "GeneratorOptions": { 
+        "Type": "Guid"
+      }
+    },
+    { 
+      "Name": "Count",
+      "GeneratorOptions": { 
+        "Type": "Integer",
+        "MinValue": 1,
+        "MaxCount": 1000
+      }
+    },
+    { 
+      "Name": "IpAddress",
+      "GeneratorOptions": { 
+        "Type": "Internet",
+        "Kind": "Ip"
+      }
+    },
+    { 
+      "Name": "Color",
+      "GeneratorOptions": { 
+        "Type": "ListItem",
+        "Items": ["Red", "Green", "Blue", "Yellow", "Purple"]
+      }
+    },
+    { 
+      "Name": "Phone",
+      "GeneratorOptions": { 
+        "Type": "Phone",
+        "Kind": "PhoneNumber"
+      }
+    },
+    { 
+      "Name": "Code",
+      "GeneratorOptions": { 
+        "Type": "String",
+        "MinLength": 3,
+        "MaxLength": 10,
+        "AllowedCharacters": "0123456789ABCDEF"
+      }
+    },
+    { 
+      "Name": "Sentence",
+      "GeneratorOptions": { 
+        "Type": "Text",
+        "Kind": "Sentence"
+      }
+    },
+    { 
+      "Name": "Vin",
+      "GeneratorOptions": { 
+        "Type": "Vehicle",
+        "Kind": "Vin"
+      }
+    },
+    { 
+      "Name": "Tags",
+      "GeneratorOptions": { 
+        "Type": "Collection",
+        "MinLength": 0,
+        "MaxLength": 5,
+        "SourceGeneratorOptions": {
+          "Type": "ListItem",
+          "Items": ["One", "Two", "Three", "Four", "Five", "Six", "Seven"]
+        }
+      }
+    },
+    { 
+      "Name": "Numbers",
+      "GeneratorOptions": { 
+        "Type": "Collection",
+        "MinLength": 0,
+        "MaxLength": 10,
+        "SourceGeneratorOptions": {
+          "Type": "Integer",
+          "MinValue": 1,
+          "MaxCount": 1000
+        }
+      }
+    },
+    { 
+      "Name": "Timestamps",
+      "GeneratorOptions": { 
+        "Type": "Collection",
+        "MinLength": 0,
+        "MaxLength": 10,
+        "SourceGeneratorOptions": {
+          "Type": "DateTime"
+        }
+      }
+    },
+    { 
+      "Name": "ReferenceGuids",
+      "GeneratorOptions": { 
+        "Type": "Collection",
+        "MinLength": 0,
+        "MaxLength": 10,
+        "SourceGeneratorOptions": {
+          "Type": "Guid"
+        }
+      }
+    }
+  ]
+}

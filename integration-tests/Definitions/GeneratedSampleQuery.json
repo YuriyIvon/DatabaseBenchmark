@@ -1,0 +1,27 @@
+{
+  "Condition": {
+    "Operator": "And",
+    "Conditions": [
+      {
+        "ColumnName": "UserId", 
+        "Operator": "Equals",
+        "RandomizeValue": true 
+      },
+      {
+        "ColumnName": "CreatedAt",
+        "Operator": "Greater",
+        "RandomizeValue": true,
+        "ValueRandomizationRule": { 
+          "UseExistingValues": false, 
+          "GeneratorOptions": { 
+            "Type": "DateTime",
+            "Direction": "Ascending",
+            "MinValue": "2020-01-01T13:00:00",
+            "Delta": "00:05:00",
+            "RandomizeDelta": true
+          }
+        }
+      }
+    ]
+  }
+}

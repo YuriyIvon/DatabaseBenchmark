@@ -1,22 +1,22 @@
 $toolPath="..\src\DatabaseBenchmark\bin\Debug\net8.0\DatabaseBenchmark"
-$queryScenarioFile = "Definitions\SalesQueryScenario.json"
-$rawQueryScenarioFile = "Definitions\SalesRawQueryScenario.json"
+$queryScenarioFile = "Definitions\SampleQueryScenario.json"
+$rawQueryScenarioFile = "Definitions\SampleRawQueryScenario.json"
 
 . .\ConnectionStrings.ps1
-. .\QueryFiles.ps1
+. .\InputFiles.ps1
 
 Write-Output "Populating databases"
 Write-Output ""
 
 @'
 {
-  "Name": "Sales scenario",
+  "Name": "Sample scenario",
   "Items": [
 '@ | Out-File -FilePath $queryScenarioFile -Encoding UTF8
 
 @'
 {
-  "Name": "Sales scenario",
+  "Name": "Sample scenario",
   "Items": [
 '@ | Out-File -FilePath $rawQueryScenarioFile -Encoding UTF8
 
@@ -27,16 +27,21 @@ foreach ($databaseType in $connectionStrings.Keys)
   Write-Output $databaseType
 
   $connectionString = $connectionStrings[$databaseType]
-  $queryFile = $queryFiles[$databaseType]
-  $rawQueryFile = $rawQueryFiles[$databaseType]
-  $tableName = if ($tableNameOverrides[$databaseType] -ne $null) { $tableNameOverrides[$databaseType] } else { "Sales" }
+  $inputFilesItem = $inputFiles[$databaseType]
+  $tableFile = $inputFilesItem['TableFile']
+  $tableNameOverride = $inputFilesItem['TableName']
+  $queryFile = $inputFilesItem['QueryFile']
+  $rawQueryFile = $inputFilesItem['RawQueryFile']
+  $rawQueryParametersFile = $inputFilesItem['RawQueryParametersFile']
+  $tableName = if ($tableNameOverride -ne $null) { $tableNameOverride } else { "GeneratedSample" }
 
 @"
     $(if ($first) {''} else {','})
     {
-      "BenchmarkName": "$databaseType Page Query With Range",
+      "BenchmarkName": "$databaseType Sample Query",
       "DatabaseType": "$databaseType",
       "ConnectionString": "$connectionString",
+      "TableFilePath": "$tableFile",
       "QueryFilePath": "$queryFile",
       "TableName": "$tableName"
     }
@@ -47,19 +52,26 @@ foreach ($databaseType in $connectionStrings.Keys)
 @"
     $(if ($first) {''} else {','})
     {
-      "BenchmarkName": "$databaseType Page Query With Range",
+      "BenchmarkName": "$databaseType Sample Raw Query",
       "DatabaseType": "$databaseType",
       "ConnectionString": "$connectionString",
       "QueryFilePath": "$rawQueryFile",
+      "QueryParametersFilePath": "$rawQueryParametersFile",
       "TableName": "$tableName"
     }
 "@ | Out-File -FilePath $rawQueryScenarioFile -Append -Encoding UTF8
   }
 
-  & $toolPath create --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/SalesTable.json --TableName="$tableName" --DropExisting=true
+  & $toolPath create --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/GeneratedUsersTable.json --DropExisting=true
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-  & $toolPath import --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/SalesTable.json --TableName="$tableName" --MappingFilePath=Definitions/SalesTableMapping.json --DataSourceType=Csv --DataSourceFilePath="Definitions/1000 Sales Records.csv"
+  & $toolPath import --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/GeneratedUsersTable.json --DataSourceType=Generator --DataSourceFilePath=Definitions/GeneratedUsersDataSource.json --DataSourceMaxRows=100
+  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+  & $toolPath create --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/$tableFile --TableName="$tableName" --DropExisting=true
+  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+  & $toolPath import --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/$tableFile --TableName="$tableName" --DataSourceType=Generator --DataSourceFilePath=Definitions/$($inputFilesItem['DataSourceFile']) --DataSourceMaxRows=1000
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   Write-Output ""
@@ -77,6 +89,6 @@ foreach ($databaseType in $connectionStrings.Keys)
 }
 '@ | Out-File -FilePath $rawQueryScenarioFile -Append -Encoding UTF8
 
-& $toolPath query-scenario --QueryScenarioFilePath=Definitions/SalesQueryScenario.json --QueryScenarioParametersFilePath=Definitions/SalesQueryScenarioParameters.json
+& $toolPath query-scenario --QueryScenarioFilePath=$queryScenarioFile --QueryScenarioParametersFilePath=Definitions/SampleQueryScenarioParameters.json
 
-& $toolPath raw-query-scenario --QueryScenarioFilePath=Definitions/SalesRawQueryScenario.json --QueryScenarioParametersFilePath=Definitions/SalesQueryScenarioParameters.json
+& $toolPath raw-query-scenario --QueryScenarioFilePath=$rawQueryScenarioFile --QueryScenarioParametersFilePath=Definitions/SampleQueryScenarioParameters.json

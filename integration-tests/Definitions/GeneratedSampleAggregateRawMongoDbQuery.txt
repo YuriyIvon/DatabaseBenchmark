@@ -1,0 +1,5 @@
+[
+  { $match: {"$and": [ { "Tags": ${Tags} } ] } },
+  { $group: { _id: "$CountryCode", "AverageRating": { $avg: "$Rating" }, "TotalCount": { $sum: "$Count" } } },
+  { $sort: {"_id": 1 } }
+]

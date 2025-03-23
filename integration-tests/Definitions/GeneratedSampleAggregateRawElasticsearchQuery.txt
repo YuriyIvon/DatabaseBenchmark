@@ -1,0 +1,34 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "terms": {
+            "Tags": ${Tags}
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "by_country": {
+      "terms": {
+        "field": "CountryCode.keyword",
+        "size": 100
+      },
+      "aggs": {
+        "AverageRating": {
+          "avg": {
+            "field": "Rating"
+          }
+        },
+        "TotalCount": {
+          "sum": {
+            "field": "Count"
+          }
+        }
+      }
+    }
+  }
+}

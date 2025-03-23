@@ -1,0 +1,7 @@
+{
+  "Condition": {
+    "ColumnName": "Tags",
+    "Operator": "Equals",
+    "Value": ["Three"]
+  }
+}

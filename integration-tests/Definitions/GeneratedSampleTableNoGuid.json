@@ -1,0 +1,20 @@
+{
+  "Name": "GeneratedSample",
+  "Columns": [
+    { "Name": "Id", "Type": "Integer", "Nullable": false, "Queryable": false, "PartitionKey": true },
+    { "Name": "CountryCode", "Type": "String", "Queryable": true },
+    { "Name": "IsActive", "Type": "Boolean", "Queryable": true },
+    { "Name": "CompanyName", "Type": "String", "Queryable": true },
+    { "Name": "CreatedAt", "Type": "DateTime", "Queryable": true },
+    { "Name": "Iban", "Type": "String", "Queryable": true },
+    { "Name": "Rating", "Type": "Double", "Queryable": true },
+    { "Name": "UserId", "Type": "Integer", "Queryable": true },
+    { "Name": "Count", "Type": "Integer", "Queryable": true },
+    { "Name": "IpAddress", "Type": "String", "Queryable": true },
+    { "Name": "Color", "Type": "String", "Queryable": true },
+    { "Name": "Phone", "Type": "String", "Queryable": true },
+    { "Name": "Code", "Type": "String", "Queryable": true },
+    { "Name": "Sentence", "Type": "String", "Queryable": true },
+    { "Name": "Vin", "Type": "String", "Queryable": true }
+  ]
+}

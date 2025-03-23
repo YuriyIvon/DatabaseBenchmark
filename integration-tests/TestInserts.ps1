@@ -1,20 +1,23 @@
 $toolPath="..\src\DatabaseBenchmark\bin\Debug\net8.0\DatabaseBenchmark"
 
+$traceQueries = "false"
+
 . .\ConnectionStrings.ps1
-. .\QueryFiles.ps1
+. .\InputFiles.ps1
 
 foreach ($databaseType in $connectionStrings.Keys)
 {
   Write-Output $databaseType
 
   $connectionString = $connectionStrings[$databaseType]
-  $tableNameOverride = $tableNameOverrides[$databaseType]
+  $inputFilesItem = $inputFiles[$databaseType]
+  $tableNameOverride = $inputFilesItem['TableName']
   $tableNameParameter = if ($tableNameOverride -ne $null) { "--TableName=$tableNameOverride" } else { "" }
 
-  & $toolPath create --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/SalesTable.json $tableNameParameter --DropExisting=true
+  & $toolPath create --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/$($inputFilesItem['TableFile']) $tableNameParameter --DropExisting=true
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-  & $toolPath insert --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/SalesTable.json $tableNameParameter --MappingFilePath=Definitions/SalesTableMapping.json --DataSourceType=Csv --DataSourceFilePath="Definitions/1000 Sales Records.csv"
+  & $toolPath insert --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/$($inputFilesItem['TableFile']) $tableNameParameter --DataSourceType=Generator --DataSourceFilePath=Definitions/$($inputFilesItem['DataSourceFile']) --DataSourceMaxRows=100 --TraceQueries=$traceQueries
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   Write-Output ""

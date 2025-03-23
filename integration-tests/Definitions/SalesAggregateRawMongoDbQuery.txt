@@ -1,6 +1,0 @@
-[
-  { $match: { "Country": ${Country} } },
-  { $addFields: { "ItemPrice": { "$multiply": ["$UnitPrice", "$UnitsSold"] } } },
-  { $group: { _id: "$ItemType", "TotalPrice": { $sum: "$ItemPrice" } } },
-  { $sort: {"_id": 1 } }
-]

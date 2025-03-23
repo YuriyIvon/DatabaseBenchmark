@@ -2,20 +2,43 @@
 
 toolPath="../src/DatabaseBenchmark/bin/Release/net8.0/linux-x64/DatabaseBenchmark"
 
-. ConnectionStrings.sh
-. QueryFiles.sh
+traceQueries="false"
 
-for databaseType in "${!connectionStrings[@]}"
-do
+. ./connectionStrings.sh
+. ./inputFiles.sh
+
+for databaseType in "${!connectionStrings[@]}"; do
   echo "$databaseType"
 
-  connectionString=${connectionStrings[$databaseType]}
+  connectionString="${connectionStrings[$databaseType]}"
+  tableFile="${inputFiles[${databaseType}_TableFile]}"
+  dataSourceFile="${inputFiles[${databaseType}_DataSourceFile]}"
+  tableNameOverride="${inputFiles[${databaseType}_TableName]}"
 
-  $toolPath create --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/SalesTable.json --DropExisting=true
-  if [ $? -ne 0 ]; then exit $?; fi
+  if [[ -n "$tableNameOverride" ]]; then
+    tableNameParameter="--TableName=$tableNameOverride"
+  else
+    tableNameParameter=""
+  fi
 
-  $toolPath insert --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/SalesTable.json --MappingFilePath=Definitions/SalesTableMapping.json --DataSourceType=Csv --DataSourceFilePath="Definitions/1000 Sales Records.csv"
-  if [ $? -ne 0 ]; then exit $?; fi
+  "$toolPath" create \
+    --DatabaseType="$databaseType" \
+    --ConnectionString="$connectionString" \
+    --TableFilePath="Definitions/$tableFile" \
+    $tableNameParameter \
+    --DropExisting=true
+  if [[ $? -ne 0 ]]; then exit $?; fi
+
+  "$toolPath" insert \
+    --DatabaseType="$databaseType" \
+    --ConnectionString="$connectionString" \
+    --TableFilePath="Definitions/$tableFile" \
+    $tableNameParameter \
+    --DataSourceType=Generator \
+    --DataSourceFilePath="Definitions/$dataSourceFile" \
+    --DataSourceMaxRows=100 \
+    --TraceQueries="$traceQueries"
+  if [[ $? -ne 0 ]]; then exit $?; fi
 
   echo ""
 done

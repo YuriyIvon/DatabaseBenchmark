@@ -1,0 +1,8 @@
+[
+  {
+     "Name": "Tags",
+     "Type": "String",
+     "Array": true,
+     "Value": ["Three"]
+  }
+]

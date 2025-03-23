@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "UserId",
+    "Type": "Integer",
+    "RandomizeValue": true,
+    "ValueRandomizationRule": {
+      "UseExistingValues": false,
+      "GeneratorOptions": {
+        "Type": "ColumnItem",
+        "TableName": "GeneratedUsers",
+        "ColumnName": "Id",
+        "Distinct": false,
+        "ColumnType": "Integer"
+      }
+    }
+  }
+]

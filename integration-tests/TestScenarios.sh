@@ -1,87 +1,122 @@
 #!/bin/bash
 
 toolPath="../src/DatabaseBenchmark/bin/Release/net8.0/linux-x64/DatabaseBenchmark"
-queryScenarioFile="Definitions/SalesQueryScenario.json"
-rawQueryScenarioFile="Definitions/SalesRawQueryScenario.json"
+queryScenarioFile="Definitions/SampleQueryScenario.json"
+rawQueryScenarioFile="Definitions/SampleRawQueryScenario.json"
 
-. ConnectionStrings.sh
-. QueryFiles.sh
+. ./connectionStrings.sh
+. ./inputFiles.sh
 
 echo "Populating databases"
 echo ""
 
-echo '{
-  "Name": "Sales scenario",
+cat <<EOF > "$queryScenarioFile"
+{
+  "Name": "Sample scenario",
   "Items": [
-' > "$queryScenarioFile"
+EOF
 
-echo '{
-  "Name": "Sales scenario",
+cat <<EOF > "$rawQueryScenarioFile"
+{
+  "Name": "Sample scenario",
   "Items": [
-' > "$rawQueryScenarioFile"
+EOF
 
-first=1
+first=true
 
-for databaseType in "${!connectionStrings[@]}"
-do
+for databaseType in "${!connectionStrings[@]}"; do
   echo "$databaseType"
 
-  connectionString=${connectionStrings[$databaseType]}
-  queryFile=${queryFiles[$databaseType]}
-  rawQueryFile=${rawQueryFiles[$databaseType]}
+  connectionString="${connectionStrings[$databaseType]}"
+  tableFile="${inputFiles[${databaseType}_TableFile]}"
+  tableNameOverride="${inputFiles[${databaseType}_TableName]}"
+  queryFile="${inputFiles[${databaseType}_QueryFile]}"
+  rawQueryFile="${inputFiles[${databaseType}_RawQueryFile]}"
+  rawQueryParametersFile="${inputFiles[${databaseType}_RawQueryParametersFile]}"
+  dataSourceFile="${inputFiles[${databaseType}_DataSourceFile]}"
+  tableName="${tableNameOverride:-GeneratedSample}"
 
-  if [[ -n "${tableNameOverrides[$databaseType]}" ]]; then
-    tableName="${tableNameOverrides[$databaseType]}"
-  else
-    tableName="Sales"
-  fi
-
-  if [ "$first" -ne 1 ]; then
+  if [ "$first" = false ]; then
     echo "," >> "$queryScenarioFile"
   fi
 
-  echo "    {
-      \"BenchmarkName\": \"$databaseType Page Query With Range\",
-      \"DatabaseType\": \"$databaseType\",
-      \"ConnectionString\": \"$connectionString\",
-      \"QueryFilePath\": \"$queryFile\",
-      \"TableName\": \"$tableName\"
-    }" >> "$queryScenarioFile"
+  cat <<EOF >> "$queryScenarioFile"
+    {
+      "BenchmarkName": "$databaseType Sample Query",
+      "DatabaseType": "$databaseType",
+      "ConnectionString": "$connectionString",
+      "TableFilePath": "$tableFile",
+      "QueryFilePath": "$queryFile",
+      "TableName": "$tableName"
+    }
+EOF
 
-  if [ -n "$rawQueryFile" ]; then
-
-    if [ "$first" -ne 1 ]; then
+  if [[ -n "$rawQueryFile" ]]; then
+    if [ "$first" = false ]; then
       echo "," >> "$rawQueryScenarioFile"
     fi
 
-    echo "    {
-      \"BenchmarkName\": \"$databaseType Page Query With Range\",
-      \"DatabaseType\": \"$databaseType\",
-      \"ConnectionString\": \"$connectionString\",
-      \"QueryFilePath\": \"$rawQueryFile\",
-      \"TableName\": \"$tableName\"
-    }" >> "$rawQueryScenarioFile"
+    cat <<EOF >> "$rawQueryScenarioFile"
+    {
+      "BenchmarkName": "$databaseType Sample Raw Query",
+      "DatabaseType": "$databaseType",
+      "ConnectionString": "$connectionString",
+      "QueryFilePath": "$rawQueryFile",
+      "QueryParametersFilePath": "$rawQueryParametersFile",
+      "TableName": "$tableName"
+    }
+EOF
   fi
 
-  $toolPath create --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/SalesTable.json --TableName="$tableName" --DropExisting=true
-  if [ $? -ne 0 ]; then exit $?; fi
+  "$toolPath" create \
+    --DatabaseType="$databaseType" \
+    --ConnectionString="$connectionString" \
+    --TableFilePath="Definitions/GeneratedUsersTable.json" \
+    --DropExisting=true
+  if [[ $? -ne 0 ]]; then exit $?; fi
 
-  $toolPath import --DatabaseType=$databaseType --ConnectionString="$connectionString" --TableFilePath=Definitions/SalesTable.json --MappingFilePath=Definitions/SalesTableMapping.json --DataSourceType=Csv --DataSourceFilePath="Definitions/1000 Sales Records.csv"
-  if [ $? -ne 0 ]; then exit $?; fi
-   
+  "$toolPath" import \
+    --DatabaseType="$databaseType" \
+    --ConnectionString="$connectionString" \
+    --TableFilePath="Definitions/GeneratedUsersTable.json" \
+    --DataSourceType=Generator \
+    --DataSourceFilePath="Definitions/GeneratedUsersDataSource.json" \
+    --DataSourceMaxRows=100
+  if [[ $? -ne 0 ]]; then exit $?; fi
+
+  "$toolPath" create \
+    --DatabaseType="$databaseType" \
+    --ConnectionString="$connectionString" \
+    --TableFilePath="Definitions/$tableFile" \
+    --TableName="$tableName" \
+    --DropExisting=true
+  if [[ $? -ne 0 ]]; then exit $?; fi
+
+  "$toolPath" import \
+    --DatabaseType="$databaseType" \
+    --ConnectionString="$connectionString" \
+    --TableFilePath="Definitions/$tableFile" \
+    --TableName="$tableName" \
+    --DataSourceType=Generator \
+    --DataSourceFilePath="Definitions/$dataSourceFile" \
+    --DataSourceMaxRows=1000
+  if [[ $? -ne 0 ]]; then exit $?; fi
+
   echo ""
 
-  first=0
+  first=false
 done
 
-echo '  ]
-}
-' >> "$queryScenarioFile"
+echo "  ]" >> "$queryScenarioFile"
+echo "}" >> "$queryScenarioFile"
 
-echo '  ]
-}
-' >> "$rawQueryScenarioFile"
+echo "  ]" >> "$rawQueryScenarioFile"
+echo "}" >> "$rawQueryScenarioFile"
 
-$toolPath query-scenario --QueryScenarioFilePath=Definitions/SalesQueryScenario.json --QueryScenarioParametersFilePath=Definitions/SalesQueryScenarioParameters.json
+"$toolPath" query-scenario \
+  --QueryScenarioFilePath="$queryScenarioFile" \
+  --QueryScenarioParametersFilePath="Definitions/SampleQueryScenarioParameters.json"
 
-$toolPath raw-query-scenario --QueryScenarioFilePath=Definitions/SalesRawQueryScenario.json --QueryScenarioParametersFilePath=Definitions/SalesQueryScenarioParameters.json
+"$toolPath" raw-query-scenario \
+  --QueryScenarioFilePath="$rawQueryScenarioFile" \
+  --QueryScenarioParametersFilePath="Definitions/SampleQueryScenarioParameters.json"

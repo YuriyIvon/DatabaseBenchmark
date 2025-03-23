@@ -1,0 +1,4 @@
+SELECT CountryCode, AVG(Rating) AverageRating, SUM(Count) TotalCount
+FROM GeneratedSample
+WHERE Tags=${Tags}
+GROUP BY CountryCode

@@ -1,0 +1,4 @@
+SELECT GeneratedSample.CountryCode, AVG(GeneratedSample.Rating) AverageRating, SUM(GeneratedSample.Count) TotalCount
+FROM GeneratedSample
+WHERE GeneratedSample.Tags=${Tags}
+GROUP BY GeneratedSample.CountryCode
