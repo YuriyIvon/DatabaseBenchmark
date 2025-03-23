@@ -18,12 +18,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.405.31" />
-    <PackageReference Include="BloomFilter.NetCore" Version="2.4.0" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.406.6" />
+    <PackageReference Include="BloomFilter.NetCore" Version="2.4.1" />
     <PackageReference Include="Bogus" Version="35.6.2" />
     <PackageReference Include="CsvHelper" Version="33.0.1" />
     <PackageReference Include="Fare" Version="2.2.1" />
-    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.47.2" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.48.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
     <PackageReference Include="MonetDB" Version="2.1.2" />
     <PackageReference Include="MongoDB.Driver" Version="3.2.1" />
