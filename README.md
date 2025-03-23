@@ -31,6 +31,7 @@ This tool addresses the issues from above by introducing a data import and query
   * [Generators](#generators)
   * [Report columns](#report_columns)
   * [Connection strings](#connection_strings)
+  * [Array columns](#array_columns)
 
 * [Limitations](#limitations)
 
@@ -211,6 +212,7 @@ A parameter file must contain a JSON array of objects having the following prope
 * `Collection` - when `RandomizeValue` is `true`, specifies if a random collection should be generated.
 * `RandomizeValue` - specifies if the value should be randomized.
 * `ValueRandomizationRule` - specifies the [value randomization rule](#value_randomization_rule).
+* `Array` - specifies if the parameter is an array. Can be used for the database engines supporting [array columns](#array_columns). Default is `false`.
 
 ### Raw query benchmark scenarios<a name="raw_query_benchmark_scenarios"></a>
 
@@ -259,11 +261,12 @@ Where each column definition has the following properties:
 
 * `Name` - column name.
 * `Type` - column type, can be one of `Boolean`, `DateTime`, `Double`, `Guid`, `Integer`, `Long`,  `String`, and `Text`.
-* `Nullable` - specifies if the column is nullable.
-* `Queryable` - gives a hint if the column is going to participate in query conditions. Based on this information some table builders may generate more optimal definitions.
-* `DatabaseGenerated` - specifies if the column is auto-generated. Databases that don't support auto-generated columns will report a warning.
-* `PartitionKey` - specifies if the table should be partitioned by this column. Is currently supported for Cosmos DB and DynamoDB only (if there is no partition key column in the table definition, a dummy constant-value partition key is created). Other database plugins ignore this flag.
-* `SortKey` - specifies if the column should be assigned as the sort key for the table. Is supported for DynamoDB only. Other database plugins ignore this flag.
+* `Nullable` - specifies if the column is nullable. Default is `true`.
+* `Queryable` - gives a hint if the column is going to participate in query conditions. Based on this information some table builders may generate more optimal definitions. Default is `true`.
+* `DatabaseGenerated` - specifies if the column is auto-generated. Databases that don't support auto-generated columns will report a warning. Default is `false`.
+* `PartitionKey` - specifies if the table should be partitioned by this column. Is currently supported for Cosmos DB and DynamoDB only (if there is no partition key column in the table definition, a dummy constant-value partition key is created). Other database plugins ignore this flag. Default is `false`.
+* `SortKey` - specifies if the column should be assigned as the sort key for the table. Is supported for DynamoDB only. Other database plugins ignore this flag. Default is `false`.
+* `Array` - specifies if the column is an [array column](#array_columns). Default is `false`.
 
 ### Query definition<a name="query_definition"></a>
 
@@ -385,6 +388,7 @@ Generates random date/time value. The available attributes are:
 * `MaxValue` - maximum value in ISO-8601 format. Defaults to the year after the current date and time.
 * `Direction` - specifies the growth direction for generated values - `None`, `Ascending`, or `Descending`. If set to `Ascending`, the sequence of generated values starts from `MinValue` and grows until `MaxValue`. With `Descending`, it starts from `MaxValue` and goes in the opposite direction until `MinValue`. Default is `None`.
 * `Delta` - time interval in .NET-specific TimeSpan format, which adheres to the pattern `[days:]hours:minutes:seconds[.fractional_seconds]`. When `Direction` is not `None`, it determines the increment for each subsequently generated value or the maximum increment if `RandomizeDelta` is also enabled. If `Direction` is `None`, it specifies the fixed interval between all possible generated values. For example, with a `MinValue` of `2020-01-01T13:00:00`, a `MaxValue` of `2020-01-04T13:00:00`, and a `Delta` of `1.00:00:00` (one day), the utility will generate values from January 1st to January 4th, 2020, all at `13:00:00`, in random order. The value of `00:00:00` is allowed only when `Direction` is `None` and means no restriction on the set of generated values other than the minimum and maximum. The default value is `00:00:00`.
+* `DateTimeKind` - .NET DateTime kind to be used for generated values. It can be `Local`, `Utc`, or `Unspecified`. For database table columns of DateTime type without time zone offset, it is better to use `Unspecified`. Default is `Unspecified`.
 
 #### Finance
 Generates finance-related pieces of information. The following values are available for its  `Kind`  attribute:
@@ -580,6 +584,25 @@ All available region endpoint codes can be found in the [official DynamoDB docum
 
 `Data Source=.;Initial Catalog=mydb;Integrated Security=True;`
 
+### Array columns<a name="array_columns"></a>
+Some databases allow storing arrays as column values, providing greater flexibility for data modeling. Data Benchmark supports array columns for both data import and querying for the following database engines:
+* `ClickHouse`
+* `CosmosDb`
+* `DynamoDb`
+* `Elasticsearch`
+* `MongoDb`
+* `Postgres`
+* `PostgresJsonb` 
+
+An array column can be declared by setting the `Array` flag to `true` in the column definition. The `Type` attribute specifies the type of the array elements.
+
+Array columns can be populated from any data source as follows:
+* For the `Generator` data source type, use the `Collection` generator.
+* For the `Database` data source type, ensure that the source column is either an array or a string representing a valid JSON array expression. 
+* For other data source types, any string value representing a valid JSON array expression can be imported into an array column.
+
+Currently, only three conditional operators are supported for array columns: `Equals`, `NotEquals`, `Contains`. If additional functionality specific to certain databases is required, the limitation can be bypassed by using [raw query benchmarks](#raw_query_benchmark). 
+
 ## Limitations<a name="limitations"></a>
 
 There are some limitations that are going to be addressed in the future:
@@ -589,3 +612,4 @@ There are some limitations that are going to be addressed in the future:
 * Configurable partitioning is supported for Cosmos DB and DynamoDB only.
 * Importing from Elasticsearch database doesn't support an unlimited number of rows.
 * Generators do not currently support contextually dependent values. For example, the first name and full name values produced by the name generator for the same row of data won't correspond to each other.
+* Array columns support elements of primitive types only, nested objects are not supported yet.
