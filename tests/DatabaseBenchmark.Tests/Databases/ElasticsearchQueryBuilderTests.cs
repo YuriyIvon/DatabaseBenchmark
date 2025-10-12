@@ -56,7 +56,7 @@ namespace DatabaseBenchmark.Tests.Databases
             Assert.Equal("{\"aggs\":{\"grouping\":{\"aggs\":{\"TotalPrice\":{\"sum\":{\"field\":\"Price\"}}},\"composite\":{\"size\":10000,\"sources\":[{\"Category\":{\"terms\":{\"field\":\"Category\",\"order\":\"asc\"}}},{\"SubCategory\":{\"terms\":{\"field\":\"SubCategory\",\"order\":\"asc\"}}}]}}}," +
                 "\"fields\":[\"Category\",\"SubCategory\"]," +
                 "\"from\":10," +
-                "\"query\":{\"bool\":{\"must\":[{\"term\":{\"Category\":{\"value\":\"ABC\"}}},{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"SubCategory\"}}]}},{\"range\":{\"Rating\":{\"gte\":5.0}}},{\"bool\":{\"should\":[{\"wildcard\":{\"Name\":{\"value\":\"A*\"}}},{\"wildcard\":{\"Name\":{\"value\":\"*B*\"}}}]}}]}}," +
+                "\"query\":{\"bool\":{\"must\":[{\"term\":{\"Category\":{\"value\":[\"ABC\",\"DEF\"]}}},{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"SubCategory\"}}]}},{\"range\":{\"Rating\":{\"gte\":5.0}}},{\"term\":{\"Count\":{\"value\":0}}},{\"bool\":{\"should\":[{\"wildcard\":{\"Name\":{\"value\":\"A*\"}}},{\"wildcard\":{\"Name\":{\"value\":\"*B*\"}}}]}}]}}," +
                 "\"size\":100}",
                 rawQuery);
         }
@@ -95,7 +95,7 @@ namespace DatabaseBenchmark.Tests.Databases
             Assert.Equal("{\"aggs\":{\"grouping\":{\"aggs\":{\"TotalPrice\":{\"sum\":{\"field\":\"Price\"}}},\"composite\":{\"size\":10000,\"sources\":[{\"Category\":{\"terms\":{\"field\":\"Category\",\"order\":\"asc\"}}},{\"SubCategory\":{\"terms\":{\"field\":\"SubCategory\",\"order\":\"asc\"}}}]}}}," +
                 "\"fields\":[\"Category\",\"SubCategory\"]," +
                 "\"from\":10," +
-                "\"query\":{\"bool\":{\"must\":[{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"SubCategory\"}}]}},{\"range\":{\"Rating\":{\"gte\":5.0}}},{\"bool\":{\"should\":[{\"wildcard\":{\"Name\":{\"value\":\"A*\"}}},{\"wildcard\":{\"Name\":{\"value\":\"*B*\"}}}]}}]}}," +
+                "\"query\":{\"bool\":{\"must\":[{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"SubCategory\"}}]}},{\"range\":{\"Rating\":{\"gte\":5.0}}},{\"term\":{\"Count\":{\"value\":0}}},{\"bool\":{\"should\":[{\"wildcard\":{\"Name\":{\"value\":\"A*\"}}},{\"wildcard\":{\"Name\":{\"value\":\"*B*\"}}}]}}]}}," +
                 "\"size\":100}",
                 rawQuery);
         }

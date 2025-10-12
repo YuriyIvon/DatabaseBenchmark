@@ -12,6 +12,8 @@
 
         public bool Queryable { get; set; } = true;
 
+        public bool PrimaryKey { get; set; } = false;
+
         public bool PartitionKey { get; set; } = false;
 
         public bool SortKey { get; set; } = false;

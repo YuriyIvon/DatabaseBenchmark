@@ -1,5 +1,6 @@
 ﻿using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.AzureSearch;
 using DatabaseBenchmark.Databases.ClickHouse;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.CosmosDb;
@@ -29,6 +30,7 @@ namespace DatabaseBenchmark.Databases
                 ["Postgres"] = (connectionString) => new PostgreSqlDatabase(connectionString, environment, optionsProvider),
                 ["PostgresJsonb"] = (connectionString) => new PostgreSqlJsonbDatabase(connectionString, environment, optionsProvider),
                 ["Elasticsearch"] = (connectionString) => new ElasticsearchDatabase(connectionString, environment),
+                ["AzureSearch"] = (connectionString) => new AzureSearchDatabase(connectionString, environment),
                 ["MySql"] = (connectionString) => new MySqlDatabase(connectionString, environment, optionsProvider),
                 ["MonetDb"] = (connectionString) => new MonetDbDatabase(connectionString, environment),
                 ["MongoDb"] = (connectionString) => new MongoDbDatabase(connectionString, environment, optionsProvider),

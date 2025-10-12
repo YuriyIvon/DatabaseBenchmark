@@ -205,7 +205,7 @@ namespace DatabaseBenchmark.Databases.Sql
         {
             if (inputConditions.Length > 1)
             {
-                throw new InputArgumentException($"Operator NOT can have only one operand");
+                throw new InputArgumentException($"Operator \"Not\" can have only one operand");
             }
 
             return $"NOT ({inputConditions.First()})";

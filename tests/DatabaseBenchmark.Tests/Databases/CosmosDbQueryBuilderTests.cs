@@ -34,19 +34,21 @@ namespace DatabaseBenchmark.Tests.Databases
             //Please note than in fact in CosmosDB GROUP BY and ORDER BY are mutually exclusive
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Sample.Category, Sample.SubCategory, SUM(Sample.Price) TotalPrice FROM Sample"
-                + " WHERE (Sample.Category = @p0 AND IS_NULL(Sample.SubCategory) AND Sample.Rating >= @p1 AND (Sample.Name LIKE @p2 OR Sample.Name LIKE @p3))"
+                + " WHERE (Sample.Category IN (@p0, @p1) AND IS_NULL(Sample.SubCategory) AND Sample.Rating >= @p2 AND Sample.Count = @p3 AND (Sample.Name LIKE @p4 OR Sample.Name LIKE @p5))"
                 + " GROUP BY Sample.Category, Sample.SubCategory"
                 + " ORDER BY Sample.Category ASC, Sample.SubCategory ASC"
-                + " OFFSET @p4 LIMIT @p5", normalizedQueryText);
+                + " OFFSET @p6 LIMIT @p7", normalizedQueryText);
 
             var reference = new SqlQueryParameter[]
             {
                 new ('@', "p0", "ABC", ColumnType.String),
-                new ('@', "p1", 5.0, ColumnType.Double),
-                new ('@', "p2", "A%", ColumnType.String),
-                new ('@', "p3", "%B%", ColumnType.String),
-                new ('@', "p4", 10, ColumnType.Integer),
-                new ('@', "p5", 100, ColumnType.Integer)
+                new ('@', "p1", "DEF", ColumnType.String),
+                new ('@', "p2", 5.0, ColumnType.Double),
+                new ('@', "p3", 0, ColumnType.Integer),
+                new ('@', "p4", "A%", ColumnType.String),
+                new ('@', "p5", "%B%", ColumnType.String),
+                new ('@', "p6", 10, ColumnType.Integer),
+                new ('@', "p7", 100, ColumnType.Integer)
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);

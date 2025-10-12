@@ -58,7 +58,7 @@ namespace DatabaseBenchmark.Tests.Databases
             var queryBson = builder.Build();
             var queryText = queryBson.ToJson();
 
-            Assert.Equal("[{ \"$match\" : { \"$and\" : [{ \"Category\" : \"ABC\" }, { \"SubCategory\" : null }, { \"Rating\" : { \"$gte\" : 5.0 } }, { \"$or\" : [{ \"Name\" : { \"$regex\" : \"^A\" } }, { \"Name\" : { \"$regex\" : \"B\" } }] }] } }," +
+            Assert.Equal("[{ \"$match\" : { \"$and\" : [{ \"Category\" : { \"$in\" : [\"ABC\", \"DEF\"] } }, { \"SubCategory\" : null }, { \"Rating\" : { \"$gte\" : 5.0 } }, { \"Count\" : 0 }, { \"$or\" : [{ \"Name\" : { \"$regex\" : \"^A\" } }, { \"Name\" : { \"$regex\" : \"B\" } }] }] } }," +
                 " { \"$group\" : { \"_id\" : { \"Category\" : \"$Category\", \"SubCategory\" : \"$SubCategory\" }, \"TotalPrice\" : { \"$sum\" : \"$Price\" } } }," +
                 " { \"$sort\" : { \"_id.Category\" : 1, \"_id.SubCategory\" : 1 } }," +
                 " { \"$skip\" : 10 }, { \"$limit\" : 100 }," +
@@ -97,7 +97,7 @@ namespace DatabaseBenchmark.Tests.Databases
             var queryBson = builder.Build();
             var queryText = queryBson.ToJson();
 
-            Assert.Equal("[{ \"$match\" : { \"$and\" : [{ \"SubCategory\" : null }, { \"Rating\" : { \"$gte\" : 5.0 } }, { \"$or\" : [{ \"Name\" : { \"$regex\" : \"^A\" } }, { \"Name\" : { \"$regex\" : \"B\" } }] }] } }," +
+            Assert.Equal("[{ \"$match\" : { \"$and\" : [{ \"SubCategory\" : null }, { \"Rating\" : { \"$gte\" : 5.0 } }, { \"Count\" : 0 }, { \"$or\" : [{ \"Name\" : { \"$regex\" : \"^A\" } }, { \"Name\" : { \"$regex\" : \"B\" } }] }] } }," +
                 " { \"$group\" : { \"_id\" : { \"Category\" : \"$Category\", \"SubCategory\" : \"$SubCategory\" }, \"TotalPrice\" : { \"$sum\" : \"$Price\" } } }," +
                 " { \"$sort\" : { \"_id.Category\" : 1, \"_id.SubCategory\" : 1 } }," +
                 " { \"$skip\" : 10 }, { \"$limit\" : 100 }," +

@@ -78,7 +78,7 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT attributes->>'Category' Category, attributes->>'SubCategory' SubCategory, SUM(Price) TotalPrice FROM Sample"
-                + " WHERE (attributes @> '{\"Category\": \"ABC\"}'::jsonb AND attributes @> '{\"SubCategory\": null}'::jsonb AND attributes @@ '$.Rating >= 5')"
+                + " WHERE ((attributes @> '{\"Category\": \"ABC\"}'::jsonb OR attributes @> '{\"Category\": \"DEF\"}'::jsonb) AND attributes @> '{\"SubCategory\": null}'::jsonb AND attributes @@ '$.Rating >= 5' AND attributes @> '{\"Count\": 0}'::jsonb)"
                 + " GROUP BY attributes->>'Category', attributes->>'SubCategory'"
                 + " ORDER BY attributes->>'Category' ASC, attributes->>'SubCategory' ASC"
                 + " OFFSET @p0 ROWS FETCH NEXT @p1 ROWS ONLY", normalizedQueryText);
@@ -104,19 +104,21 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT attributes->>'Category' Category, attributes->>'SubCategory' SubCategory, SUM(Price) TotalPrice FROM Sample"
-                + " WHERE (attributes->>'Category' = @p0 AND attributes->>'SubCategory' IS NULL AND (attributes->>'Rating')::double >= @p1 AND (attributes->>'Name' LIKE @p2 OR attributes->>'Name' LIKE @p3))"
+                + " WHERE (attributes->>'Category' IN (@p0, @p1) AND attributes->>'SubCategory' IS NULL AND (attributes->>'Rating')::double >= @p2 AND (attributes->>'Count')::integer = @p3 AND (attributes->>'Name' LIKE @p4 OR attributes->>'Name' LIKE @p5))"
                 + " GROUP BY attributes->>'Category', attributes->>'SubCategory'"
                 + " ORDER BY attributes->>'Category' ASC, attributes->>'SubCategory' ASC"
-                + " OFFSET @p4 ROWS FETCH NEXT @p5 ROWS ONLY", normalizedQueryText);
+                + " OFFSET @p6 ROWS FETCH NEXT @p7 ROWS ONLY", normalizedQueryText);
 
             var reference = new SqlQueryParameter[]
             {
                 new ('@', "p0", "ABC", ColumnType.String),
-                new ('@', "p1", 5.0, ColumnType.Double),
-                new ('@', "p2", "A%", ColumnType.String),
-                new ('@', "p3", "%B%", ColumnType.String),
-                new ('@', "p4", query.Skip, ColumnType.Integer),
-                new ('@', "p5", query.Take, ColumnType.Integer),
+                new ('@', "p1", "DEF", ColumnType.String),
+                new ('@', "p2", 5.0, ColumnType.Double),
+                new ('@', "p3", 0, ColumnType.Integer),
+                new ('@', "p4", "A%", ColumnType.String),
+                new ('@', "p5", "%B%", ColumnType.String),
+                new ('@', "p6", query.Skip, ColumnType.Integer),
+                new ('@', "p7", query.Take, ColumnType.Integer),
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);
@@ -166,7 +168,7 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT attributes->>'Category' Category, attributes->>'SubCategory' SubCategory, SUM(Price) TotalPrice FROM Sample"
-                + " WHERE (attributes @> '{\"SubCategory\": null}'::jsonb AND attributes @@ '$.Rating >= 5')"
+                + " WHERE (attributes @> '{\"SubCategory\": null}'::jsonb AND attributes @@ '$.Rating >= 5' AND attributes @> '{\"Count\": 0}'::jsonb)"
                 + " GROUP BY attributes->>'Category', attributes->>'SubCategory'"
                 + " ORDER BY attributes->>'Category' ASC, attributes->>'SubCategory' ASC"
                 + " OFFSET @p0 ROWS FETCH NEXT @p1 ROWS ONLY", normalizedQueryText);

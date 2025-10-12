@@ -85,15 +85,17 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Category, SubCategory FROM Sample"
-                + " WHERE (Category = ? AND attribute_not_exists(SubCategory) AND Rating >= ? AND (begins_with(Name, ?) OR contains(Name, ?)))"
+                + " WHERE (Category IN (?, ?) AND attribute_not_exists(SubCategory) AND Rating >= ? AND Count = ? AND (begins_with(Name, ?) OR contains(Name, ?)))"
                 + " ORDER BY Category ASC, SubCategory ASC", normalizedQueryText);
 
             var reference = new SqlQueryParameter[]
             {
                 new ('?', "p0", "ABC", ColumnType.String),
-                new ('?', "p1", 5.0, ColumnType.Double),
-                new ('?', "p2", "A", ColumnType.String),
-                new ('?', "p3", "B", ColumnType.String)
+                new ('?', "p1", "DEF", ColumnType.String),
+                new ('?', "p2", 5.0, ColumnType.Double),
+                new ('?', "p3", 0, ColumnType.Integer),
+                new ('?', "p4", "A", ColumnType.String),
+                new ('?', "p5", "B", ColumnType.String)
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);

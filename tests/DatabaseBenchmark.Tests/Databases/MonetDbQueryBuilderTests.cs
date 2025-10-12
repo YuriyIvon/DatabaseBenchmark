@@ -32,19 +32,21 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var normalizedQueryText = queryText.NormalizeSpaces();
             Assert.Equal("SELECT Category, SubCategory, SUM(Price) TotalPrice FROM Sample"
-                + " WHERE (Category = @p0 AND SubCategory IS NULL AND Rating >= @p1 AND (Name LIKE @p2 OR Name LIKE @p3))"
+                + " WHERE (Category IN (@p0, @p1) AND SubCategory IS NULL AND Rating >= @p2 AND Count = @p3 AND (Name LIKE @p4 OR Name LIKE @p5))"
                 + " GROUP BY Category, SubCategory"
                 + " ORDER BY Category ASC, SubCategory ASC"
-                + " LIMIT @p4 OFFSET @p5", normalizedQueryText);
+                + " LIMIT @p6 OFFSET @p7", normalizedQueryText);
 
             var reference = new SqlQueryParameter[]
             {
                 new ('@', "p0", "ABC", ColumnType.String),
-                new ('@', "p1", 5.0, ColumnType.Double),
-                new ('@', "p2", "A%", ColumnType.String),
-                new ('@', "p3", "%B%", ColumnType.String),
-                new ('@', "p4", 100, ColumnType.Integer),
-                new ('@', "p5", 10, ColumnType.Integer)
+                new ('@', "p1", "DEF", ColumnType.String),
+                new ('@', "p2", 5.0, ColumnType.Double),
+                new ('@', "p3", 0, ColumnType.Integer),
+                new ('@', "p4", "A%", ColumnType.String),
+                new ('@', "p5", "%B%", ColumnType.String),
+                new ('@', "p6", 100, ColumnType.Integer),
+                new ('@', "p7", 10, ColumnType.Integer)
             };
 
             Assert.Equal(reference, parametersBuilder.Parameters);

@@ -64,7 +64,7 @@ namespace DatabaseBenchmark.Tests.Utils
                 {
                     Name = "Count",
                     Type = ColumnType.Integer,
-                    Queryable = false,
+                    Queryable = true,
                     Nullable = false
                 }
             ]
@@ -113,8 +113,8 @@ namespace DatabaseBenchmark.Tests.Utils
                     new QueryPrimitiveCondition
                     {
                         ColumnName = "Category",
-                        Operator = QueryPrimitiveOperator.Equals,
-                        Value = "ABC"
+                        Operator = QueryPrimitiveOperator.In,
+                        Value = new string[] { "ABC", "DEF" }
                     },
                     new QueryPrimitiveCondition
                     {
@@ -127,6 +127,12 @@ namespace DatabaseBenchmark.Tests.Utils
                         ColumnName = "Rating",
                         Operator = QueryPrimitiveOperator.GreaterEquals,
                         Value = 5.0
+                    },
+                    new QueryPrimitiveCondition
+                    {
+                        ColumnName = "Count",
+                        Operator = QueryPrimitiveOperator.Equals,
+                        Value = 0
                     },
                     new QueryGroupCondition
                     {
@@ -296,6 +302,31 @@ namespace DatabaseBenchmark.Tests.Utils
         {
             Text = @"[{ ""$match"" : { ""Tags"" : ${tags} } }]",
             Parameters = RawQueryArrayParameters
+        };
+
+        public static RawQuery RawAzureSearchQuery => new()
+        {
+            Text = @"{""Filter"": ""Category eq ${category} and createdDate ge ${minDate} and price le ${maxPrice} and available eq ${available}"", ""OrderBy"": [""createdDate""], ""Skip"": 2, ""Size"": 20}",
+            Parameters = RawQueryParameters
+        };
+
+        public static RawQuery RawAzureSearchInlineQuery => new()
+        {
+            Text = @"{""Filter"": ""Category eq '${category}' and createdDate ge ${minDate} and price le ${maxPrice} and available eq ${available}"", ""OrderBy"": [""createdDate""], ""Skip"": 2, ""Size"": 20}",
+            Parameters = RawQueryInlineParameters
+        };
+
+        public static RawQuery RawAzureSearchArrayQuery => new()
+        {
+            Text = @"{""Filter"": ""Tags/any(item: item eq ${tag})""}",
+            Parameters = [
+                new RawQueryParameter
+                {
+                    Name = "tag",
+                    Type = ColumnType.String,
+                    Value = "One"
+                }
+            ] 
         };
 
         public static RawQueryParameter[] RawQueryParameters =>
