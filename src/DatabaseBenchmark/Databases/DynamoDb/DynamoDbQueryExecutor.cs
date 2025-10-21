@@ -37,9 +37,11 @@ namespace DatabaseBenchmark.Databases.DynamoDb
             {
                 Statement = query,
                 ReturnConsumedCapacity = ReturnConsumedCapacity.TOTAL,
-                Parameters = _parametersBuilder.Parameters
-                    .Select(p => DynamoDbAttributeValueUtils.ToAttributeValue(p.Type, p.Array, p.Value))
-                    .ToList()
+                Parameters = _parametersBuilder.Parameters.Any()
+                    ? _parametersBuilder.Parameters
+                        .Select(p => DynamoDbAttributeValueUtils.ToAttributeValue(p.Type, p.Array, p.Value))
+                        .ToList()
+                    : null
             };
 
             return new DynamoDbPreparedQuery(_client, request);

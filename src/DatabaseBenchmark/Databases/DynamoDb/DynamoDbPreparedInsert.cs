@@ -32,7 +32,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
         {
             var response = _client.BatchWriteItemAsync(_batchRequest).Result;
 
-            _capacityUnits = response.ConsumedCapacity.Sum(cc => cc.CapacityUnits);
+            _capacityUnits = response.ConsumedCapacity.Sum(cc => cc.CapacityUnits.GetValueOrDefault());
             var requestCount = _batchRequest.RequestItems.Sum(i => i.Value.Count);
             var unprocessedCount = response.UnprocessedItems?.Sum(i => i.Value.Count) ?? 0;
             var processedCount = requestCount - unprocessedCount;

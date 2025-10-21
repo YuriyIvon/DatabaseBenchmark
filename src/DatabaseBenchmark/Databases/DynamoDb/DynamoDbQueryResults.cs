@@ -40,7 +40,7 @@ namespace DatabaseBenchmark.Databases.DynamoDb
                 _request.NextToken = _response?.NextToken;
                 _response = _client.ExecuteStatementAsync(_request).Result;
 
-                ConsumedCapacity += _response.ConsumedCapacity.CapacityUnits;
+                ConsumedCapacity += _response.ConsumedCapacity.CapacityUnits.GetValueOrDefault();
 
                 return _response.Items.Any();
             }
