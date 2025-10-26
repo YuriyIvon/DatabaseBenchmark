@@ -1,4 +1,3 @@
-
 # Database Benchmark
 ![Application Status](https://github.com/YuriyIvon/DatabaseBenchmark/actions/workflows/build.yml/badge.svg)
 
@@ -56,6 +55,7 @@ DatabaseBenchmark create --DatabaseType=MongoDb --ConnectionString="mongodb://lo
 **Please note that in most real-life scenarios, the benchmark tool and a database engine must run on separate machines to take network throughput into account and avoid resource contention.**
 
 <a name="database_types"></a>Supported values for `DatabaseType` parameter are:
+* `AzureSearch`
 * `ClickHouse`
 * `CosmosDb` - SQL API only, connection string must contain a non-standard property specifying a database name to be used - `Database=database_name`.
 * `DynamoDB` - the connection string format is specific to the tool, an example can be found in the [Connection strings](#connection_strings) section.
@@ -214,6 +214,13 @@ A parameter file must contain a JSON array of objects having the following prope
 * `ValueRandomizationRule` - specifies the [value randomization rule](#value_randomization_rule).
 * `Array` - specifies if the parameter is an array. Can be used for the database engines supporting [array columns](#array_columns). Default is `false`.
 
+For Azure AI Search, the raw query file must be a JSON file with the following attributes (all are optional):
+* `Select` - an array of column names to be selected.
+* `Filter` - an OData query filter expression.
+* `OrderBy` - an array of column names to sort by.
+* `Skip` - a number of documents to skip in the query results before returning to the client (similar to `OFFSET` in SQL queries).
+* `Size` - a number of documents to be retrieved.
+
 ### Raw query benchmark scenarios<a name="raw_query_benchmark_scenarios"></a>
 
 Raw query benchmark scenarios are very similar to [regular scenarios](#query_benchmark_scenarios). The only difference is in a few step definition properties that are explained in the [raw query benchmark](#raw_query_benchmark) section.
@@ -264,6 +271,7 @@ Where each column definition has the following properties:
 * `Nullable` - specifies if the column is nullable. Default is `true`.
 * `Queryable` - gives a hint if the column is going to participate in query conditions. Based on this information some table builders may generate more optimal definitions. Default is `true`.
 * `DatabaseGenerated` - specifies if the column is auto-generated. Databases that don't support auto-generated columns will report a warning. Default is `false`.
+* `PrimaryKey` - specifies if it is a primary key for the table. Currently used only by Azure AI Search. Default is `false`.
 * `PartitionKey` - specifies if the table should be partitioned by this column. Is currently supported for Cosmos DB and DynamoDB only (if there is no partition key column in the table definition, a dummy constant-value partition key is created). Other database plugins ignore this flag. Default is `false`.
 * `SortKey` - specifies if the column should be assigned as the sort key for the table. Is supported for DynamoDB only. Other database plugins ignore this flag. Default is `false`.
 * `Array` - specifies if the column is an [array column](#array_columns). Default is `false`.
@@ -545,6 +553,10 @@ Please note that the latter setting is applied to all custom metrics provided by
 ### Connection strings<a name="connection_strings"></a>
 The list below shows only basic examples. For more advanced connection settings please refer to the respective client library documentation.
 
+**AzureSearch**
+
+`Endpoint=myendpoint;ApiKey=myapikey`
+
 **ClickHouse**
 
 `Host=myhost;Port=9000;Database=default;Password=mypassword`
@@ -617,6 +629,7 @@ There are some limitations that are going to be addressed in the future:
 * Query definitions don't support joins. A workaround is using the raw queries approach.
 * Random inclusion of condition parts is currently not supported for raw queries.
 * Configurable partitioning is supported for Cosmos DB and DynamoDB only.
-* Importing from Elasticsearch database doesn't support an unlimited number of rows.
+* Importing from Azure AI Search doesn't support an unlimited number of rows.
+* Importing from Elasticsearch doesn't support an unlimited number of rows.
 * Generators do not currently support contextually dependent values. For example, the first name and full name values produced by the name generator for the same row of data won't correspond to each other.
 * Array columns support elements of primitive types only, nested objects are not supported yet.
