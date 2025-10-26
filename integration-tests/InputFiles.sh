@@ -95,3 +95,11 @@ inputFiles[DynamoDb_DataSourceFile]="GeneratedSampleDataSourceWithArrays.json"
 inputFiles[DynamoDb_QueryFile]="GeneratedSampleDynamoDbQuery.json"
 inputFiles[DynamoDb_RawQueryFile]=""
 inputFiles[DynamoDb_RawQueryParametersFile]=""
+
+# AzureSearch
+inputFiles[AzureSearch_TableFile]="GeneratedSampleTableWithArrays.json"
+inputFiles[AzureSearch_TableName]="GeneratedSample"
+inputFiles[AzureSearch_DataSourceFile]="GeneratedSampleDataSourceWithArrays.json"
+inputFiles[AzureSearch_QueryFile]="GeneratedSampleQueryWithArrays.json"
+inputFiles[AzureSearch_RawQueryFile]="GeneratedSampleRawAzureSearchQuery.json"
+inputFiles[AzureSearch_RawQueryParametersFile]="GeneratedSampleRawQueryParameters.json"

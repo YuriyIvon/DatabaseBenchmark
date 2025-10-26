@@ -24,11 +24,6 @@
             "ColumnName": "ReferenceGuids", 
             "Operator": "Contains",
             "RandomizeValue": true 
-          },
-          {
-            "ColumnName": "Tags",
-            "Operator": "Equals",
-            "Value": ["One", "Two"]
           }
         ]
       },

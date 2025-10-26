@@ -93,4 +93,12 @@ $inputFiles = @{
     QueryFile = "GeneratedSampleDynamoDbQuery.json"
     RawQueryFile = $null
   }
+  AzureSearch = @{
+    TableFile = "GeneratedSampleTableWithArrays.json"
+    TableName = "GeneratedSample"
+    DataSourceFile = "GeneratedSampleDataSourceWithArrays.json"
+    QueryFile = "GeneratedSampleQueryWithArrays.json"
+    RawQueryFile = "GeneratedSampleRawAzureSearchQuery.json"
+    RawQueryParametersFile = "GeneratedSampleRawQueryParameters.json"
+  }
 }

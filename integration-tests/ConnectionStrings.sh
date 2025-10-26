@@ -1,5 +1,6 @@
 #Update the sample connection strings with your specific connection settings
 declare -A connectionStrings=(
+  ["AzureSearch"]="Endpoint=myendpoint;ApiKey=myapikey"
   ["SqlServer"]="Data Source=.;Initial Catalog=benchmark;Integrated Security=True;"
   ["Postgres"]="Host=localhost;Port=5432;Database=benchmark;Username=postgres;Password=password;"
   ["PostgresJsonb"]="Host=localhost;Port=5432;Database=benchmark;Username=postgres;Password=password;"
