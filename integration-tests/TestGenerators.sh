@@ -1,6 +1,6 @@
 #!/bin/bash
 
-toolPath="../src/DatabaseBenchmark/bin/Release/net8.0/linux-x64/DatabaseBenchmark"
+toolPath="../src/DatabaseBenchmark/bin/Release/net10.0/linux-x64/DatabaseBenchmark"
 
 source ./connectionStrings.sh
 source ./inputFiles.sh

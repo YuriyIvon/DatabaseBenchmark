@@ -1,4 +1,4 @@
-$toolPath="..\src\DatabaseBenchmark\bin\Debug\net8.0\DatabaseBenchmark"
+$toolPath="..\src\DatabaseBenchmark\bin\Debug\net10.0\DatabaseBenchmark"
 
 $traceQueries = "true"
 $traceResults = "true"
