@@ -7,7 +7,8 @@ namespace DatabaseBenchmark.Commands.Options
         QueryBenchmarkOptions,
         IReportOptions,
         IQueryTraceOptions,
-        IResultTraceOptions
+        IResultTraceOptions,
+        IPluginOptions
     {
         public string ReportFormatterType { get; set; } = "Text";
 
@@ -20,5 +21,7 @@ namespace DatabaseBenchmark.Commands.Options
         public bool TraceQueries { get; set; } = false;
 
         public bool TraceResults { get; set; } = false;
+
+        public string PluginsFilePath { get; set; }
     }
 }

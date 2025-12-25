@@ -1,5 +1,4 @@
 ﻿using DatabaseBenchmark.Commands.Options.Interfaces;
-using DatabaseBenchmark.Common;
 
 namespace DatabaseBenchmark.Commands.Options
 {
@@ -7,7 +6,8 @@ namespace DatabaseBenchmark.Commands.Options
         IScenarioOptions,
         IReportOptions,
         IQueryTraceOptions,
-        IResultTraceOptions
+        IResultTraceOptions,
+        IPluginOptions
     {
         public string QueryScenarioFilePath { get; set; }
 
@@ -26,5 +26,7 @@ namespace DatabaseBenchmark.Commands.Options
         public bool TraceQueries { get; set; } = false;
 
         public bool TraceResults { get; set; } = false;
+
+        public string PluginsFilePath { get; set; }
     }
 }

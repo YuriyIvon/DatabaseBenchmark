@@ -4,18 +4,27 @@ using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
+using DatabaseBenchmark.Plugins.Interfaces;
 
 namespace DatabaseBenchmark.Generators
 {
     public class GeneratorFactory : IGeneratorFactory
     {
-        private readonly IDatabase _database;
+        private readonly IDatabase _currentDatabase;
         private readonly DataSourceIteratorGeneratorFactory _dataSourceIteratorGeneratorFactory;
+        private readonly IPluginRepository _pluginRepository;
+        private readonly IGeneratedValuesContext _generatedValuesContext;
 
-        public GeneratorFactory(IDataSourceFactory dataSourceFactory, IDatabase database)
+        public GeneratorFactory(
+            IDataSourceFactory dataSourceFactory,
+            IDatabase currentDatabase,
+            IPluginRepository pluginRepository,
+            IGeneratedValuesContext generatedValuesContext)
         {
             _dataSourceIteratorGeneratorFactory = new DataSourceIteratorGeneratorFactory(dataSourceFactory);
-            _database = database;
+            _currentDatabase = currentDatabase;
+            _pluginRepository = pluginRepository;
+            _generatedValuesContext = generatedValuesContext;
         }
 
         public IGenerator Create(IGeneratorOptions options)
@@ -29,10 +38,12 @@ namespace DatabaseBenchmark.Generators
                 ConstantGeneratorOptions o => new ConstantGenerator(o),
                 DataSourceIteratorGeneratorOptions o => _dataSourceIteratorGeneratorFactory.Create(o),
                 DateTimeGeneratorOptions o => new DateTimeGenerator(o),
+                EmbeddingGeneratorOptions o => new EmbeddingGenerator(o, CreateSourceGenerator(o.SourceGeneratorOptions, nameof(EmbeddingGenerator)), _pluginRepository),
                 FinanceGeneratorOptions o => new FinanceGenerator(o),
                 FloatGeneratorOptions o => new FloatGenerator(o),
-                ColumnItemGeneratorOptions o => new ColumnItemGenerator(o, _database),
-                ColumnIteratorGeneratorOptions o => new ColumnIteratorGenerator(o, _database),
+                ColumnItemGeneratorOptions o => new ColumnItemGenerator(o, _currentDatabase),
+                ColumnIteratorGeneratorOptions o => new ColumnIteratorGenerator(o, _currentDatabase),
+                ColumnReferenceGeneratorOptions o => new ColumnReferenceGenerator(o, _generatedValuesContext),
                 GuidGeneratorOptions => new GuidGenerator(),
                 IntegerGeneratorOptions o => new IntegerGenerator(o),
                 InternetGeneratorOptions o => new InternetGenerator(o),

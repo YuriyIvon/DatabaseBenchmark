@@ -27,7 +27,7 @@ namespace DatabaseBenchmark.Tests.Common
             _distinctColumn = _table.Columns.Single(c => c.Name == "Category");
             _distinctValues = ["One", "Two", "Three", "Four", "Five", "Six", "Seven"];
 
-            _randomGeneratorFactory = new GeneratorFactory(null, null);
+            _randomGeneratorFactory = new GeneratorFactory(null, null, null, null);
             var distinctValuesProvider = Substitute.For<IDistinctValuesProvider>();
             distinctValuesProvider.GetDistinctValues(_table.Name, _distinctColumn, false).Returns(_distinctValues);
             _randomValueProvider = new RandomValueProvider(_randomGeneratorFactory, distinctValuesProvider);

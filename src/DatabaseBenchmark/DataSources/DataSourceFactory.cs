@@ -5,6 +5,7 @@ using DatabaseBenchmark.DataSources.Csv;
 using DatabaseBenchmark.DataSources.Database;
 using DatabaseBenchmark.DataSources.Generator;
 using DatabaseBenchmark.DataSources.Interfaces;
+using DatabaseBenchmark.Plugins.Interfaces;
 
 namespace DatabaseBenchmark.DataSources
 {
@@ -14,13 +15,13 @@ namespace DatabaseBenchmark.DataSources
         public IEnumerable<string> Options => _factories.Keys;
 
         //TODO: find a way to avoid the direct database project dependency
-        public DataSourceFactory(IDatabase currentDatabase, IDatabaseFactory databaseFactory, IOptionsProvider optionsProvider)
+        public DataSourceFactory(IDatabase currentDatabase, IDatabaseFactory databaseFactory, IOptionsProvider optionsProvider, IPluginRepository pluginRepository)
         {
             _factories = new()
             {
                 ["Csv"] = filePath => new CsvDataSource(filePath, optionsProvider),
                 ["Database"] = filePath => new DatabaseDataSource(filePath, databaseFactory),
-                ["Generator"] = filePath => new GeneratorDataSource(filePath, this, currentDatabase)
+                ["Generator"] = filePath => new GeneratorDataSource(filePath, this, currentDatabase, pluginRepository)
             };
         }
 

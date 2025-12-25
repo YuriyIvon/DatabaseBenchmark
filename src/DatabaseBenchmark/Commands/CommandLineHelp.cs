@@ -72,7 +72,7 @@ namespace DatabaseBenchmark.Commands
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(ImportCommandOptions.DataSourceType),
-                        AllowedValuesProvider = new DataSourceFactory(null, null, null),
+                        AllowedValuesProvider = new DataSourceFactory(null, null, null, null),
                         ValueSpecificOptions =
                         [
                             new ValueSpecificOptionsDescriptor
@@ -106,7 +106,7 @@ namespace DatabaseBenchmark.Commands
                     new RestrictedValueOptionDescriptor
                     {
                         Name = nameof(InsertCommandOptions.DataSourceType),
-                        AllowedValuesProvider = new DataSourceFactory(null, null, null),
+                        AllowedValuesProvider = new DataSourceFactory(null, null, null, null),
                         ValueSpecificOptions =
                         [
                             new ValueSpecificOptionsDescriptor

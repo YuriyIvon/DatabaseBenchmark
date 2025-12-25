@@ -38,7 +38,11 @@ namespace DatabaseBenchmark.Commands
                 table.Name = options.TableName;
             }
 
-            var dataSourceFactory = new DataSourceFactory(database, databaseFactory, _optionsProvider);
+            var pluginRepository = !string.IsNullOrEmpty(options.PluginsFilePath)
+                ? new Plugins.PluginRepository(options.PluginsFilePath)
+                : null;
+
+            var dataSourceFactory = new DataSourceFactory(database, databaseFactory, _optionsProvider, pluginRepository);
             var baseDataSource = dataSourceFactory.Create(options.DataSourceType, options.DataSourceFilePath);
             using var dataSource = new DataSourceDecorator(baseDataSource)
                 .MaxRows(options.DataSourceMaxRows)

@@ -4,14 +4,14 @@ using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
-using DatabaseBenchmark.DataSources.Interfaces;
+using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.DataSources;
-using DatabaseBenchmark.Generators.Interfaces;
+using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Generators;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Reporting;
-using DatabaseBenchmark.Databases.Common.Interfaces;
 
 namespace DatabaseBenchmark.Commands
 {
@@ -61,6 +61,14 @@ namespace DatabaseBenchmark.Commands
 
                     var databaseFactory = new DatabaseFactory(_environment, jsonOptionsProvider);
                     var database = databaseFactory.Create(scenarioStep.DatabaseType, scenarioStep.ConnectionString);
+
+                    var pluginRepository = !string.IsNullOrEmpty(options.PluginsFilePath)
+                        ? new Plugins.PluginRepository(options.PluginsFilePath)
+                        : null;
+
+                    var dataSourceFactory = new DataSourceFactory(database, databaseFactory, _optionsProvider, pluginRepository);
+                    var generatorFactory = new GeneratorFactory(dataSourceFactory, database, pluginRepository, null);
+
                     var table = JsonUtils.DeserializeFile<Table>(scenarioStep.TableFilePath);
                     var query = JsonUtils.DeserializeFile<Query>(scenarioStep.QueryFilePath, new GeneratorOptionsConverter());
 
@@ -70,10 +78,7 @@ namespace DatabaseBenchmark.Commands
                     }
 
                     var executorFactory = database.CreateQueryExecutorFactory(table, query)
-                        .Customize<IGeneratorFactory, GeneratorFactory>()
-                        .Customize<IDatabaseFactory>(() => databaseFactory)
-                        .Customize<IOptionsProvider>(() => _optionsProvider)
-                        .Customize<IDataSourceFactory, DataSourceFactory>();
+                        .Customize<IGeneratorFactory>(() => generatorFactory);
 
                     benchmark.Benchmark(executorFactory, scenarioStep);
                 }

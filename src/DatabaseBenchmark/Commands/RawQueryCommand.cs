@@ -1,15 +1,14 @@
 ﻿using DatabaseBenchmark.Commands.Interfaces;
 using DatabaseBenchmark.Commands.Options;
-using DatabaseBenchmark.Commands.Options.Interfaces;
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
 using DatabaseBenchmark.Databases.Common.Interfaces;
-using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.DataSources;
-using DatabaseBenchmark.Generators.Interfaces;
+using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Generators;
+using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Reporting;
@@ -38,6 +37,14 @@ namespace DatabaseBenchmark.Commands
 
             var databaseFactory = new DatabaseFactory(_environment, _optionsProvider);
             var database = databaseFactory.Create(options.DatabaseType, options.ConnectionString);
+
+            var pluginRepository = !string.IsNullOrEmpty(options.PluginsFilePath)
+                ? new Plugins.PluginRepository(options.PluginsFilePath)
+                : null;
+
+            var dataSourceFactory = new DataSourceFactory(database, databaseFactory, _optionsProvider, pluginRepository);
+            var generatorFactory = new GeneratorFactory(dataSourceFactory, database, pluginRepository, null);
+
             var query = new RawQuery
             {
                 Text = File.ReadAllText(options.QueryFilePath),
@@ -50,10 +57,7 @@ namespace DatabaseBenchmark.Commands
             }
 
             var executorFactory = database.CreateRawQueryExecutorFactory(query)
-                .Customize<IGeneratorFactory, GeneratorFactory>()
-                .Customize<IDatabaseFactory>(() => databaseFactory)
-                .Customize<IOptionsProvider>(() => _optionsProvider)
-                .Customize<IDataSourceFactory, DataSourceFactory>();
+                .Customize<IGeneratorFactory>(() => generatorFactory);
 
             benchmark.Benchmark(executorFactory, options);
 

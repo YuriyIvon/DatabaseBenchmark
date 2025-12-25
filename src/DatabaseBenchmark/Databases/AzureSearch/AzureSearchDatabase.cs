@@ -19,6 +19,8 @@ namespace DatabaseBenchmark.Databases.AzureSearch
 
         private const string EndpointConnectionStringProperty = "Endpoint";
         private const string ApiKeyConnectionStringProperty = "ApiKey";
+        private const string VectorProfileName = "vector-profile";
+        private const string VectorAlgorithmConfigurationName = "algorithm-config";
 
         private readonly IExecutionEnvironment _environment;
 
@@ -96,7 +98,7 @@ namespace DatabaseBenchmark.Databases.AzureSearch
                 ConnectionString,
                 EndpointConnectionStringProperty,
                 ApiKeyConnectionStringProperty);
-                
+
             var endpoint = new Uri(connectionParameters[EndpointConnectionStringProperty]);
             var credential = new AzureKeyCredential(connectionParameters[ApiKeyConnectionStringProperty]);
             var client = new SearchIndexClient(endpoint, credential);
@@ -114,14 +116,14 @@ namespace DatabaseBenchmark.Databases.AzureSearch
             var endpoint = new Uri(connectionParameters[EndpointConnectionStringProperty]);
             var credential = new AzureKeyCredential(connectionParameters[ApiKeyConnectionStringProperty]);
             var client = new SearchClient(endpoint, indexName, credential);
-            
+
             return client;
         }
 
         private SearchIndex BuildIndexDefinition(Table table)
         {
             var fields = new List<SearchField>();
-            
+
             if (!table.Columns.Any(c => c.PrimaryKey))
             {
                 throw new InputArgumentException("Azure Search requires a primary key to be defined");
@@ -131,6 +133,8 @@ namespace DatabaseBenchmark.Databases.AzureSearch
             {
                 _environment.WriteLine("WARNING: Azure Search doesn't support database-generated columns");
             }
+
+            VectorSearch vectorSearch = null;
 
             foreach (var column in table.Columns)
             {
@@ -145,6 +149,16 @@ namespace DatabaseBenchmark.Databases.AzureSearch
                         IsSortable = false,
                         IsFacetable = false
                     };
+                }
+                else if (column.Type == ColumnType.Vector)
+                {
+                    vectorSearch ??= new VectorSearch
+                    {
+                        Algorithms = { new HnswAlgorithmConfiguration(VectorAlgorithmConfigurationName) },
+                        Profiles = { new VectorSearchProfile(VectorProfileName, VectorAlgorithmConfigurationName) }
+                    };
+
+                    field = new VectorSearchField(column.Name, column.Size.Value, VectorProfileName);
                 }
                 else
                 {
@@ -176,7 +190,10 @@ namespace DatabaseBenchmark.Databases.AzureSearch
                 fields.Add(field);
             }
 
-            var indexDefinition = new SearchIndex(table.Name, fields);
+            var indexDefinition = new SearchIndex(table.Name, fields)
+            {
+                VectorSearch = vectorSearch
+            };
 
             return indexDefinition;
         }

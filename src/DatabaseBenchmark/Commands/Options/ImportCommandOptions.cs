@@ -6,7 +6,8 @@ namespace DatabaseBenchmark.Commands.Options
     public class ImportCommandOptions :
         IStructuredTargetOptions,
         IDataSourceOptions,
-        IQueryTraceOptions
+        IQueryTraceOptions,
+        IPluginOptions
     {
         public string DatabaseType { get; set; }
 
@@ -30,6 +31,8 @@ namespace DatabaseBenchmark.Commands.Options
         public string PostScriptFilePath { get; set; }
 
         public bool TraceQueries { get; set; } = false;
+
+        public string PluginsFilePath { get; set; }
 
         [Option("Number of records in a batch inserted into the database during import (each database type has its own default)")]
         public int BatchSize { get; set; } = 0;

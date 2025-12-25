@@ -143,6 +143,11 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                             .Name(column.Name)
                             .Index(column.Queryable));
                         break;
+                    case ColumnType.Vector:
+                        propertiesDescriptor.DenseVector(vpd => vpd
+                            .Name(column.Name)
+                            .Dimensions(column.Size));
+                        break;
                     default:
                         throw new InputArgumentException($"Unknown column type \"{column.Type}\"");
                 }

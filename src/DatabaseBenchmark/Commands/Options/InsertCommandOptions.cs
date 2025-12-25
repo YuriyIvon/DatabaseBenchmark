@@ -9,7 +9,8 @@ namespace DatabaseBenchmark.Commands.Options
         IDataSourceOptions,
         IQueryExecutionOptions,
         IReportOptions,
-        IQueryTraceOptions
+        IQueryTraceOptions,
+        IPluginOptions
     {
         public string DatabaseType { get; set; }
 
@@ -48,6 +49,8 @@ namespace DatabaseBenchmark.Commands.Options
         public string[] ReportCustomMetricColumns { get; set; }
 
         public bool TraceQueries { get; set; } = false;
+
+        public string PluginsFilePath { get; set; }
 
         [Option("Number of records inserted into the database in one query")]
         public int BatchSize { get; set; } = 1;

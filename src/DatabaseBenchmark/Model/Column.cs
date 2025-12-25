@@ -19,5 +19,7 @@
         public bool SortKey { get; set; } = false;
 
         public bool DatabaseGenerated { get; set; } = false;
+
+        public int? Size { get; set; }
     }
 }

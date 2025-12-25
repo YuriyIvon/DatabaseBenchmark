@@ -4,6 +4,7 @@ using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Generators;
 using DatabaseBenchmark.Generators.Interfaces;
 using DatabaseBenchmark.Generators.Options;
+using DatabaseBenchmark.Plugins.Interfaces;
 
 namespace DatabaseBenchmark.DataSources.Generator
 {
@@ -15,7 +16,7 @@ namespace DatabaseBenchmark.DataSources.Generator
 
         private object[] _currentRow;
 
-        public GeneratorDataSource(string filePath, IDataSourceFactory dataSourceFactory, IDatabase database)
+        public GeneratorDataSource(string filePath, IDataSourceFactory dataSourceFactory, IDatabase database, IPluginRepository pluginRepository)
         {
             _options = JsonUtils.DeserializeFile<GeneratorDataSourceOptions>(filePath, new GeneratorOptionsConverter());
 
@@ -27,7 +28,7 @@ namespace DatabaseBenchmark.DataSources.Generator
             var optionsDirectory = Path.GetDirectoryName(Path.GetFullPath(filePath));
             Directory.SetCurrentDirectory(optionsDirectory);
 
-            var generatorFactory = new GeneratorFactory(dataSourceFactory, database);
+            var generatorFactory = new GeneratorFactory(dataSourceFactory, database, pluginRepository, new DataSourceValuesContext(this));
             _generators = _options.Columns
                 .Select(c => generatorFactory.Create(c.GeneratorOptions))
                 .ToArray();

@@ -59,6 +59,7 @@ namespace DatabaseBenchmark.DataSources.Decorators
                 ColumnType.DateTime => ToDateTime(value, formatProvider),
                 ColumnType.Guid => ToGuid(value),
                 ColumnType.Json => value,
+                ColumnType.Vector => value,
                 _ => throw new InputArgumentException($"Unknown column type \"{column.Type}\"")
             };
 

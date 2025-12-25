@@ -37,6 +37,14 @@ namespace DatabaseBenchmark.Commands
 
             var databaseFactory = new DatabaseFactory(_environment, _optionsProvider);
             var database = databaseFactory.Create(options.DatabaseType, options.ConnectionString);
+
+            var pluginRepository = !string.IsNullOrEmpty(options.PluginsFilePath)
+                ? new Plugins.PluginRepository(options.PluginsFilePath)
+                : null;
+
+            var dataSourceFactory = new DataSourceFactory(database, databaseFactory, _optionsProvider, pluginRepository);
+            var generatorFactory = new GeneratorFactory(dataSourceFactory, database, pluginRepository, null);
+
             var table = JsonUtils.DeserializeFile<Table>(options.TableFilePath);
             var query = JsonUtils.DeserializeFile<Query>(options.QueryFilePath, new GeneratorOptionsConverter());
 
@@ -46,10 +54,7 @@ namespace DatabaseBenchmark.Commands
             }
 
             var executorFactory = database.CreateQueryExecutorFactory(table, query)
-                .Customize<IGeneratorFactory, GeneratorFactory>()
-                .Customize<IDatabaseFactory>(() => databaseFactory)
-                .Customize<IOptionsProvider>(() => _optionsProvider)
-                .Customize<IDataSourceFactory, DataSourceFactory>();
+                .Customize<IGeneratorFactory>(() => generatorFactory);
 
             benchmark.Benchmark(executorFactory, options);
 

@@ -10,7 +10,7 @@ namespace DatabaseBenchmark.Tests.DataSources
         [Fact]
         public void GenerateValues()
         {
-            var dataSource = new GeneratorDataSource("DataSources/GeneratorDataSourceOptions.json", null, null);
+            var dataSource = new GeneratorDataSource("DataSources/GeneratorDataSourceOptions.json", null, null, null);
             int id = 1;
             var createdAt = new DateTime(2020, 1, 1, 13, 0, 0);
 
@@ -34,7 +34,7 @@ namespace DatabaseBenchmark.Tests.DataSources
         [Fact]
         public void GenerateValuesNoMaxRows()
         {
-            var dataSource = new GeneratorDataSource("DataSources/UnboundedGeneratorDataSourceOptions.json", null, null);
+            var dataSource = new GeneratorDataSource("DataSources/UnboundedGeneratorDataSourceOptions.json", null, null, null);
             
             Assert.Throws<InputArgumentException>(() => dataSource.SetMaxRows(0));
         }
