@@ -3,7 +3,7 @@ using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
-using Nest;
+using Elastic.Clients.Elasticsearch;
 using SimpleInjector;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
@@ -11,7 +11,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
     public class ElasticsearchInsertExecutorFactory : QueryExecutorFactoryBase
     {
         public ElasticsearchInsertExecutorFactory(
-            Func<ElasticClient> createClient,
+            Func<ElasticsearchClient> createClient,
             Table table,
             IDataSource source,
             int batchSize)
@@ -24,7 +24,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
             Container.RegisterSingleton<IDataSourceReader, DataSourceReader>();
 
-            Container.Register<IElasticClient>(createClient, Lifestyle);
+            Container.Register<ElasticsearchClient>(createClient, Lifestyle);
             Container.Register<IElasticsearchInsertBuilder, ElasticsearchInsertBuilder>(Lifestyle);
             Container.Register<IQueryExecutor, ElasticsearchInsertExecutor>(Lifestyle);
         }

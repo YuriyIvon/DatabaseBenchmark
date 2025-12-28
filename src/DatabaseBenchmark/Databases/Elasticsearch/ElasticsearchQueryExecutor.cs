@@ -1,16 +1,16 @@
 ﻿using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
 using DatabaseBenchmark.Databases.Common.Interfaces;
-using Nest;
+using Elastic.Clients.Elasticsearch;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
 {
     public sealed class ElasticsearchQueryExecutor : IQueryExecutor
     {
-        private readonly ElasticClient _client;
+        private readonly ElasticsearchClient _client;
         private readonly IElasticsearchQueryBuilder _queryBuilder;
 
         public ElasticsearchQueryExecutor(
-            ElasticClient client,
+            ElasticsearchClient client,
             IElasticsearchQueryBuilder queryBuilder)
         {
             _client = client;

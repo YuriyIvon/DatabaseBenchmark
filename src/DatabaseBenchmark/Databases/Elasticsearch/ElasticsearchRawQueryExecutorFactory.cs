@@ -4,8 +4,8 @@ using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
 using DatabaseBenchmark.Generators.Interfaces;
-using Elasticsearch.Net;
-using Nest;
+using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
 using RawQuery = DatabaseBenchmark.Model.RawQuery;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
@@ -14,7 +14,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
     {
         public ElasticsearchRawQueryExecutorFactory(
             IDatabase database,
-            Func<ElasticClient> createClient,
+            Func<ElasticsearchClient> createClient,
             RawQuery query)
         {
             Container.RegisterInstance<IDatabase>(database);
@@ -24,9 +24,9 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             Container.RegisterSingleton<ICache, MemoryCache>();
             Container.RegisterDecorator<IDistinctValuesProvider, CachedDistinctValuesProvider>(Lifestyle);
 
-            Container.Register<ElasticClient>(createClient, Lifestyle);
+            Container.Register<ElasticsearchClient>(createClient, Lifestyle);
             //TODO: Find a better way to instantiate the default serializer
-            Container.Register<IElasticsearchSerializer>(() => Container.GetInstance<ElasticClient>().RequestResponseSerializer, Lifestyle);
+            Container.Register<Serializer>(() => Container.GetInstance<ElasticsearchClient>().RequestResponseSerializer, Lifestyle);
             Container.Register<IDistinctValuesProvider, ElasticsearchDistinctValuesProvider>(Lifestyle);
             Container.Register<IRandomValueProvider, RandomValueProvider>(Lifestyle);
             Container.Register<IElasticsearchQueryBuilder, ElasticsearchRawQueryBuilder>(Lifestyle);

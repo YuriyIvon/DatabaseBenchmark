@@ -1,12 +1,12 @@
 ﻿using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Model;
-using Nest;
+using Elastic.Clients.Elasticsearch;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
 {
     public sealed class ElasticsearchPreparedInsert : IPreparedQuery
     {
-        private readonly IElasticClient _client;
+        private readonly ElasticsearchClient _client;
         private readonly Table _table;
         private readonly IEnumerable<object> _documents;
 
@@ -15,7 +15,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         public IQueryResults Results => null;
 
         public ElasticsearchPreparedInsert(
-            IElasticClient client,
+            ElasticsearchClient client,
             Table table,
             IEnumerable<object> documents)
         {
@@ -27,9 +27,9 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         public int Execute()
         {
             //TODO: make refresh parameter configurable
-            var response = _client.Bulk(b => b
+            var response = _client.BulkAsync(b => b
                 .Index(_table.Name.ToLower())
-                .IndexMany(_documents));
+                .IndexMany(_documents)).GetAwaiter().GetResult();
 
             return response.Items.Count;
         }

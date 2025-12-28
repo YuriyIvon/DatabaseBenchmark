@@ -5,7 +5,8 @@ using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
-using Nest;
+using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.Mapping;
 using System.Text;
 using RawQuery = DatabaseBenchmark.Model.RawQuery;
 
@@ -33,16 +34,16 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
             if (dropExisting)
             {
-                var exists = client.Indices.Exists(table.Name);
-                if (exists.Exists)
+                var existsResponse = client.Indices.ExistsAsync(table.Name).GetAwaiter().GetResult();
+                if (existsResponse.Exists)
                 {
-                    client.Indices.Delete(table.Name);
+                    client.Indices.DeleteAsync(table.Name).GetAwaiter().GetResult();
                 }
             }
 
-            client.Indices.CreateAsync(table.Name, ci => ci
-                .Map(md => md
-                    .Properties(pd => BuildProperties(table, pd)))).Wait();
+            client.Indices.CreateAsync(table.Name, c => c
+                .Mappings(m => m
+                    .Properties(BuildProperties(table)))).GetAwaiter().GetResult();
         }
 
         public IDataImporter CreateDataImporter(Table table, IDataSource source, int batchSize)
@@ -58,7 +59,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                 .Environment(_environment)
                 .Customize((container, lifestyle) =>
                 {
-                    container.Register<IElasticClient>(CreateClient, lifestyle);
+                    container.Register<ElasticsearchClient>(CreateClient, lifestyle);
                 })
                 .Build();
         }
@@ -74,32 +75,34 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
         public void ExecuteScript(string script) => throw new InputArgumentException("Custom scripts are not supported for Elasticsearch");
 
-        private ElasticClient CreateClient()
+        private ElasticsearchClient CreateClient()
         {
-            var connectionSettings = new ConnectionSettings(new Uri(ConnectionString))
+            var settings = new ElasticsearchClientSettings(new Uri(ConnectionString))
                 .ThrowExceptions();
 
             if (_environment.TraceQueries || _environment.TraceResults)
             {
-                connectionSettings.EnableDebugMode(response =>
+                settings.EnableDebugMode(details =>
                 {
-                    if (_environment.TraceQueries && response.RequestBodyInBytes != null)
+                    if (_environment.TraceQueries && details.RequestBodyInBytes != null)
                     {
-                        _environment.WriteLine(Encoding.UTF8.GetString(response.RequestBodyInBytes));
+                        _environment.WriteLine(Encoding.UTF8.GetString(details.RequestBodyInBytes));
                     }
 
-                    if (_environment.TraceResults && response.ResponseBodyInBytes != null)
+                    if (_environment.TraceResults && details.ResponseBodyInBytes != null)
                     {
-                        _environment.WriteLine(Encoding.UTF8.GetString(response.ResponseBodyInBytes));
+                        _environment.WriteLine(Encoding.UTF8.GetString(details.ResponseBodyInBytes));
                     }
                 });
             }
 
-            return new ElasticClient(connectionSettings);
+            return new ElasticsearchClient(settings);
         }
 
-        private PropertiesDescriptor<object> BuildProperties(Table table, PropertiesDescriptor<object> propertiesDescriptor)
+        private Properties BuildProperties(Table table)
         {
+            var properties = new Properties();
+
             foreach (var column in table.Columns)
             {
                 if (column.DatabaseGenerated)
@@ -108,47 +111,22 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                     continue;
                 }
 
-                switch (column.Type)
+                IProperty property = column.Type switch
                 {
-                    case ColumnType.Boolean:
-                        propertiesDescriptor.Boolean(bpd => bpd
-                            .Name(column.Name)
-                            .Index(column.Queryable));
-                        break;
-                    case ColumnType.Guid:
-                    case ColumnType.String:
-                        propertiesDescriptor.Keyword(kpd => kpd
-                            .Name(column.Name)
-                            .Index(column.Queryable));
-                        break;
-                    case ColumnType.Double:
-                        propertiesDescriptor.Number(npd => npd
-                            .Name(column.Name)
-                            .Type(NumberType.Double)
-                            .Index(column.Queryable));
-                        break;
-                    case ColumnType.Integer:
-                        propertiesDescriptor.Number(npd => npd
-                            .Name(column.Name)
-                            .Type(NumberType.Integer)
-                            .Index(column.Queryable));
-                        break;
-                    case ColumnType.Text:
-                        propertiesDescriptor.Text(tpd => tpd
-                            .Name(column.Name)
-                            .Index(column.Queryable));
-                        break;
-                    case ColumnType.DateTime:
-                        propertiesDescriptor.Date(dpd => dpd
-                            .Name(column.Name)
-                            .Index(column.Queryable));
-                        break;
-                    default:
-                        throw new InputArgumentException($"Unknown column type \"{column.Type}\"");
-                }
+                    ColumnType.Boolean => new BooleanProperty { Index = column.Queryable },
+                    ColumnType.Guid => new KeywordProperty { Index = column.Queryable },
+                    ColumnType.String => new KeywordProperty { Index = column.Queryable },
+                    ColumnType.Double => new DoubleNumberProperty { Index = column.Queryable },
+                    ColumnType.Integer => new IntegerNumberProperty { Index = column.Queryable },
+                    ColumnType.Text => new TextProperty { Index = column.Queryable },
+                    ColumnType.DateTime => new DateProperty { Index = column.Queryable },
+                    _ => throw new InputArgumentException($"Unknown column type \"{column.Type}\"")
+                };
+
+                properties.Add(column.Name, property);
             }
 
-            return propertiesDescriptor;
+            return properties;
         }
 
         private static Table NormalizeNames(Table table)

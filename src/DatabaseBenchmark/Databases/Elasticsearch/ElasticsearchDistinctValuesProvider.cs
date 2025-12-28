@@ -1,14 +1,15 @@
 ﻿using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Model;
-using Nest;
+using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.Aggregations;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
 {
     public class ElasticsearchDistinctValuesProvider : IDistinctValuesProvider
     {
-        private readonly ElasticClient _client;
+        private readonly ElasticsearchClient _client;
 
-        public ElasticsearchDistinctValuesProvider(ElasticClient client)
+        public ElasticsearchDistinctValuesProvider(ElasticsearchClient client)
         {
             _client = client;
         }
@@ -18,19 +19,24 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             const int maxBuckets = 10000;
             const string bucketName = "distinct";
 
-            var result = _client.Search<object>(sd => sd
-                .Index(tableName)
+            var result = _client.SearchAsync<object>(s => s
+                .Indices(tableName)
                 .Size(0)
                 .Aggregations(a => a
-                    .Terms(bucketName, td => td
-                        .Field(column.Name)
-                        .Size(maxBuckets))));
+                    .Add(bucketName, agg => agg
+                        .Terms(t => t
+                            .Field(column.Name)
+                            .Size(maxBuckets))))).GetAwaiter().GetResult();
 
-            return result.Aggregations
-                .Terms<object>(bucketName)
-                .Buckets
-                .Select(i => i.Key)
-                .ToArray();
+            var aggregate = result.Aggregations[bucketName];
+
+            return result.Aggregations[bucketName] switch
+            {
+                StringTermsAggregate stringTerms => stringTerms.Buckets.Select(b => (object)b.Key.Value).ToArray(),
+                LongTermsAggregate longTerms => longTerms.Buckets.Select(b => (object)b.Key).ToArray(),
+                DoubleTermsAggregate doubleTerms => doubleTerms.Buckets.Select(b => (object)b.Key).ToArray(),
+                _ => throw new InvalidOperationException($"Unsupported aggregate type: {aggregate.GetType()}")
+            };
         }
     }
 }

@@ -2,8 +2,8 @@
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
 using DatabaseBenchmark.Model;
-using Elasticsearch.Net;
-using Nest;
+using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -14,12 +14,12 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
     public class ElasticsearchRawQueryBuilder : IElasticsearchQueryBuilder
     {
         private readonly RawQuery _query;
-        private readonly IElasticsearchSerializer _serializer;
+        private readonly Serializer _serializer;
         private readonly IRandomValueProvider _randomValueProvider;
 
         public ElasticsearchRawQueryBuilder(
             RawQuery query,
-            IElasticsearchSerializer serializer,
+            Serializer serializer,
             IRandomValueProvider randomValueProvider)
         {
             _query = query;
@@ -71,7 +71,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
         private static void CopyPublicProperties<T>(T source, T destination)
         {
-            foreach(var property in typeof(T).GetProperties(
+            foreach (var property in typeof(T).GetProperties(
                 BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
             {
                 var value = property.GetValue(source, null);
@@ -83,7 +83,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         }
 
         private static string FormatParameter(RawQueryParameter parameter, object value) =>
-            parameter.Inline 
+            parameter.Inline
                 ? InlineParameterFormatter.Format(parameter.InlineFormat, value)
                 : JsonSerializer.Serialize(value);
     }
