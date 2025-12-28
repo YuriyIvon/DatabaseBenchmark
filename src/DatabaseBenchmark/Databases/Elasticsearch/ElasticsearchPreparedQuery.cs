@@ -1,11 +1,11 @@
 ﻿using DatabaseBenchmark.Databases.Common.Interfaces;
-using Nest;
+using Elastic.Clients.Elasticsearch;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
 {
     public sealed class ElasticsearchPreparedQuery : IPreparedQuery
     {
-        private readonly ElasticClient _client;
+        private readonly ElasticsearchClient _client;
         private readonly SearchRequest _request;
 
         private ElasticsearchQueryResults _results;
@@ -14,7 +14,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
         public IQueryResults Results => _results;
 
-        public ElasticsearchPreparedQuery(ElasticClient client, SearchRequest request)
+        public ElasticsearchPreparedQuery(ElasticsearchClient client, SearchRequest request)
         {
             _client = client;
             _request = request;
@@ -22,7 +22,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
         public int Execute()
         {
-            var response = _client.Search<Dictionary<string, object>>(_request);
+            var response = _client.SearchAsync<Dictionary<string, object>>(_request).GetAwaiter().GetResult();
             _results = new ElasticsearchQueryResults(response);
 
             return 0;

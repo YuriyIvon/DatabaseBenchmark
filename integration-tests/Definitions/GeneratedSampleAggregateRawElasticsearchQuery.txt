@@ -14,7 +14,7 @@
   "aggs": {
     "by_country": {
       "terms": {
-        "field": "CountryCode.keyword",
+        "field": "CountryCode",
         "size": 100
       },
       "aggs": {

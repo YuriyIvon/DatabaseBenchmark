@@ -3,7 +3,7 @@ using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Elasticsearch;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
-using Nest;
+using Elastic.Clients.Elasticsearch;
 using NSubstitute;
 using System.IO;
 using Xunit;
@@ -53,10 +53,10 @@ namespace DatabaseBenchmark.Tests.Databases
             var request = builder.Build();
             var rawQuery = SerializeSearchRequest(request);
 
-            Assert.Equal("{\"aggs\":{\"grouping\":{\"aggs\":{\"TotalPrice\":{\"sum\":{\"field\":\"Price\"}}},\"composite\":{\"size\":10000,\"sources\":[{\"Category\":{\"terms\":{\"field\":\"Category\",\"order\":\"asc\"}}},{\"SubCategory\":{\"terms\":{\"field\":\"SubCategory\",\"order\":\"asc\"}}}]}}}," +
-                "\"fields\":[\"Category\",\"SubCategory\"]," +
+            Assert.Equal("{\"aggregations\":{\"grouping\":{\"composite\":{\"size\":10000,\"sources\":[{\"Category\":{\"terms\":{\"field\":\"Category\",\"order\":\"asc\"}}},{\"SubCategory\":{\"terms\":{\"field\":\"SubCategory\",\"order\":\"asc\"}}}]},\"aggregations\":{\"TotalPrice\":{\"sum\":{\"field\":\"Price\"}}}}}," +
+                "\"fields\":[{\"field\":\"Category\"},{\"field\":\"SubCategory\"}]," +
                 "\"from\":10," +
-                "\"query\":{\"bool\":{\"must\":[{\"term\":{\"Category\":{\"value\":[\"ABC\",\"DEF\"]}}},{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"SubCategory\"}}]}},{\"range\":{\"Rating\":{\"gte\":5.0}}},{\"term\":{\"Count\":{\"value\":0}}},{\"bool\":{\"should\":[{\"wildcard\":{\"Name\":{\"value\":\"A*\"}}},{\"wildcard\":{\"Name\":{\"value\":\"*B*\"}}}]}}]}}," +
+                "\"query\":{\"bool\":{\"must\":[{\"terms\":{\"Category\":[\"ABC\",\"DEF\"]}},{\"bool\":{\"must_not\":{\"exists\":{\"field\":\"SubCategory\"}}}},{\"range\":{\"Rating\":{\"gte\":5}}},{\"term\":{\"Count\":{\"value\":0}}},{\"bool\":{\"should\":[{\"wildcard\":{\"Name\":{\"value\":\"A*\"}}},{\"wildcard\":{\"Name\":{\"value\":\"*B*\"}}}]}}]}}," +
                 "\"size\":100}",
                 rawQuery);
         }
@@ -73,8 +73,8 @@ namespace DatabaseBenchmark.Tests.Databases
             var request = builder.Build();
             var rawQuery = SerializeSearchRequest(request);
 
-            Assert.Equal("{\"aggs\":{\"grouping\":{\"aggs\":{\"TotalPrice\":{\"sum\":{\"field\":\"Price\"}}},\"composite\":{\"size\":10000,\"sources\":[{\"Category\":{\"terms\":{\"field\":\"Category\",\"order\":\"asc\"}}},{\"SubCategory\":{\"terms\":{\"field\":\"SubCategory\",\"order\":\"asc\"}}}]}}}," +
-                "\"fields\":[\"Category\",\"SubCategory\"]," +
+            Assert.Equal("{\"aggregations\":{\"grouping\":{\"composite\":{\"size\":10000,\"sources\":[{\"Category\":{\"terms\":{\"field\":\"Category\",\"order\":\"asc\"}}},{\"SubCategory\":{\"terms\":{\"field\":\"SubCategory\",\"order\":\"asc\"}}}]},\"aggregations\":{\"TotalPrice\":{\"sum\":{\"field\":\"Price\"}}}}}," +
+                "\"fields\":[{\"field\":\"Category\"},{\"field\":\"SubCategory\"}]," +
                 "\"from\":10," +
                 "\"size\":100}",
                 rawQuery);
@@ -92,10 +92,10 @@ namespace DatabaseBenchmark.Tests.Databases
             var request = builder.Build();
             var rawQuery = SerializeSearchRequest(request);
 
-            Assert.Equal("{\"aggs\":{\"grouping\":{\"aggs\":{\"TotalPrice\":{\"sum\":{\"field\":\"Price\"}}},\"composite\":{\"size\":10000,\"sources\":[{\"Category\":{\"terms\":{\"field\":\"Category\",\"order\":\"asc\"}}},{\"SubCategory\":{\"terms\":{\"field\":\"SubCategory\",\"order\":\"asc\"}}}]}}}," +
-                "\"fields\":[\"Category\",\"SubCategory\"]," +
+            Assert.Equal("{\"aggregations\":{\"grouping\":{\"composite\":{\"size\":10000,\"sources\":[{\"Category\":{\"terms\":{\"field\":\"Category\",\"order\":\"asc\"}}},{\"SubCategory\":{\"terms\":{\"field\":\"SubCategory\",\"order\":\"asc\"}}}]},\"aggregations\":{\"TotalPrice\":{\"sum\":{\"field\":\"Price\"}}}}}," +
+                "\"fields\":[{\"field\":\"Category\"},{\"field\":\"SubCategory\"}]," +
                 "\"from\":10," +
-                "\"query\":{\"bool\":{\"must\":[{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"SubCategory\"}}]}},{\"range\":{\"Rating\":{\"gte\":5.0}}},{\"term\":{\"Count\":{\"value\":0}}},{\"bool\":{\"should\":[{\"wildcard\":{\"Name\":{\"value\":\"A*\"}}},{\"wildcard\":{\"Name\":{\"value\":\"*B*\"}}}]}}]}}," +
+                "\"query\":{\"bool\":{\"must\":[{\"bool\":{\"must_not\":{\"exists\":{\"field\":\"SubCategory\"}}}},{\"range\":{\"Rating\":{\"gte\":5}}},{\"term\":{\"Count\":{\"value\":0}}},{\"bool\":{\"should\":[{\"wildcard\":{\"Name\":{\"value\":\"A*\"}}},{\"wildcard\":{\"Name\":{\"value\":\"*B*\"}}}]}}]}}," +
                 "\"size\":100}",
                 rawQuery);
         }
@@ -110,8 +110,8 @@ namespace DatabaseBenchmark.Tests.Databases
             var request = builder.Build();
             var rawQuery = SerializeSearchRequest(request);
 
-            Assert.Equal("{\"fields\":[\"Category\",\"SubCategory\"]," +
-                "\"query\":{\"bool\":{\"should\":[{\"term\":{\"Tags\":{\"value\":\"ABC\"}}}," + 
+            Assert.Equal("{\"fields\":[{\"field\":\"Category\"},{\"field\":\"SubCategory\"}]," +
+                "\"query\":{\"bool\":{\"should\":[{\"term\":{\"Tags\":{\"value\":\"ABC\"}}}," +
                 "{\"terms\":{\"Tags\":[\"A\",\"B\",\"C\"]}}]}}}",
                 rawQuery);
         }
@@ -135,7 +135,7 @@ namespace DatabaseBenchmark.Tests.Databases
 
         private static string SerializeSearchRequest(SearchRequest searchRequest)
         {
-            var elasticClient = new ElasticClient();
+            var elasticClient = new ElasticsearchClient();
             using var stream = new MemoryStream();
             elasticClient.RequestResponseSerializer.Serialize(searchRequest, stream);
             stream.Position = 0;

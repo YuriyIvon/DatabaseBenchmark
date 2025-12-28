@@ -3,7 +3,10 @@ using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Elasticsearch.Interfaces;
 using DatabaseBenchmark.Model;
-using Nest;
+using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.Aggregations;
+using Elastic.Clients.Elasticsearch.QueryDsl;
+using Query = Elastic.Clients.Elasticsearch.QueryDsl.Query;
 
 namespace DatabaseBenchmark.Databases.Elasticsearch
 {
@@ -17,13 +20,13 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         ];
 
         private readonly Table _table;
-        private readonly Query _query;
+        private readonly DatabaseBenchmark.Model.Query _query;
         private readonly IRandomValueProvider _randomValueProvider;
         private readonly IRandomPrimitives _randomPrimitives;
 
         public ElasticsearchQueryBuilder(
             Table table,
-            Query query,
+            DatabaseBenchmark.Model.Query query,
             IRandomValueProvider randomValueProvider,
             IRandomPrimitives randomPrimitives)
         {
@@ -46,7 +49,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
             if (_query.Columns != null)
             {
-                request.Fields = _query.Columns.Select(c => new Field(c)).ToArray();
+                request.Fields = _query.Columns.Select(c => new FieldAndFormat { Field = new Field(c) }).ToArray();
             }
 
             if (_query.Condition != null)
@@ -63,13 +66,15 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
 
             if (_query.Sort != null && _query.Aggregate == null)
             {
-                request.Sort = _query.Sort.Select(s => 
-                    new FieldSort 
+                request.Sort = _query.Sort.Select(s =>
+                    new SortOptions
                     {
-                        Field = s.ColumnName,
-                        Order = s.Direction == QuerySortDirection.Ascending 
-                            ? SortOrder.Ascending 
-                            : SortOrder.Descending 
+                        Field = new FieldSort(new Field(s.ColumnName))
+                        {
+                            Order = s.Direction == QuerySortDirection.Ascending
+                                ? SortOrder.Asc
+                                : SortOrder.Desc
+                        }
                     })
                     .ToArray();
             }
@@ -87,7 +92,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             return request;
         }
 
-        private QueryContainer BuildCondition(IQueryCondition condition)
+        private Query BuildCondition(IQueryCondition condition)
         {
             if (condition.RandomizeInclusion && _randomPrimitives.GetRandomBoolean())
             {
@@ -104,10 +109,10 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             }
         }
 
-        private QueryContainer BuildGroupCondition(QueryGroupCondition condition)
+        private Query BuildGroupCondition(QueryGroupCondition condition)
         {
             var conditions = condition.Conditions
-                .Select(p => BuildCondition(p))
+                .Select(BuildCondition)
                 .Where(p => p != null)
                 .ToArray();
 
@@ -127,7 +132,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             }
         }
 
-        private static QueryContainer BuildNotCondition(QueryContainer[] inputConditions)
+        private static Query BuildNotCondition(Query[] inputConditions)
         {
             if (inputConditions.Length > 1)
             {
@@ -137,7 +142,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             return new BoolQuery { MustNot = inputConditions };
         }
 
-        private QueryContainer BuildPrimitiveCondition(QueryPrimitiveCondition condition)
+        private Query BuildPrimitiveCondition(QueryPrimitiveCondition condition)
         {
             var column = GetColumn(condition.ColumnName);
 
@@ -146,129 +151,147 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                 throw new InputArgumentException($"Primitive operator \"{condition.Operator}\" is not supported for array columns");
             }
 
-            var rawValue = !condition.RandomizeValue 
+            var rawValue = !condition.RandomizeValue
                 ? condition.Value
-                : condition.Operator == QueryPrimitiveOperator.In 
+                : condition.Operator == QueryPrimitiveOperator.In
                     ? _randomValueProvider.GetValueCollection(_table.Name, column, condition.ValueRandomizationRule)
                     : _randomValueProvider.GetValue(_table.Name, column, condition.ValueRandomizationRule);
 
             //TODO: double-check DateTime and serialization for all database types
             return condition.Operator switch
             {
-                QueryPrimitiveOperator.Equals => 
-                    rawValue != null 
+                QueryPrimitiveOperator.Equals =>
+                    rawValue != null
                         ? column.Array
-                            ? new TermsQuery { Field = condition.ColumnName, Terms = (IEnumerable<object>)rawValue }
-                            : new TermQuery { Field = condition.ColumnName, Value = rawValue }
+                            ? new TermsQuery { Field = condition.ColumnName, Terms = BuildTermsQueryField(condition.ColumnName, rawValue) }
+                            : new TermQuery { Field = condition.ColumnName, Value = FieldValue.FromValue(rawValue) }
                         : new BoolQuery
                         {
-                            MustNot = new QueryContainer[]
+                            MustNot = new List<Query>
                             {
                                 new ExistsQuery { Field = condition.ColumnName }
                             }
                         },
-                QueryPrimitiveOperator.In => new TermQuery { Field = condition.ColumnName, Value = rawValue },
-                QueryPrimitiveOperator.NotEquals => 
-                    rawValue != null 
-                        ? new BoolQuery 
+                QueryPrimitiveOperator.In => 
+                    new TermsQuery { Field = condition.ColumnName, Terms = BuildTermsQueryField(condition.ColumnName, rawValue) },
+                QueryPrimitiveOperator.NotEquals =>
+                    rawValue != null
+                        ? new BoolQuery
                         {
-                            MustNot = new QueryContainer[]
+                            MustNot =
                             {
                                 column.Array
-                                    ? new TermsQuery { Field = condition.ColumnName, Terms = (IEnumerable<object>)rawValue }
-                                    : new TermQuery { Field = condition.ColumnName, Value = rawValue }
+                                    ? new TermsQuery { Field = condition.ColumnName, Terms = BuildTermsQueryField(condition.ColumnName, rawValue) }
+                                    : new TermQuery { Field = condition.ColumnName, Value = FieldValue.FromValue(rawValue) }
                             }
                         }
                         : new ExistsQuery { Field = condition.ColumnName },
-                QueryPrimitiveOperator.Lower => column.Type switch 
-                    {
-                        ColumnType.Integer => new LongRangeQuery { Field = condition.ColumnName, LessThan = (long?)rawValue },
-                        ColumnType.Double => new NumericRangeQuery { Field = condition.ColumnName, LessThan = (double?)rawValue },
-                        ColumnType.DateTime => new DateRangeQuery { Field = condition.ColumnName, LessThan = (DateTime?)rawValue },
-                        ColumnType.String => new TermRangeQuery { Field = condition.ColumnName, LessThan = (string)rawValue },
-                        ColumnType.Text => new TermRangeQuery { Field = condition.ColumnName, LessThan = (string)rawValue },
-                        _ => throw new InputArgumentException($"Operator Lower is not supported for column type \"{column.Type}\"")
-                    },
+                QueryPrimitiveOperator.Lower => column.Type switch
+                {
+                    ColumnType.Integer => new NumberRangeQuery { Field = condition.ColumnName, Lt = (long?)rawValue },
+                    ColumnType.Double => new NumberRangeQuery { Field = condition.ColumnName, Lt = (double?)rawValue },
+                    ColumnType.DateTime => new DateRangeQuery { Field = condition.ColumnName, Lt = DateMath.Anchored((DateTime)rawValue) },
+                    ColumnType.String => new TermRangeQuery { Field = condition.ColumnName, Lt = rawValue?.ToString() },
+                    ColumnType.Text => new TermRangeQuery { Field = condition.ColumnName, Lt = rawValue?.ToString() },
+                    _ => throw new InputArgumentException($"Operator Lower is not supported for column type \"{column.Type}\"")
+                },
                 QueryPrimitiveOperator.LowerEquals => column.Type switch
-                    {
-                        ColumnType.Integer => new LongRangeQuery { Field = condition.ColumnName, LessThanOrEqualTo = (long?)rawValue },
-                        ColumnType.Double => new NumericRangeQuery { Field = condition.ColumnName, LessThanOrEqualTo = (double?)rawValue },
-                        ColumnType.DateTime => new DateRangeQuery { Field = condition.ColumnName, LessThanOrEqualTo = (DateTime?)rawValue },
-                        ColumnType.String => new TermRangeQuery { Field = condition.ColumnName, LessThanOrEqualTo = (string)rawValue },
-                        ColumnType.Text => new TermRangeQuery { Field = condition.ColumnName, LessThanOrEqualTo = (string)rawValue },
-                        _ => throw new InputArgumentException($"Operator LowerEquals is not supported for column type \"{column.Type}\"")
-                    },
+                {
+                    ColumnType.Integer => new NumberRangeQuery { Field = condition.ColumnName, Lte = (long?)rawValue },
+                    ColumnType.Double => new NumberRangeQuery { Field = condition.ColumnName, Lte = (double?)rawValue },
+                    ColumnType.DateTime => new DateRangeQuery { Field = condition.ColumnName, Lte = DateMath.Anchored((DateTime)rawValue) },
+                    ColumnType.String => new TermRangeQuery { Field = condition.ColumnName, Lte = rawValue?.ToString() },
+                    ColumnType.Text => new TermRangeQuery { Field = condition.ColumnName, Lte = rawValue?.ToString() },
+                    _ => throw new InputArgumentException($"Operator LowerEquals is not supported for column type \"{column.Type}\"")
+                },
                 QueryPrimitiveOperator.Greater => column.Type switch
-                    {
-                        ColumnType.Integer => new LongRangeQuery { Field = condition.ColumnName, GreaterThan = (long?)rawValue },
-                        ColumnType.Double => new NumericRangeQuery { Field = condition.ColumnName, GreaterThan = (double?)rawValue },
-                        ColumnType.DateTime => new DateRangeQuery { Field = condition.ColumnName, GreaterThan = (DateTime?)rawValue },
-                        ColumnType.String => new TermRangeQuery { Field = condition.ColumnName, GreaterThan = (string)rawValue },
-                        ColumnType.Text => new TermRangeQuery { Field = condition.ColumnName, GreaterThan = (string)rawValue },
-                        _ => throw new InputArgumentException($"Operator Greater is not supported for column type \"{column.Type}\"")
-                    },
+                {
+                    ColumnType.Integer => new NumberRangeQuery { Field = condition.ColumnName, Gt = (long?)rawValue },
+                    ColumnType.Double => new NumberRangeQuery { Field = condition.ColumnName, Gt = (double?)rawValue },
+                    ColumnType.DateTime => new DateRangeQuery { Field = condition.ColumnName, Gt = DateMath.Anchored((DateTime)rawValue) },
+                    ColumnType.String => new TermRangeQuery { Field = condition.ColumnName, Gt = rawValue?.ToString() },
+                    ColumnType.Text => new TermRangeQuery { Field = condition.ColumnName, Gt = rawValue?.ToString() },
+                    _ => throw new InputArgumentException($"Operator Greater is not supported for column type \"{column.Type}\"")
+                },
                 QueryPrimitiveOperator.GreaterEquals => column.Type switch
-                    {
-                        ColumnType.Integer => new LongRangeQuery { Field = condition.ColumnName, GreaterThanOrEqualTo = (long?)rawValue },
-                        ColumnType.Double => new NumericRangeQuery { Field = condition.ColumnName, GreaterThanOrEqualTo = (double?)rawValue },
-                        ColumnType.DateTime => new DateRangeQuery { Field = condition.ColumnName, GreaterThanOrEqualTo = (DateTime?)rawValue },
-                        ColumnType.String => new TermRangeQuery { Field = condition.ColumnName, GreaterThanOrEqualTo = (string)rawValue },
-                        ColumnType.Text => new TermRangeQuery { Field = condition.ColumnName, GreaterThanOrEqualTo = (string)rawValue },
-                        _ => throw new InputArgumentException($"Operator GreaterEquals is not supported for column type \"{column.Type}\"")
-                    },
-                QueryPrimitiveOperator.Contains => 
-                    column.Array 
-                        ? new TermQuery { Field = condition.ColumnName, Value = rawValue }
+                {
+                    ColumnType.Integer => new NumberRangeQuery { Field = condition.ColumnName, Gte = (long?)rawValue },
+                    ColumnType.Double => new NumberRangeQuery { Field = condition.ColumnName, Gte = (double?)rawValue },
+                    ColumnType.DateTime => new DateRangeQuery { Field = condition.ColumnName, Gte = DateMath.Anchored((DateTime)rawValue) },
+                    ColumnType.String => new TermRangeQuery { Field = condition.ColumnName, Gte = rawValue?.ToString() },
+                    ColumnType.Text => new TermRangeQuery { Field = condition.ColumnName, Gte = rawValue?.ToString() },
+                    _ => throw new InputArgumentException($"Operator GreaterEquals is not supported for column type \"{column.Type}\"")
+                },
+                QueryPrimitiveOperator.Contains =>
+                    column.Array
+                        ? new TermQuery { Field = condition.ColumnName, Value = FieldValue.FromValue(rawValue) }
                         : new WildcardQuery { Field = condition.ColumnName, Value = $"*{rawValue}*" },
-                QueryPrimitiveOperator.StartsWith => new WildcardQuery { Field = condition.ColumnName, Value = $"{rawValue}*"},
+                QueryPrimitiveOperator.StartsWith => new WildcardQuery { Field = condition.ColumnName, Value = $"{rawValue}*" },
                 _ => throw new InputArgumentException($"Unknown primitive operator \"{condition.Operator}\"")
             };
         }
 
-        private AggregationDictionary BuildAggregations()
+        private IDictionary<string, Aggregation> BuildAggregations()
         {
-            var aggregation = new CompositeAggregation("grouping")
+            var sources = _query.Aggregate.GroupColumnNames
+                .Select(columnName => new KeyValuePair<string, CompositeAggregationSource>(
+                    columnName,
+                    new CompositeTermsAggregation
+                    {
+                        Field = columnName,
+                        Order = BuildGroupSortDirection(columnName)
+                    }))
+                .ToList();
+
+            var subAggregations = _query.Aggregate.ResultColumns
+                .Where(c => c.Function != QueryAggregateFunction.Count)
+                .ToDictionary(c => c.ResultColumnName, BuildAggregation);
+
+            var groupingAggregation = new Aggregation
             {
-                Sources = _query.Aggregate.GroupColumnNames
-                    .Select(g => new TermsCompositeAggregationSource(g)
-                    { 
-                        Field = g,
-                        Order = BuildGroupSortDirection(g)
-                    })
-                    .ToArray(),
-                Aggregations = new AggregationDictionary(
-                    _query.Aggregate.ResultColumns
-                        .Where(c => c.Function != QueryAggregateFunction.Count)
-                        .ToDictionary(c => c.ResultColumnName, BuildAggregation)),
-                //TODO: parameterize and provide a way to fetch all
-                Size = 10000
+                Composite = new CompositeAggregation
+                {
+                    Sources = sources,
+                    //TODO: parameterize and provide a way to fetch all
+                    Size = 10000,
+                },
+                Aggregations = subAggregations
             };
 
-            return new AggregationDictionary(
-                new Dictionary<string, AggregationContainer>
-                { 
-                    { "grouping", aggregation } 
-                });
+            return new Dictionary<string, Aggregation>
+            {
+                { "grouping", groupingAggregation }
+            };
         }
 
-        private static AggregationContainer BuildAggregation(QueryAggregateColumn resultColumn) =>
+        private Aggregation BuildAggregation(QueryAggregateColumn resultColumn) =>
             resultColumn.Function switch
             {
-                QueryAggregateFunction.Average => new AverageAggregation(resultColumn.ResultColumnName, resultColumn.SourceColumnName),
-                QueryAggregateFunction.Sum => new SumAggregation(resultColumn.ResultColumnName, resultColumn.SourceColumnName),
-                QueryAggregateFunction.Min => new MinAggregation(resultColumn.ResultColumnName, resultColumn.SourceColumnName),
-                QueryAggregateFunction.Max => new MaxAggregation(resultColumn.ResultColumnName, resultColumn.SourceColumnName),
+                QueryAggregateFunction.Average => new AverageAggregation { Field = resultColumn.SourceColumnName },
+                QueryAggregateFunction.Sum => new SumAggregation { Field = resultColumn.SourceColumnName },
+                QueryAggregateFunction.Min => new MinAggregation { Field = resultColumn.SourceColumnName },
+                QueryAggregateFunction.Max => new MaxAggregation { Field = resultColumn.SourceColumnName },
                 _ => throw new InputArgumentException($"Unknown aggregate function {resultColumn.Function}")
             };
 
         private SortOrder? BuildGroupSortDirection(string groupColumnName)
         {
-            var sort = _query.Sort?.FirstOrDefault(s => s.ColumnName == groupColumnName);
-            return sort == null 
-                ? null
-                : sort.Direction == QuerySortDirection.Ascending
-                    ? SortOrder.Ascending
-                    : SortOrder.Descending;
+            var sortItem = _query.Sort?.FirstOrDefault(s => s.ColumnName == groupColumnName);
+            return sortItem?.Direction == QuerySortDirection.Ascending
+                ? SortOrder.Asc
+                : SortOrder.Desc;
+        }
+
+        private static TermsQueryField BuildTermsQueryField(string columnName, object rawValue)
+        {
+            if (rawValue is IEnumerable<object> collection)
+            {
+                return new TermsQueryField(collection.Select(FieldValue.FromValue).ToArray());
+            }
+            else
+            {
+                throw new InputArgumentException($"The query argument for the column \"{columnName}\" must be a collection");
+            }
         }
 
         protected Column GetColumn(string columnName)
