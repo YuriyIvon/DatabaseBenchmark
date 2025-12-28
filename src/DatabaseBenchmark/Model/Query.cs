@@ -8,6 +8,8 @@ namespace DatabaseBenchmark.Model
 
         public string[] Columns { get; set; }
 
+        public QueryRanking Ranking { get; set; }
+
         [JsonConverter(typeof(JsonQueryConditionConverter))]
         public IQueryCondition Condition { get; set; }
 

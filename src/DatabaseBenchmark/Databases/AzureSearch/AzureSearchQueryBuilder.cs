@@ -1,4 +1,5 @@
 ﻿using Azure.Search.Documents;
+using Azure.Search.Documents.Models;
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.AzureSearch.Interfaces;
@@ -51,6 +52,11 @@ namespace DatabaseBenchmark.Databases.AzureSearch
                 }
             }
 
+            if (_query.Ranking != null)
+            {
+                options.VectorSearch = BuildRanking(_query.Ranking);
+            }
+
             if (_query.Condition != null)
             {
                 options.Filter = BuildCondition(_query.Condition);
@@ -65,8 +71,8 @@ namespace DatabaseBenchmark.Databases.AzureSearch
             {
                 foreach (var sort in _query.Sort)
                 {
-                    options.OrderBy.Add(sort.Direction == QuerySortDirection.Ascending 
-                        ? sort.ColumnName 
+                    options.OrderBy.Add(sort.Direction == QuerySortDirection.Ascending
+                        ? sort.ColumnName
                         : $"{sort.ColumnName} desc");
                 }
             }
@@ -82,6 +88,55 @@ namespace DatabaseBenchmark.Databases.AzureSearch
             }
 
             return options;
+        }
+
+        private VectorSearchOptions BuildRanking(QueryRanking ranking)
+        {
+            if (ranking.Queries == null || !ranking.Queries.Any())
+            {
+                return null;
+            }
+
+            if (ranking.FusionStrategy != RankingQueryFusionStrategy.ReciprocalRankFusion)
+            {
+                throw new InputArgumentException($"Ranking fusion strategy \"{ranking.FusionStrategy}\" is not supported for Azure Search");
+            }
+
+            var vectorSearch = new VectorSearchOptions();
+
+            foreach (var rankingQuery in ranking.Queries)
+            {
+                if (rankingQuery is VectorRankingQuery vectorQuery)
+                {
+                    var vectorizedQuery = BuildVectorizedQuery(vectorQuery);
+                    vectorSearch.Queries.Add(vectorizedQuery);
+                }
+                else
+                {
+                    throw new InputArgumentException($"Unknown ranking query type \"{rankingQuery.GetType()}\"");
+                }
+            }
+
+            return vectorSearch;
+        }
+
+        private VectorizedQuery BuildVectorizedQuery(VectorRankingQuery vectorQuery)
+        {
+            var vector = !vectorQuery.RandomizeVector
+                ? vectorQuery.Vector
+                : (float[])_randomValueProvider.GetValue(_table.Name, GetColumn(vectorQuery.ColumnName), vectorQuery.VectorRandomizationRule);
+
+            var vectorizedQuery = new VectorizedQuery(vector)
+            {
+                KNearestNeighborsCount = vectorQuery.Limit,
+                Weight = vectorQuery.Weight
+            };
+
+            vectorizedQuery.Fields.Add(vectorQuery.ColumnName);
+
+            //TODO: Implement FilterOverride once it is available
+
+            return vectorizedQuery;
         }
 
         private string BuildCondition(IQueryCondition condition)
@@ -142,7 +197,7 @@ namespace DatabaseBenchmark.Databases.AzureSearch
                     new QueryGroupCondition
                     {
                         Operator = QueryGroupOperator.Or,
-                        Conditions = collectionValue.Select(v => 
+                        Conditions = collectionValue.Select(v =>
                             new QueryPrimitiveCondition
                             {
                                 ColumnName = columnName,
@@ -167,9 +222,9 @@ namespace DatabaseBenchmark.Databases.AzureSearch
                 throw new InputArgumentException($"Primitive operator \"{condition.Operator}\" is not supported for array columns");
             }
 
-            var rawValue = !condition.RandomizeValue 
+            var rawValue = !condition.RandomizeValue
                 ? condition.Value
-                : condition.Operator == QueryPrimitiveOperator.In 
+                : condition.Operator == QueryPrimitiveOperator.In
                     ? _randomValueProvider.GetValueCollection(_table.Name, column, condition.ValueRandomizationRule)
                     : _randomValueProvider.GetValue(_table.Name, column, condition.ValueRandomizationRule);
 
@@ -179,9 +234,9 @@ namespace DatabaseBenchmark.Databases.AzureSearch
             {
                 return condition.Operator switch
                 {
-                    QueryPrimitiveOperator.Contains => 
-                        rawValue != null 
-                            ? $"{condition.ColumnName}/any(item: item eq {valueString})" 
+                    QueryPrimitiveOperator.Contains =>
+                        rawValue != null
+                            ? $"{condition.ColumnName}/any(item: item eq {valueString})"
                             : throw new InputArgumentException("Cannot search for NULL values in arrays with \"Contains\" operator"),
                     _ => throw new InputArgumentException($"Primitive operator \"{condition.Operator}\" is not supported for array columns")
                 };
@@ -190,26 +245,26 @@ namespace DatabaseBenchmark.Databases.AzureSearch
             {
                 return condition.Operator switch
                 {
-                    QueryPrimitiveOperator.Equals => 
-                        rawValue != null 
-                            ? $"{condition.ColumnName} eq {valueString}" 
+                    QueryPrimitiveOperator.Equals =>
+                        rawValue != null
+                            ? $"{condition.ColumnName} eq {valueString}"
                             : $"{condition.ColumnName} eq null",
-                    QueryPrimitiveOperator.NotEquals => 
-                        rawValue != null 
-                            ? $"{condition.ColumnName} ne {valueString}" 
+                    QueryPrimitiveOperator.NotEquals =>
+                        rawValue != null
+                            ? $"{condition.ColumnName} ne {valueString}"
                             : $"{condition.ColumnName} ne null",
                     QueryPrimitiveOperator.In => BuildInCondition(condition.ColumnName, rawValue),
                     QueryPrimitiveOperator.Lower => $"{condition.ColumnName} lt {valueString}",
                     QueryPrimitiveOperator.LowerEquals => $"{condition.ColumnName} le {valueString}",
                     QueryPrimitiveOperator.Greater => $"{condition.ColumnName} gt {valueString}",
                     QueryPrimitiveOperator.GreaterEquals => $"{condition.ColumnName} ge {valueString}",
-                    QueryPrimitiveOperator.Contains => 
-                        column.Type == ColumnType.String || column.Type == ColumnType.Text 
-                            ? $"search.ismatchscoring('{rawValue}', '{condition.ColumnName}')" 
+                    QueryPrimitiveOperator.Contains =>
+                        column.Type == ColumnType.String || column.Type == ColumnType.Text
+                            ? $"search.ismatchscoring('{rawValue}', '{condition.ColumnName}')"
                             : throw new InputArgumentException("Operator \"Contains\" is only supported for string columns"),
-                    QueryPrimitiveOperator.StartsWith => 
-                        column.Type == ColumnType.String || column.Type == ColumnType.Text 
-                            ? $"search.ismatchscoring('{rawValue}*', '{condition.ColumnName}')" 
+                    QueryPrimitiveOperator.StartsWith =>
+                        column.Type == ColumnType.String || column.Type == ColumnType.Text
+                            ? $"search.ismatchscoring('{rawValue}*', '{condition.ColumnName}')"
                             : throw new InputArgumentException("Operator \"StartsWith\" is only supported for string columns"),
                     _ => throw new InputArgumentException($"Unknown primitive operator \"{condition.Operator}\"")
                 };

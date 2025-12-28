@@ -87,6 +87,29 @@ namespace DatabaseBenchmark.Tests.Utils
             ]
         };
 
+        public static Table VectorColumnTable => new()
+        {
+            Name = "Sample",
+            Columns =
+            [
+                .. Table.Columns,
+                new Column
+                {
+                    Name = "TextVector",
+                    Type = ColumnType.Vector,
+                    Queryable = true,
+                    Nullable = false
+                },
+                new Column
+                {
+                    Name = "ImageVector",
+                    Type = ColumnType.Vector,
+                    Queryable = true,
+                    Nullable = false
+                }
+            ]
+        };
+
         public static Query NoArgumentsQuery => new();
 
         public static Query SpecificFieldsQuery => new()
@@ -104,7 +127,7 @@ namespace DatabaseBenchmark.Tests.Utils
 
         public static Query AllArgumentsQuery => new()
         {
-            Columns = [ "Category", "SubCategory" ],
+            Columns = ["Category", "SubCategory"],
             Condition = new QueryGroupCondition
             {
                 Operator = QueryGroupOperator.And,
@@ -326,7 +349,7 @@ namespace DatabaseBenchmark.Tests.Utils
                     Type = ColumnType.String,
                     Value = "One"
                 }
-            ] 
+            ]
         };
 
         public static RawQueryParameter[] RawQueryParameters =>
@@ -405,5 +428,79 @@ namespace DatabaseBenchmark.Tests.Utils
                 Value = new object[] { "One", "Two" }
             }
         ];
+
+        public static Query SingleVectorRankingQuery => new()
+        {
+            Columns = ["Id", "Name"],
+            Ranking = new QueryRanking
+            {
+                FusionStrategy = RankingQueryFusionStrategy.ReciprocalRankFusion,
+                Queries =
+                [
+                    new VectorRankingQuery
+                    {
+                        ColumnName = "TextVector",
+                        Vector = [0.1f, 0.2f, 0.3f, 0.4f],
+                        Limit = 10,
+                        Weight = 1.0f
+                    }
+                ]
+            },
+            Take = 10
+        };
+
+        public static Query MultipleVectorRankingQueryRRF => new()
+        {
+            Columns = ["Id", "Name"],
+            Ranking = new QueryRanking
+            {
+                FusionStrategy = RankingQueryFusionStrategy.ReciprocalRankFusion,
+                Queries =
+                [
+                    new VectorRankingQuery
+                    {
+                        ColumnName = "TextVector",
+                        Vector = [0.1f, 0.2f, 0.3f, 0.4f],
+                        Limit = 10,
+                        Weight = 1.0f
+                    },
+                    new VectorRankingQuery
+                    {
+                        ColumnName = "ImageVector",
+                        Vector = [0.5f, 0.6f, 0.7f, 0.8f],
+                        Limit = 10,
+                        Weight = 0.5f
+                    }
+                ]
+            },
+            Take = 10
+        };
+
+        public static Query MultipleVectorRankingQueryWeighted => new()
+        {
+            Columns = ["Id", "Name"],
+            Ranking = new QueryRanking
+            {
+                FusionStrategy = RankingQueryFusionStrategy.WeightedAverage,
+                Queries =
+                [
+                    new VectorRankingQuery
+                    {
+                        ColumnName = "TextVector",
+                        Vector = [0.1f, 0.2f, 0.3f, 0.4f],
+                        Limit = 10,
+                        Weight = 0.7f
+                    },
+                    new VectorRankingQuery
+                    {
+                        ColumnName = "ImageVector",
+                        Vector = [0.5f, 0.6f, 0.7f, 0.8f],
+                        Limit = 10,
+                        Weight = 0.3f
+                    }
+                ]
+            },
+            Take = 10
+        };
     }
 }

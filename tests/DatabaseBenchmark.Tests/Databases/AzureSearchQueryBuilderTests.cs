@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Common;
+﻿using Azure.Search.Documents.Models;
+using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Databases.AzureSearch;
 using DatabaseBenchmark.Model;
 using DatabaseBenchmark.Tests.Utils;
@@ -117,6 +118,49 @@ namespace DatabaseBenchmark.Tests.Databases
             var builder = new AzureSearchQueryBuilder(SampleInputs.ArrayColumnTable, query, null, null);
 
             Assert.Throws<InputArgumentException>(builder.Build);
+        }
+
+        [Fact]
+        public void BuildQueryWithSingleVectorRanking()
+        {
+            var builder = new AzureSearchQueryBuilder(SampleInputs.VectorColumnTable, SampleInputs.SingleVectorRankingQuery, null, null);
+
+            var searchOptions = builder.Build();
+
+            Assert.NotNull(searchOptions.VectorSearch);
+            Assert.Single(searchOptions.VectorSearch.Queries);
+
+            var vectorQuery = searchOptions.VectorSearch.Queries[0] as VectorizedQuery;
+            Assert.NotNull(vectorQuery);
+            Assert.Equal(10, vectorQuery.KNearestNeighborsCount);
+            Assert.Equal(1.0f, vectorQuery.Weight);
+            Assert.Contains("TextVector", vectorQuery.Fields);
+            Assert.Equal([0.1f, 0.2f, 0.3f, 0.4f], vectorQuery.Vector.ToArray());
+        }
+
+        [Fact]
+        public void BuildQueryWithMultipleVectorRankingRRF()
+        {
+            var builder = new AzureSearchQueryBuilder(SampleInputs.VectorColumnTable, SampleInputs.MultipleVectorRankingQueryRRF, null, null);
+
+            var searchOptions = builder.Build();
+
+            Assert.NotNull(searchOptions.VectorSearch);
+            Assert.Equal(2, searchOptions.VectorSearch.Queries.Count);
+
+            var vectorQuery1 = searchOptions.VectorSearch.Queries[0] as VectorizedQuery;
+            Assert.NotNull(vectorQuery1);
+            Assert.Equal(10, vectorQuery1.KNearestNeighborsCount);
+            Assert.Equal(1.0f, vectorQuery1.Weight);
+            Assert.Contains("TextVector", vectorQuery1.Fields);
+            Assert.Equal([0.1f, 0.2f, 0.3f, 0.4f], vectorQuery1.Vector.ToArray());
+
+            var vectorQuery2 = searchOptions.VectorSearch.Queries[1] as VectorizedQuery;
+            Assert.NotNull(vectorQuery2);
+            Assert.Equal(10, vectorQuery2.KNearestNeighborsCount);
+            Assert.Equal(0.5f, vectorQuery2.Weight);
+            Assert.Contains("ImageVector", vectorQuery2.Fields);
+            Assert.Equal([0.5f, 0.6f, 0.7f, 0.8f], vectorQuery2.Vector.ToArray());
         }
     }
 }
