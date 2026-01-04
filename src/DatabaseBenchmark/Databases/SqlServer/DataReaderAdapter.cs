@@ -1,6 +1,6 @@
-﻿using DatabaseBenchmark.Databases.Common;
-using DatabaseBenchmark.DataSources.Interfaces;
+﻿using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
+using Microsoft.Data.SqlTypes;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 
@@ -10,16 +10,22 @@ namespace DatabaseBenchmark.Databases.SqlServer
     {
         private readonly IDataSource _dataSource;
         private readonly Table _table;
+        private readonly HashSet<string> _vectorColumns;
 
         public DataReaderAdapter(Table table, IDataSource dataSource)
         {
             _dataSource = dataSource;
             _table = table;
+
+            _vectorColumns = table.Columns
+                .Where(c => c.Type == ColumnType.Vector)
+                .Select(c => c.Name)
+                .ToHashSet();
         }
 
         public object this[int i] => this[_table.Columns[i].Name];
 
-        public object this[string name] => _dataSource.GetValue(name);
+        public object this[string name] => PrepareValue(name, _dataSource.GetValue(name));
 
         public int Depth => throw new NotSupportedException();
 
@@ -87,5 +93,10 @@ namespace DatabaseBenchmark.Databases.SqlServer
         public bool NextResult() => throw new NotSupportedException();
 
         public bool Read() => _dataSource.Read();
+
+        private object PrepareValue(string columnName, object value) =>
+            value != null && _vectorColumns.Contains(columnName)
+                ? new SqlVector<float>((float[])value)
+                : value;
     }
 }

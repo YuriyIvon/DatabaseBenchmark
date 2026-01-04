@@ -152,6 +152,11 @@ namespace DatabaseBenchmark.Databases.AzureSearch
                 }
                 else if (column.Type == ColumnType.Vector)
                 {
+                    if (column.Size == null)
+                    {
+                        throw new InputArgumentException("A vector column must have a specified size");
+                    }
+
                     vectorSearch ??= new VectorSearch
                     {
                         Algorithms = { new HnswAlgorithmConfiguration(VectorAlgorithmConfigurationName) },
