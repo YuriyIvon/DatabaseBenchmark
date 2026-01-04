@@ -37,6 +37,9 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                     ColumnType.DateTime => "timestamp",
                     ColumnType.String => "varchar(1000)",
                     ColumnType.Text => "varchar",
+                    ColumnType.Vector => column.Size != null
+                        ? $"vector({column.Size})"
+                        : throw new InputArgumentException("A vector column must have a specified size"),
                     _ => throw new InputArgumentException($"Unknown column type \"{column.Type}\"")
                 };
 

@@ -6,6 +6,7 @@ using DatabaseBenchmark.Databases.Sql;
 using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Npgsql;
+using Pgvector;
 using System.Diagnostics;
 
 namespace DatabaseBenchmark.Databases.PostgreSql
@@ -31,8 +32,11 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
         public ImportResult Import()
         {
-            using var connection = new NpgsqlConnection(_connectionString);
-            connection.Open();
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(_connectionString);
+            dataSourceBuilder.UseVector();
+
+            using var dataSource = dataSourceBuilder.Build();
+            using var connection = dataSource.OpenConnection();
 
             var columns = _table.Columns.Where(c => !c.DatabaseGenerated).ToArray();
             var columnNames = columns.Select(c => c.Name).ToArray();
@@ -50,8 +54,16 @@ namespace DatabaseBenchmark.Databases.PostgreSql
                     {
                         var value = _source.GetValue(column.Name);
 
-                        var nativeColumnType = PostgreSqlDatabaseUtils.GetNativeColumnType(column.Type, column.Array);
-                        writer.Write(value, nativeColumnType);
+                        if (column.Type == ColumnType.Vector)
+                        {
+                            var vector = new Vector((float[])value);
+                            writer.Write(vector);
+                        }
+                        else
+                        {
+                            var nativeColumnType = PostgreSqlDatabaseUtils.GetNativeColumnType(column.Type, column.Array);
+                            writer.Write(value, nativeColumnType);
+                        }
                     }
 
                     progressReporter.Increment(1);
