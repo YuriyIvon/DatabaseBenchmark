@@ -23,17 +23,20 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         private readonly DatabaseBenchmark.Model.Query _query;
         private readonly IRandomValueProvider _randomValueProvider;
         private readonly IRandomPrimitives _randomPrimitives;
+        private readonly ElasticsearchQueryOptions _queryOptions;
 
         public ElasticsearchQueryBuilder(
             Table table,
             DatabaseBenchmark.Model.Query query,
             IRandomValueProvider randomValueProvider,
-            IRandomPrimitives randomPrimitives)
+            IRandomPrimitives randomPrimitives,
+            IOptionsProvider optionsProvider)
         {
             _table = table;
             _query = query;
             _randomValueProvider = randomValueProvider;
             _randomPrimitives = randomPrimitives;
+            _queryOptions = optionsProvider.GetOptions<ElasticsearchQueryOptions>();
         }
 
         public SearchRequest Build()
@@ -50,6 +53,18 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             if (_query.Columns != null)
             {
                 request.Fields = _query.Columns.Select(c => new FieldAndFormat { Field = new Field(c) }).ToArray();
+            }
+
+            if (_query.Ranking != null)
+            {
+                if (_queryOptions.UseRetriever)
+                {
+                    request.Retriever = BuildRetriever(_query.Ranking);
+                }
+                else
+                {
+                    request.Knn = BuildKnnQueries(_query.Ranking);
+                }
             }
 
             if (_query.Condition != null)
@@ -90,6 +105,124 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             }
 
             return request;
+        }
+
+        private Retriever BuildRetriever(QueryRanking ranking)
+        {
+            if (ranking.Queries == null || !ranking.Queries.Any())
+            {
+                return null;
+            }
+
+            var retrievers = new List<WeightedRetriever>();
+
+            foreach (var rankingQuery in ranking.Queries)
+            {
+                if (rankingQuery is VectorRankingQuery vectorQuery)
+                {
+                    var knnRetriever = BuildKnnRetriever(vectorQuery);
+                    retrievers.Add(new WeightedRetriever(knnRetriever, vectorQuery.Weight));
+                }
+                else
+                {
+                    throw new InputArgumentException($"Unknown ranking query type \"{rankingQuery.GetType()}\"");
+                }
+            }
+
+            return retrievers.Count switch
+            {
+                0 => null,
+                1 => retrievers[0].Retriever,
+                _ => ranking.FusionStrategy switch
+                { 
+                    RankingQueryFusionStrategy.ReciprocalRankFusion => BuildRRFRetriever(retrievers),
+                    RankingQueryFusionStrategy.WeightedAverage => BuildLinearRetriever(retrievers),
+                    _ => throw new InputArgumentException($"Unknown ranking fusion strategy \"{ranking.FusionStrategy}\"")
+                }
+            };
+        }
+
+        private RRFRetriever BuildRRFRetriever(IEnumerable<WeightedRetriever> retrievers) =>
+            new()
+            {
+                Retrievers = retrievers.Select(rw => rw.Retriever).ToList()
+            };
+
+        private LinearRetriever BuildLinearRetriever(IEnumerable<WeightedRetriever> retrievers) =>
+            new()
+            {
+                Retrievers = retrievers.Select(
+                    rw => new InnerRetriever
+                    {
+                        Retriever = rw.Retriever,
+                        Weight = rw.GetRequiredWeight(),
+                        Normalizer = ScoreNormalizer.Minmax //TODO: make configurable
+                    })
+                    .ToList()
+            };
+
+        private KnnRetriever BuildKnnRetriever(VectorRankingQuery vectorQuery)
+        {
+            var vector = !vectorQuery.RandomizeVector
+                ? vectorQuery.Vector
+                : (float[])_randomValueProvider.GetValue(_table.Name, GetColumn(vectorQuery.ColumnName), vectorQuery.VectorRandomizationRule);
+
+            var knnRetriever = new KnnRetriever
+            {
+                Field = vectorQuery.ColumnName,
+                QueryVector = vector,
+                K = vectorQuery.Limit,
+                NumCandidates = vectorQuery.Candidates ?? (vectorQuery.Limit * 10)
+            };
+
+            if (vectorQuery.Condition != null)
+            {
+                knnRetriever.Filter = [BuildCondition(vectorQuery.Condition)];
+            }
+
+            return knnRetriever;
+        }
+
+        private KnnSearch[] BuildKnnQueries(QueryRanking ranking)
+        {
+            if (ranking.Queries == null || !ranking.Queries.Any())
+            {
+                return null;
+            }
+
+            if (ranking.FusionStrategy != RankingQueryFusionStrategy.WeightedAverage)
+            {
+                throw new InputArgumentException($"Fusion strategy \"{ranking.FusionStrategy}\" is not supported when retriever is not used");
+            }
+
+            var queries = new List<KnnSearch>();
+
+            foreach (var rankingQuery in ranking.Queries)
+            {
+                if (rankingQuery is VectorRankingQuery vectorQuery)
+                {
+                    var vector = !vectorQuery.RandomizeVector
+                        ? vectorQuery.Vector
+                        : (float[])_randomValueProvider.GetValue(_table.Name, GetColumn(vectorQuery.ColumnName), vectorQuery.VectorRandomizationRule);
+
+                    var query = new KnnSearch
+                    {
+                        Field = vectorQuery.ColumnName,
+                        QueryVector = vector,
+                        K = vectorQuery.Limit,
+                        NumCandidates = vectorQuery.Candidates ?? (vectorQuery.Limit * 10),
+                        Boost = vectorQuery.Weight
+                    };
+
+                    queries.Add(query);
+                }
+                else
+                {
+                    throw new InputArgumentException($"Unknown ranking query type \"{rankingQuery.GetType()}\"");
+                }
+            }
+
+            return queries.ToArray();
         }
 
         private Query BuildCondition(IQueryCondition condition)
@@ -298,6 +431,12 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         {
             var column = _table.Columns.FirstOrDefault(c => c.Name == columnName);
             return column ?? throw new InputArgumentException($"Unknown column \"{columnName}\"");
+        }
+
+        private record WeightedRetriever(Retriever Retriever, float? Weight)
+        {
+            public float GetRequiredWeight() =>
+                Weight ?? throw new InputArgumentException("Weight can't be null for the chosen fusion strategy");
         }
     }
 }

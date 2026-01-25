@@ -4,6 +4,7 @@ using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
 using DatabaseBenchmark.Databases.ClickHouse;
 using DatabaseBenchmark.Databases.CosmosDb;
+using DatabaseBenchmark.Databases.Elasticsearch;
 using DatabaseBenchmark.Databases.MongoDb;
 using DatabaseBenchmark.Databases.MySql;
 using DatabaseBenchmark.Databases.PostgreSql;
@@ -134,6 +135,11 @@ namespace DatabaseBenchmark.Commands
                             {
                                 Value = "CosmosDb",
                                 OptionsContainerType = typeof(CosmosDbQueryOptions)
+                            },
+                            new ValueSpecificOptionsDescriptor
+                            {
+                                Value = "CosmosDb",
+                                OptionsContainerType = typeof(ElasticsearchQueryOptions)
                             },
                             new ValueSpecificOptionsDescriptor
                             {

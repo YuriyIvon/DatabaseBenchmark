@@ -15,11 +15,13 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             IDatabase database,
             Func<ElasticsearchClient> createClient,
             Table table,
-            Query query)
+            Query query,
+            IOptionsProvider optionsProvider)
         {
             Container.RegisterInstance<IDatabase>(database);
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<Query>(query);
+            Container.RegisterInstance<IOptionsProvider>(optionsProvider);
             Container.RegisterSingleton<IGeneratorFactory, DummyGeneratorFactory>();
             Container.RegisterSingleton<IRandomPrimitives, RandomPrimitives>();
             Container.RegisterSingleton<ICache, MemoryCache>();

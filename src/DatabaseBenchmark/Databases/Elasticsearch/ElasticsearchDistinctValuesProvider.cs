@@ -33,7 +33,9 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
             return result.Aggregations[bucketName] switch
             {
                 StringTermsAggregate stringTerms => stringTerms.Buckets.Select(b => (object)b.Key.Value).ToArray(),
-                LongTermsAggregate longTerms => longTerms.Buckets.Select(b => (object)b.Key).ToArray(),
+                LongTermsAggregate longTerms => column.Type == ColumnType.DateTime
+                    ? longTerms.Buckets.Select(b => (object)DateTimeOffset.FromUnixTimeMilliseconds(b.Key).UtcDateTime).ToArray()
+                    : longTerms.Buckets.Select(b => (object)b.Key).ToArray(),
                 DoubleTermsAggregate doubleTerms => doubleTerms.Buckets.Select(b => (object)b.Key).ToArray(),
                 _ => throw new InvalidOperationException($"Unsupported aggregate type: {aggregate.GetType()}")
             };

@@ -1,4 +1,5 @@
 ﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Elasticsearch;
 using DatabaseBenchmark.Model;
@@ -12,10 +13,18 @@ namespace DatabaseBenchmark.Tests.Databases
 {
     public class ElasticsearchQueryBuilderTests
     {
+        private readonly IOptionsProvider _optionsProvider;
+
+        public ElasticsearchQueryBuilderTests()
+        {
+            _optionsProvider = Substitute.For<IOptionsProvider>();
+            _optionsProvider.GetOptions<ElasticsearchQueryOptions>().Returns(new ElasticsearchQueryOptions());
+        }
+
         [Fact]
         public void BuildQueryNoArguments()
         {
-            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, SampleInputs.NoArgumentsQuery, null, null);
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, SampleInputs.NoArgumentsQuery, null, null, _optionsProvider);
 
             var request = builder.Build();
             var rawQuery = SerializeSearchRequest(request);
@@ -28,7 +37,7 @@ namespace DatabaseBenchmark.Tests.Databases
         {
             var query = SampleInputs.NoArgumentsQuery;
             query.Distinct = true;
-            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, null);
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, null, _optionsProvider);
 
             Assert.Throws<InputArgumentException>(builder.Build);
         }
@@ -39,7 +48,7 @@ namespace DatabaseBenchmark.Tests.Databases
             var query = SampleInputs.NoArgumentsQuery;
             query.Distinct = true;
             query.Columns = ["Category", "SubCategory"];
-            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, null);
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, null, _optionsProvider);
 
             Assert.Throws<InputArgumentException>(builder.Build);
         }
@@ -48,7 +57,7 @@ namespace DatabaseBenchmark.Tests.Databases
         public void BuildQueryAllArguments()
         {
             var query = SampleInputs.AllArgumentsQuery;
-            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, null);
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, null, _optionsProvider);
 
             var request = builder.Build();
             var rawQuery = SerializeSearchRequest(request);
@@ -68,7 +77,7 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var mockRandomPrimitives = Substitute.For<IRandomPrimitives>();
             mockRandomPrimitives.GetRandomBoolean().Returns(true);
-            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, mockRandomPrimitives);
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, mockRandomPrimitives, _optionsProvider);
 
             var request = builder.Build();
             var rawQuery = SerializeSearchRequest(request);
@@ -87,7 +96,7 @@ namespace DatabaseBenchmark.Tests.Databases
 
             var mockRandomPrimitives = Substitute.For<IRandomPrimitives>();
             mockRandomPrimitives.GetRandomBoolean().Returns(true);
-            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, mockRandomPrimitives);
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.Table, query, null, mockRandomPrimitives, _optionsProvider);
 
             var request = builder.Build();
             var rawQuery = SerializeSearchRequest(request);
@@ -105,7 +114,7 @@ namespace DatabaseBenchmark.Tests.Databases
         {
             var query = SampleInputs.ArrayColumnQuery;
 
-            var builder = new ElasticsearchQueryBuilder(SampleInputs.ArrayColumnTable, query, null, null);
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.ArrayColumnTable, query, null, null, _optionsProvider);
 
             var request = builder.Build();
             var rawQuery = SerializeSearchRequest(request);
@@ -113,6 +122,92 @@ namespace DatabaseBenchmark.Tests.Databases
             Assert.Equal("{\"fields\":[{\"field\":\"Category\"},{\"field\":\"SubCategory\"}]," +
                 "\"query\":{\"bool\":{\"should\":[{\"term\":{\"Tags\":{\"value\":\"ABC\"}}}," +
                 "{\"terms\":{\"Tags\":[\"A\",\"B\",\"C\"]}}]}}}",
+                rawQuery);
+        }
+
+        [Fact]
+        public void BuildQueryWithSingleVectorRanking()
+        {
+            var query = SampleInputs.SingleVectorRankingQuery;
+
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.VectorColumnTable, query, null, null, _optionsProvider);
+
+            var request = builder.Build();
+            var rawQuery = SerializeSearchRequest(request);
+
+            Assert.Equal("{\"fields\":[{\"field\":\"Id\"},{\"field\":\"Name\"}]," + 
+                "\"retriever\":{\"knn\":{\"field\":\"TextVector\",\"k\":10,\"num_candidates\":100,\"query_vector\":[0.1,0.2,0.3,0.4]}}," +
+                "\"size\":10}",
+                rawQuery);
+        }
+
+        [Fact]
+        public void BuildQueryWithMultipleVectorRankingRRF()
+        {
+            var query = SampleInputs.MultipleVectorRankingQueryRRF;
+
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.VectorColumnTable, query, null, null, _optionsProvider);
+
+            var request = builder.Build();
+            var rawQuery = SerializeSearchRequest(request);
+
+            Assert.Equal("{\"fields\":[{\"field\":\"Id\"},{\"field\":\"Name\"}]," +
+                "\"retriever\":{\"rrf\":{\"retrievers\":[" +
+                "{\"knn\":{\"field\":\"TextVector\",\"k\":10,\"num_candidates\":100,\"query_vector\":[0.1,0.2,0.3,0.4]}}," +
+                "{\"knn\":{\"field\":\"ImageVector\",\"k\":10,\"num_candidates\":100,\"query_vector\":[0.5,0.6,0.7,0.8]}}]}}," +
+                "\"size\":10}",
+                rawQuery);
+        }
+
+        [Fact]
+        public void BuildQueryWithMultipleVectorRankingWeighted()
+        {
+            var query = SampleInputs.MultipleVectorRankingQueryWeighted;
+
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.VectorColumnTable, query, null, null, _optionsProvider);
+
+            var request = builder.Build();
+            var rawQuery = SerializeSearchRequest(request);
+
+            Assert.Equal("{\"fields\":[{\"field\":\"Id\"},{\"field\":\"Name\"}]," +
+                "\"retriever\":{\"linear\":{\"retrievers\":[" +
+                "{\"normalizer\":\"minmax\",\"retriever\":{\"knn\":{\"field\":\"TextVector\",\"k\":10,\"num_candidates\":100,\"query_vector\":[0.1,0.2,0.3,0.4]}},\"weight\":0.7}," +
+                "{\"normalizer\":\"minmax\",\"retriever\":{\"knn\":{\"field\":\"ImageVector\",\"k\":10,\"num_candidates\":100,\"query_vector\":[0.5,0.6,0.7,0.8]}},\"weight\":0.3}]}}," +
+                "\"size\":10}",
+                rawQuery);
+        }
+
+        [Fact]
+        public void BuildQueryWithMultipleVectorRankingRRFAndDisabledRetriever()
+        {
+            var optionsProvider = Substitute.For<IOptionsProvider>();
+            optionsProvider.GetOptions<ElasticsearchQueryOptions>().Returns(new ElasticsearchQueryOptions { UseRetriever = false });
+
+            var query = SampleInputs.MultipleVectorRankingQueryRRF;
+
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.VectorColumnTable, query, null, null, optionsProvider);
+
+            Assert.Throws<InputArgumentException>(builder.Build);
+        }
+
+        [Fact]
+        public void BuildQueryWithMultipleVectorRankingWeightedAndDisabledRetriever()
+        {
+            var optionsProvider = Substitute.For<IOptionsProvider>();
+            optionsProvider.GetOptions<ElasticsearchQueryOptions>().Returns(new ElasticsearchQueryOptions { UseRetriever = false });
+
+            var query = SampleInputs.MultipleVectorRankingQueryWeighted;
+
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.VectorColumnTable, query, null, null, optionsProvider);
+
+            var request = builder.Build();
+            var rawQuery = SerializeSearchRequest(request);
+
+            Assert.Equal("{\"fields\":[{\"field\":\"Id\"},{\"field\":\"Name\"}]," +
+                "\"knn\":[" +
+                "{\"boost\":0.7,\"field\":\"TextVector\",\"k\":10,\"num_candidates\":100,\"query_vector\":[0.1,0.2,0.3,0.4]}," +
+                "{\"boost\":0.3,\"field\":\"ImageVector\",\"k\":10,\"num_candidates\":100,\"query_vector\":[0.5,0.6,0.7,0.8]}]," +
+                "\"size\":10}",
                 rawQuery);
         }
 
@@ -128,7 +223,7 @@ namespace DatabaseBenchmark.Tests.Databases
             var query = SampleInputs.ArrayColumnQuery;
             ((QueryPrimitiveCondition)((QueryGroupCondition)query.Condition).Conditions[0]).Operator = @operator;
 
-            var builder = new ElasticsearchQueryBuilder(SampleInputs.ArrayColumnTable, query, null, null);
+            var builder = new ElasticsearchQueryBuilder(SampleInputs.ArrayColumnTable, query, null, null, _optionsProvider);
 
             Assert.Throws<InputArgumentException>(builder.Build);
         }

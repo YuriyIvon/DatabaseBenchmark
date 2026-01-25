@@ -17,13 +17,18 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         private const int DefaultImportBatchSize = 500;
 
         private readonly IExecutionEnvironment _environment;
+        private readonly IOptionsProvider _optionsProvider;
 
         public string ConnectionString { get; }
 
-        public ElasticsearchDatabase(string connectionString, IExecutionEnvironment environment)
+        public ElasticsearchDatabase(
+            string connectionString,
+            IExecutionEnvironment environment,
+            IOptionsProvider optionsProvider)
         {
             ConnectionString = connectionString;
             _environment = environment;
+            _optionsProvider = optionsProvider;
         }
 
         public void CreateTable(Table table, bool dropExisting)
@@ -65,7 +70,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         }
 
         public IQueryExecutorFactory CreateQueryExecutorFactory(Table table, Query query) =>
-            new ElasticsearchQueryExecutorFactory(this, CreateClient, NormalizeNames(table), query);
+            new ElasticsearchQueryExecutorFactory(this, CreateClient, NormalizeNames(table), query, _optionsProvider);
 
         public IQueryExecutorFactory CreateRawQueryExecutorFactory(RawQuery query) =>
             new ElasticsearchRawQueryExecutorFactory(this, CreateClient, query);
@@ -120,6 +125,7 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
                     ColumnType.Integer => new IntegerNumberProperty { Index = column.Queryable },
                     ColumnType.Text => new TextProperty { Index = column.Queryable },
                     ColumnType.DateTime => new DateProperty { Index = column.Queryable },
+                    ColumnType.Vector => new DenseVectorProperty { Index = column.Queryable, Dims = column.Size },
                     _ => throw new InputArgumentException($"Unknown column type \"{column.Type}\"")
                 };
 
