@@ -1,5 +1,4 @@
 ﻿using DatabaseBenchmark.Common;
-using DatabaseBenchmark.Core;
 
 namespace DatabaseBenchmark.Databases.ClickHouse
 {

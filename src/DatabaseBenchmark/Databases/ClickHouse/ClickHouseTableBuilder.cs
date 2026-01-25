@@ -41,6 +41,7 @@ namespace DatabaseBenchmark.Databases.ClickHouse
                 ColumnType.String => "String",
                 ColumnType.Text => "String",
                 ColumnType.DateTime => "DateTime64",
+                ColumnType.Vector => "Array(Float32)",
                 _ => throw new InputArgumentException($"Unknown column type \"{column.Type}\"")
             };
 
