@@ -4,6 +4,7 @@ using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.DataSources.Csv;
 using DatabaseBenchmark.DataSources.Database;
 using DatabaseBenchmark.DataSources.Generator;
+using DatabaseBenchmark.DataSources.Parquet;
 using DatabaseBenchmark.DataSources.Interfaces;
 
 namespace DatabaseBenchmark.DataSources
@@ -19,6 +20,7 @@ namespace DatabaseBenchmark.DataSources
             _factories = new()
             {
                 ["Csv"] = filePath => new CsvDataSource(filePath, optionsProvider),
+                ["Parquet"] = filePath => new ParquetDataSource(filePath),
                 ["Database"] = filePath => new DatabaseDataSource(filePath, databaseFactory),
                 ["Generator"] = filePath => new GeneratorDataSource(filePath, this, currentDatabase)
             };
