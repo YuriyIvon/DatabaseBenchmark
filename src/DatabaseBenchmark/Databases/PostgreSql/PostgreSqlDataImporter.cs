@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Core.Interfaces;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.Model;
@@ -56,7 +57,7 @@ namespace DatabaseBenchmark.Databases.PostgreSql
 
                         if (column.Type == ColumnType.Vector)
                         {
-                            var vector = new Vector((float[])value);
+                            var vector = new Vector((float[])TypeConverter.ChangeType(value, typeof(float[])));
                             writer.Write(vector);
                         }
                         else

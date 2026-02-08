@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.DataSources.Interfaces;
+﻿using DatabaseBenchmark.Common;
+using DatabaseBenchmark.DataSources.Interfaces;
 using DatabaseBenchmark.Model;
 using Microsoft.Data.SqlTypes;
 using System.Data;
@@ -96,7 +97,7 @@ namespace DatabaseBenchmark.Databases.SqlServer
 
         private object PrepareValue(string columnName, object value) =>
             value != null && _vectorColumns.Contains(columnName)
-                ? new SqlVector<float>((float[])value)
+                ? new SqlVector<float>((float[])TypeConverter.ChangeType(value, typeof(float[])))
                 : value;
     }
 }
