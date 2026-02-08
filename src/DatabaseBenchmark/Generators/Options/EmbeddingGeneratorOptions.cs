@@ -14,6 +14,8 @@ namespace DatabaseBenchmark.Generators.Options
 
         public int? Dimensions { get; set; }
 
+        public bool Cache { get; set; } = false;
+
         public IGeneratorOptions SourceGeneratorOptions { get; set; }
 
         public enum GeneratorKind
