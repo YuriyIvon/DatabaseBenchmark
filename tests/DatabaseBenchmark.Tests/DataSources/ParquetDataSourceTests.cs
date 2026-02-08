@@ -2,6 +2,7 @@ using DatabaseBenchmark.DataSources.Parquet;
 using Parquet;
 using Parquet.Data;
 using Parquet.Schema;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Xunit;
@@ -17,7 +18,7 @@ namespace DatabaseBenchmark.Tests.DataSources
         [Fact]
         public async Task ReadValues()
         {
-            string testFilePath = "test.parquet";
+            string testFilePath = Path.Combine(Path.GetTempPath(), $"test-{Guid.NewGuid()}.parquet");
 
             try
             {
@@ -64,7 +65,7 @@ namespace DatabaseBenchmark.Tests.DataSources
         [Fact]
         public async Task ReadListValues()
         {
-            string testFilePath = "test-list.parquet";
+            string testFilePath = Path.Combine(Path.GetTempPath(), $"test-list-{Guid.NewGuid()}.parquet");
 
             try
             {
