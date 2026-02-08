@@ -2,6 +2,7 @@
 using DatabaseBenchmark.Common;
 using DatabaseBenchmark.Core.Interfaces;
 using DatabaseBenchmark.Databases;
+using DatabaseBenchmark.Databases.AzureSearch;
 using DatabaseBenchmark.Databases.ClickHouse;
 using DatabaseBenchmark.Databases.CosmosDb;
 using DatabaseBenchmark.Databases.Elasticsearch;
@@ -65,6 +66,11 @@ namespace DatabaseBenchmark.Commands
                         [
                             new ValueSpecificOptionsDescriptor
                             {
+                                Value = "AzureSearch",
+                                OptionsContainerType = typeof(AzureSearchInsertOptions)
+                            },
+                            new ValueSpecificOptionsDescriptor
+                            {
                                 Value = "MongoDb",
                                 OptionsContainerType = typeof(MongoDbInsertOptions)
                             }
@@ -97,6 +103,11 @@ namespace DatabaseBenchmark.Commands
                         AllowedValuesProvider = new DatabaseFactory(null, null),
                         ValueSpecificOptions =
                         [
+                            new ValueSpecificOptionsDescriptor
+                            {
+                                Value = "AzureSearch",
+                                OptionsContainerType = typeof(AzureSearchInsertOptions)
+                            },
                             new ValueSpecificOptionsDescriptor
                             {
                                 Value = "MongoDb",

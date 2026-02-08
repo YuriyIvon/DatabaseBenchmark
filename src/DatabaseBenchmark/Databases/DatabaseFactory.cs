@@ -30,7 +30,7 @@ namespace DatabaseBenchmark.Databases
                 ["Postgres"] = (connectionString) => new PostgreSqlDatabase(connectionString, environment, optionsProvider),
                 ["PostgresJsonb"] = (connectionString) => new PostgreSqlJsonbDatabase(connectionString, environment, optionsProvider),
                 ["Elasticsearch"] = (connectionString) => new ElasticsearchDatabase(connectionString, environment, optionsProvider),
-                ["AzureSearch"] = (connectionString) => new AzureSearchDatabase(connectionString, environment),
+                ["AzureSearch"] = (connectionString) => new AzureSearchDatabase(connectionString, environment, optionsProvider),
                 ["MySql"] = (connectionString) => new MySqlDatabase(connectionString, environment, optionsProvider),
                 ["MonetDb"] = (connectionString) => new MonetDbDatabase(connectionString, environment),
                 ["MongoDb"] = (connectionString) => new MongoDbDatabase(connectionString, environment, optionsProvider),

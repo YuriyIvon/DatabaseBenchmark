@@ -23,13 +23,18 @@ namespace DatabaseBenchmark.Databases.AzureSearch
         private const string VectorAlgorithmConfigurationName = "algorithm-config";
 
         private readonly IExecutionEnvironment _environment;
+        private readonly IOptionsProvider _optionsProvider;
 
         public string ConnectionString { get; }
 
-        public AzureSearchDatabase(string connectionString, IExecutionEnvironment environment)
+        public AzureSearchDatabase(
+            string connectionString,
+            IExecutionEnvironment environment,
+            IOptionsProvider optionsProvider)
         {
             ConnectionString = connectionString;
             _environment = environment;
+            _optionsProvider = optionsProvider;
         }
 
         public void CreateTable(Table table, bool dropExisting)
@@ -62,6 +67,7 @@ namespace DatabaseBenchmark.Databases.AzureSearch
             table.Name = NormalizeTableName(table.Name);
 
             return new DataImporterBuilder(table, source, batchSize, DefaultImportBatchSize)
+                .OptionsProvider(_optionsProvider)
                 .TransactionProvider<NoTransactionProvider>()
                 .InsertBuilder<IAzureSearchInsertBuilder, AzureSearchInsertBuilder>()
                 .InsertExecutor<AzureSearchInsertExecutor>()
@@ -87,7 +93,7 @@ namespace DatabaseBenchmark.Databases.AzureSearch
         public IQueryExecutorFactory CreateInsertExecutorFactory(Table table, IDataSource source, int batchSize)
         {
             table.Name = NormalizeTableName(table.Name);
-            return new AzureSearchInsertExecutorFactory(() => CreateSearchClient(table.Name), table, source, batchSize);
+            return new AzureSearchInsertExecutorFactory(() => CreateSearchClient(table.Name), table, source, _optionsProvider, batchSize);
         }
 
         public void ExecuteScript(string script) => throw new InputArgumentException("Custom scripts are not supported for Azure Search");

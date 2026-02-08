@@ -1,4 +1,5 @@
-﻿using DatabaseBenchmark.Databases.Common;
+﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.Databases.Common.Interfaces;
 using DatabaseBenchmark.Databases.AzureSearch.Interfaces;
 using DatabaseBenchmark.DataSources.Interfaces;
@@ -13,10 +14,12 @@ namespace DatabaseBenchmark.Databases.AzureSearch
             Func<SearchClient> createClient,
             Table table,
             IDataSource source,
+            IOptionsProvider optionsProvider,
             int batchSize)
         {
             Container.RegisterInstance<Table>(table);
             Container.RegisterInstance<IDataSource>(source);
+            Container.RegisterInstance<IOptionsProvider>(optionsProvider);
 
             var insertBuilderOptions = new InsertBuilderOptions { BatchSize = batchSize };
             Container.RegisterInstance<InsertBuilderOptions>(insertBuilderOptions);

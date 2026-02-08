@@ -1,7 +1,9 @@
-﻿using DatabaseBenchmark.Databases.AzureSearch;
+﻿using DatabaseBenchmark.Core.Interfaces;
+using DatabaseBenchmark.Databases.AzureSearch;
 using DatabaseBenchmark.Databases.Common;
 using DatabaseBenchmark.DataSources;
 using DatabaseBenchmark.Tests.Utils;
+using NSubstitute;
 using System;
 using System.Linq;
 using Xunit;
@@ -18,7 +20,9 @@ namespace DatabaseBenchmark.Tests.Databases
                 .DataSource;
             var reader = new DataSourceReader(source);
             var options = new InsertBuilderOptions { BatchSize = 1 };
-            var queryBuilder = new AzureSearchInsertBuilder(SampleInputs.Table, reader, options);
+            var optionsProvider = Substitute.For<IOptionsProvider>();
+            optionsProvider.GetOptions<AzureSearchInsertOptions>().Returns(new AzureSearchInsertOptions());
+            var queryBuilder = new AzureSearchInsertBuilder(SampleInputs.Table, reader, optionsProvider, options);
 
             var documents = queryBuilder.Build();
 
@@ -34,7 +38,9 @@ namespace DatabaseBenchmark.Tests.Databases
                 .DataSource;
             var reader = new DataSourceReader(source);
             var options = new InsertBuilderOptions { BatchSize = 3 };
-            var queryBuilder = new AzureSearchInsertBuilder(SampleInputs.Table, reader, options);
+            var optionsProvider = Substitute.For<IOptionsProvider>();
+            optionsProvider.GetOptions<AzureSearchInsertOptions>().Returns(new AzureSearchInsertOptions());
+            var queryBuilder = new AzureSearchInsertBuilder(SampleInputs.Table, reader, optionsProvider, options);
 
             var documents = queryBuilder.Build();
 
@@ -50,7 +56,9 @@ namespace DatabaseBenchmark.Tests.Databases
                 .DataSource;
             var reader = new DataSourceReader(source);
             var options = new InsertBuilderOptions { BatchSize = 3 };
-            var queryBuilder = new AzureSearchInsertBuilder(SampleInputs.Table, reader, options);
+            var optionsProvider = Substitute.For<IOptionsProvider>();
+            optionsProvider.GetOptions<AzureSearchInsertOptions>().Returns(new AzureSearchInsertOptions());
+            var queryBuilder = new AzureSearchInsertBuilder(SampleInputs.Table, reader, optionsProvider, options);
 
             reader.ReadDictionary(SampleInputs.Table.Columns, out var _);
             reader.ReadDictionary(SampleInputs.Table.Columns, out var _);
