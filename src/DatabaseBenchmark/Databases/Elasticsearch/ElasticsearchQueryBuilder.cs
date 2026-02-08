@@ -145,7 +145,9 @@ namespace DatabaseBenchmark.Databases.Elasticsearch
         private RRFRetriever BuildRRFRetriever(IEnumerable<WeightedRetriever> retrievers) =>
             new()
             {
-                Retrievers = retrievers.Select(rw => rw.Retriever).ToList()
+                Retrievers = retrievers
+                    .Select(rw => new Union<Retriever, RRFRetrieverComponent>(rw.Retriever))
+                    .ToList()
             };
 
         private LinearRetriever BuildLinearRetriever(IEnumerable<WeightedRetriever> retrievers) =>
