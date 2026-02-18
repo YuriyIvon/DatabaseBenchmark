@@ -129,7 +129,8 @@ namespace DatabaseBenchmark.Databases.AzureSearch
             var vectorizedQuery = new VectorizedQuery(vector)
             {
                 KNearestNeighborsCount = vectorQuery.Limit,
-                Weight = vectorQuery.Weight
+                Weight = vectorQuery.Weight,
+                Exhaustive = vectorQuery.Exact
             };
 
             vectorizedQuery.Fields.Add(vectorQuery.ColumnName);

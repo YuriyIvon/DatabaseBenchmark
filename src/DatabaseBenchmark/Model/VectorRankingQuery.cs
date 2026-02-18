@@ -15,6 +15,8 @@ namespace DatabaseBenchmark.Model
         [JsonConverter(typeof(JsonQueryConditionConverter))]
         public IQueryCondition Condition { get; set; }
 
+        public bool Exact { get; set; } = false;
+
         public int Limit { get; set; } = 10;
 
         public int? Candidates { get; set; }
